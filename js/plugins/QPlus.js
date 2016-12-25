@@ -147,8 +147,8 @@ QPlus.indexToPoint = function(index, maxCols, maxRows) {
 
   Math.randomIntBetween = function(min, max) {
     if (min.constructor === Array) {
-      min = Math.ceil(min[0]);
       max = Math.floor(min[1]);
+      min = Math.ceil(min[0]);
     } else {
       min = Math.ceil(min);
       max = Math.floor(max);
