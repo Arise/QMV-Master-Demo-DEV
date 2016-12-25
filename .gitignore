@@ -1,0 +1,19 @@
+# Ignore unchanged MV folders
+audio/*
+img/*
+icon/
+fonts/
+movies/
+
+# Ignore default js
+js/libs/
+js/main.js
+js/rpg_core.js
+js/rpg_managers.js
+js/rpg_objects.js
+js/rpg_scenes.js
+js/rpg_sprites.js
+js/rpg_windows.js
+
+# Ignore my js base file
+js/plugins/QBase.js
