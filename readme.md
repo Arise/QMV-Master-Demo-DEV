@@ -1,7 +1,9 @@
 QMV Master Demo
 ===============
-**Downloading Demo:**<br>
-Click on the Clone or Download button on the upper right of the page, then click on Download ZIP<br>
+**Downloading Demo:**
+
+Click on the Clone or Download button on the upper right of the page, then click on Download ZIP
+
 ![Click on the Download Zip button on the upper right of the page](https://cloud.githubusercontent.com/assets/9346563/13860612/87321562-ec46-11e5-88f0-c0da7027c441.png)
 
 **Installing Demo:**
@@ -11,12 +13,15 @@ Click on the Clone or Download button on the upper right of the page, then click
  * Copy the files and folders from this Demo folder into the new project and accept to replace files
  * Open project and play test
 
-**Reporting Bugs / Issues:**<br>
+**Reporting Bugs / Issues:**
+
 If you got an error inside MV, first push F8 to open the console log.
-Then create a new issue in this repo, with the details in that log + any additional information that can help.<br>
+Then create a new issue in this repo, with the details in that log + any additional information that can help.
+
 https://github.com/quxios/QMV-Master-Demo/issues
 
-**TERMS OF USE FOR NON-COMMERCIAL AND COMMERCIAL:**
+TERMS OF USE FOR NON-COMMERCIAL AND COMMERCIAL
+==============================================
  * Credit is as Quasi, Quxios or Emilio Islas.
  * Free to use, modify and distribute.
  * Do not claim the Plugins as your own.
