@@ -10,5 +10,5 @@ var $plugins =
 {"name":"========================","status":true,"description":"","parameters":{}},
 {"name":"QSprite","status":true,"description":"<QSprite>\nLets you configure Spritesheets","parameters":{"File Name Identifier":"%{config}-","Random Idle Interval":"60 300","Use New Adjust":"true"}},
 {"name":"QAudio","status":true,"description":"<QAudio>\r\nFew new audio features","parameters":{}},
-{"name":"QCamera","status":true,"description":"<QCamera>\r\ndesc","parameters":{"":""}}
+{"name":"QCamera","status":false,"description":"<QCamera>\r\ndesc","parameters":{"":""}}
 ];
