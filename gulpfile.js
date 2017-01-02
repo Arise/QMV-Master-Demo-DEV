@@ -1,16 +1,32 @@
-const gulp = require('gulp')
-const fs   = require('fs')
-const path = require('path')
+// tasks:
+// docs
+// rmw
+// sync
 
-const docOutput = '../quxios.github.io/data'
-const rmwOutput = './'
-const pluginsPath   = 'js/plugins/'
-const repo = 'https://github.com/quxios/Quasi-MV-Master-Demo/tree/master/js/plugins'
+const gulp  = require('gulp')
+const syncy = require('syncy');
+const fs    = require('fs')
+const path  = require('path')
+
+const docOutput  = '../quxios.github.io/data'
+const syncOutput = '../QMV-Master-Demo'
+const rmwOutput  = './'
+const pluginsPath = 'js/plugins/'
+const repo = 'https://github.com/quxios/QMV-Master-Demo/tree/master/js/plugins'
 
 const ignore = ['QBase.js']
 const pluginFiles  = fs.readdirSync(pluginsPath).filter((name) => {
   return ignore.indexOf(name) === -1
 })
+
+const selectedPlugins = [
+  'QPlus.js',
+  'QSprite.js',
+  'QAudio.js',
+  'QInput.js',
+  'QInputRemap.js',
+  'QNameInput.js'
+]
 
 class Plugin {
   static get(pluginName) {
@@ -94,17 +110,35 @@ gulp.task('docs', function() {
   })
   fs.writeFileSync(path.join(docOutput, 'plugins.json'), JSON.stringify(plugins, null, 2))
   fs.writeFileSync(path.join(docOutput, 'tags.json'), JSON.stringify(tags))
+  console.log('Exported to: ', path.join(__dirname, docOutput));
 });
 
 gulp.task('rmw', function() {
-  let text = '';
-  pluginFiles.forEach((pluginName) => {
+  let text = ''
+  selectedPlugins.forEach((pluginName) => {
     if (/^Q/.test(pluginName)) {
       const plugin = Plugin.get(pluginName);
-      text += `${plugin.name} - v${plugin.version}\n`;
+      plugin.about = plugin.about.replace(/## About/g, '')
+      plugin.about = plugin.about.replace(/\r/g, '\n')
+      plugin.about = plugin.about.replace(/(\n)+/g, '\n')
+      plugin.about = plugin.about.replace(/(\n)/g, ' ')
+      text += `${plugin.name} - v${plugin.version}\n`
       text += `Download - ${plugin.download}\n`
-      text += `${plugin.about}\n\n`;
+      text += `${plugin.about.trim()}\n\n`
     }
   })
   fs.writeFileSync(path.join(rmwOutput, 'rmw.txt'), text)
+  console.log('Exported to: ', path.join(__dirname, rmwOutput));
 });
+
+gulp.task('sync', function() {
+  const glob = [
+    'data/**',
+    'js/plugins/!(QBase.js|*dev.js)'
+  ]
+  syncy(glob, syncOutput, { updateAndDelete: false })
+    .then(() => {
+      console.log('Done!');
+    })
+    .catch(console.error);
+})

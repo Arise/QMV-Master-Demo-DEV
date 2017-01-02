@@ -1,66 +1,24 @@
-QAudio - v2.0.1
-Download - https://github.com/quxios/Quasi-MV-Master-Demo/tree/master/js/plugins/QAudio.js
-
-## About
-
-This plugin allows you to play an audio (bgm, bgs, me or se) at a fixed
-position. The volume and panning will be dynamically updated based off of
-the players distance from that audios location.
-
-
-
-QCamera - v1.0.0
-Download - https://github.com/quxios/Quasi-MV-Master-Demo/tree/master/js/plugins/QCamera.js
-
-## About
-
-
-
-
-QInput - v2.0.0
-Download - https://github.com/quxios/Quasi-MV-Master-Demo/tree/master/js/plugins/QInput.js
-
-## About
-
-This plugin enables full keyboard support as well as letting you set the
-default keyboard keys for mv inputs.
-
-
-QInputRemap - v1.0.0
-Download - https://github.com/quxios/Quasi-MV-Master-Demo/tree/master/js/plugins/QInputRemap.js
-
-## About
-
-This plugin adds an input remapping window to the Scene_Options. This lets
-players change their keybinds ingame.
-
-
-QNameInput - v2.0.0
-Download - https://github.com/quxios/Quasi-MV-Master-Demo/tree/master/js/plugins/QNameInput.js
-
-## About
-
-Adds Keyboard support to the Name Input Scene.
-
-
 QPlus - v1.0.0
-Download - https://github.com/quxios/Quasi-MV-Master-Demo/tree/master/js/plugins/QPlus.js
-
-## About
-
-This plugin is the core for most of the QPlugins. It also adds a few new
-functionality to RPG Maker MV to improve it.
-
-
+Download - https://github.com/quxios/QMV-Master-Demo/tree/master/js/plugins/QPlus.js
+This plugin is the core for most of the QPlugins. It also adds a few new functionality to RPG Maker MV to improve it.
 
 QSprite - v2.0.0
-Download - https://github.com/quxios/Quasi-MV-Master-Demo/tree/master/js/plugins/QSprite.js
+Download - https://github.com/quxios/QMV-Master-Demo/tree/master/js/plugins/QSprite.js
+This plugin lets you use sprites that are set up with Quasi Sprite Animator https://github.com/quxios/SpriteAnimator
 
-## About
+QAudio - v2.0.2
+Download - https://github.com/quxios/QMV-Master-Demo/tree/master/js/plugins/QAudio.js
+This plugin allows you to play an audio (bgm, bgs, me or se) at a fixed position. The volume and panning will be dynamically updated based off of the players distance from that audios location.
 
-This plugin lets you use sprites that are set up with Quasi Sprite Animator
+QInput - v2.0.0
+Download - https://github.com/quxios/QMV-Master-Demo/tree/master/js/plugins/QInput.js
+This plugin enables full keyboard support as well as letting you set the default keyboard keys for mv inputs.
 
-https://github.com/quxios/SpriteAnimator
+QInputRemap - v1.0.0
+Download - https://github.com/quxios/QMV-Master-Demo/tree/master/js/plugins/QInputRemap.js
+This plugin adds an input remapping window to the Scene_Options. This lets players change their keybinds ingame.
 
-
+QNameInput - v2.0.0
+Download - https://github.com/quxios/QMV-Master-Demo/tree/master/js/plugins/QNameInput.js
+Adds Keyboard support to the Name Input Scene.
 

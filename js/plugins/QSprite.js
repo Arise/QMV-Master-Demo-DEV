@@ -568,6 +568,8 @@ QSprite.json = null;
   Game_CharacterBase.prototype.setImage = function(characterName, characterIndex) {
     Alias_Game_CharacterBase_setImage.call(this, characterName, characterIndex);
     this._isQChara = undefined;
+    this._isIdle   = null;
+    this._posePlaying = null;
     this.getAvailableIdlePoses();
   };
 

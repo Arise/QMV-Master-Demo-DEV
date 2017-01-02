@@ -124,29 +124,13 @@ function Sprite_Bars() {
   Game_Map.prototype.displayCenterX = function() {
     var half = this.screenTileX() / 2;
     var x = this._displayX + half;
-    if (!this.isLoopHorizontal()) {
-      if (x < half) {
-        x = half;
-      }
-      if (x > this.width() - half) {
-        x = this.width() - half;
-      }
-    }
-    return x;
+    return this.roundX(x);
   };
 
   Game_Map.prototype.displayCenterY = function() {
     var half = this.screenTileY() / 2;
     var y = this._displayY + half;
-    if (!this.isLoopVertical()) {
-      if (y < half) {
-        y = half;
-      }
-      if (y > this.height() - half) {
-        y = this.height() - half;
-      }
-    }
-    return y;
+    return this.roundY(y);
   };
 
   var Alias_Game_Map_doScroll = Game_Map.prototype.doScroll;
@@ -188,6 +172,12 @@ function Sprite_Bars() {
     }
     var distanceX = (chara._realX + 0.5) - centerX;
     var distanceY = (chara._realY + 0.5) - centerY;
+    if (Math.abs(distanceX) >= this.width() - 1) {
+      distanceX -= this.width() * Math.sign(distanceX);
+    }
+    if (Math.abs(distanceY) >= this.height() - 1) {
+      distanceY -= this.height() * Math.sign(distanceY);
+    }
     this.startQScroll(distanceX, distanceY, speed, frames);
   };
 

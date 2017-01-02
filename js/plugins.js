@@ -9,6 +9,6 @@ var $plugins =
 {"name":"QNameInput","status":true,"description":"<QNameInput>\r\nQuasi Input addon: Adds Keyboard Input to Name Input Scene","parameters":{"Show Window with Keys":"false","Window Width":"480"}},
 {"name":"========================","status":true,"description":"","parameters":{}},
 {"name":"QSprite","status":true,"description":"<QSprite>\nLets you configure Spritesheets","parameters":{"File Name Identifier":"%{config}-","Random Idle Interval":"60 300","Use New Adjust":"true"}},
-{"name":"QAudio","status":true,"description":"<QAudio>\r\nFew new audio features","parameters":{}},
-{"name":"QCamera","status":false,"description":"<QCamera>\r\ndesc","parameters":{"":""}}
+{"name":"QAudio","status":true,"description":"<QAudio>\r\nFew new audio features","parameters":{"Default Radius":"5","Default Max Volume":"100"}},
+{"name":"QCamera-dev","status":true,"description":"<QCamera>\r\ndesc","parameters":{"":""}}
 ];
