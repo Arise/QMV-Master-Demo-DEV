@@ -18,6 +18,8 @@ if (!Imported.QPlus) {
  * Lets you configure Spritesheets
  * @author Quxios  | Version 2.0.0
  *
+ * @requires QPlus
+ *
  * @param File Name Identifier
  * @desc Set the file name identifier for QSprites
  * Default: %{config}-
@@ -37,6 +39,185 @@ if (!Imported.QPlus) {
  * ----------------------------------------------------------------------------
  * ** About
  * ============================================================================
+<<<<<<< HEAD
+ * ## About
+ * ============================================================================
+ * This plugin lets you use sprites that are set up with Quasi Sprite Animator
+ *
+ * https://github.com/quxios/SpriteAnimator
+ *
+ * ============================================================================
+ * ## How to use
+ * ============================================================================
+ * First configure your sprite with the Sprite Animator. Then you can use your
+ * sprites by identifying it as a QSprite. To do so, just name your sprite file
+ * by using the File Name Identifier format. By default this is:
+ * ~~~
+ *   %{config}-
+ * ~~~
+ * You would replace {config} with the config you made inside the Sprite
+ * Animator. For example, if I made a config named: `Hero` then I would name
+ * the file something like: `%Hero-Example.png`
+ * ============================================================================
+ * ## Built-in Poses
+ * ============================================================================
+ * This plugin adds a few built in poses:
+ *  - moveX
+ *  - dashX
+ *  - idleX
+ *  - idle[A-Z]X ( more info for this below )
+ *
+ * Where X is the direction:
+ *
+ *  - 2 - down
+ *  - 4 - left
+ *  - 6 - right
+ *  - 8 - up
+ *  - 1 - lower left
+ *  - 3 - lower right
+ *  - 7 - upper left
+ *  - 9 - upper right
+ *
+ * (Diagonals only work if you are using this with Quasi Movement)
+ *
+ * ----------------------------------------------------------------------------
+ * **idle[A-Z]X**
+ * ----------------------------------------------------------------------------
+ * This is a random idle that will play a random `idle[A-Z]` every X frames.
+ * The random wait depends on the `Random Idle Interval` parameter. To clarify
+ * you won't be naming this pose `idle[A-Z]2` (for example for the down direction)
+ * you would name it `idleA2` or `idleB2` or `idleC2`, ect.
+ *
+ * You can also add in a multipier if you want one of the idles to appear more
+ * often then others by adding: `Tx` Where T is the multipler.
+ *
+ * For example:
+ *
+ * Lets say I want 4 `idle[A-Z]` poses, and I want one of them to have a 4 times
+ * better chance of appearing then the rest. My idle names would be:
+ *
+ *   - idleA2
+ *   - idleB2
+ *   - idleC2
+ *   - idleD4x2
+ *
+ * (Note: all their directions are 2(down))
+ * ============================================================================
+ * ## Notetags / Comments
+ * ============================================================================
+ * **Set default direction**
+ * ----------------------------------------------------------------------------
+ * With spritesheets being large, it may be hard to pick that events starting
+ * direction. To fix that, you can add a comment in that event that will set
+ * it's default direction.
+ * ```
+ *   <direction:X>
+ * ```
+ * Set X to direction. 2 for down, 4 left, 6 right, 8 up.
+ * ============================================================================
+ * ## Plugin Commands
+ * ============================================================================
+ * **Playing a Pose**
+ * ----------------------------------------------------------------------------
+ * Play a pose.
+ * ~~~
+ *   qSprite [CHARAID] play [POSE] [list of options]
+ * ~~~
+ * CHARAID - The character identifier.
+ *
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID or eventEVENTID
+ *  (replace EVENTID with a number)
+ *
+ * POSE    - The pose to play (Don’t add the direction! ex: atk, not atk2)
+ *
+ * Possible options:
+ *
+ *  - lock      - Disable character movement while pose is playing
+ *  - pause     - Pause the pose on the last frame
+ *  - breakable - If character moves, the pose will end
+ *  - wait      - Next Event Command runs once pose is complete
+ *
+ * ----------------------------------------------------------------------------
+ * **Looping a Pose**
+ * ----------------------------------------------------------------------------
+ * Loop a pose until it's cleared, broken out of or played over.
+ * ~~~
+ *   qSprite [CHARAID] loop [POSE] [list of options]
+ * ~~~
+ * CHARAID - The character identifier.
+ *
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID or eventEVENTID
+ *  (replace EVENTID with a number)
+ *
+ * POSE    - The pose to play (Don’t add the direction! ex: atk, not atk2)
+ *
+ * Possible options:
+ *
+ *  - lock      - Disable character movement while pose is playing
+ *  - breakable - If character moves, the loop will end
+ *  - wait      - Next Event Command runs once first loop has is complete
+ * ----------------------------------------------------------------------------
+ * **Clearing**
+ * ----------------------------------------------------------------------------
+ * Clear current playing/looping pose.
+ * ~~~
+ *   qSprite [CHARAID] clear
+ * ~~~
+ * CHARAID - The character identifier.
+ * ----------------------------------------------------------------------------
+ * **Add / Remove an idle[A-Z]**
+ * ----------------------------------------------------------------------------
+ * Maybe you only want to play an idle[A-Z] during certain scenes. So you can
+ * add and remove them whenever you want!
+ * ~~~
+ *   qSprite [CHARAID] addIdleAZ [POSE]
+ *
+ *   qSprite [CHARAID] removeIdleAZ [POSE]
+ * ~~~
+ * CHARAID - The character identifier.
+ *
+ * POSE    - The idle[A-Z] to add (Don’t add the direction! ex: idleA not idleA2)
+ * ----------------------------------------------------------------------------
+ * **Change idle pose**
+ * ----------------------------------------------------------------------------
+ * Maybe you want to have a different idle for certain parts of the game. I
+ * would recommend just using a different spritesheet, but I added a plugin
+ * command to let you change your idle!
+ * ~~~
+ *   qSprite [CHARAID] changeIdle [POSE]
+ * ~~~
+ * CHARAID - The character identifier.
+ *
+ * POSE    - The new pose to use when idle
+ *           (Don’t add the direction! ex: idleA not idleA2)
+ * ----------------------------------------------------------------------------
+ * **Examples**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ *   qSprite 0 play confused pause breakable
+ *   qSprite p play confused pause breakable
+ *   qSprite player play confused pause breakable
+ * ~~~
+ * (Note: All 3 are the same, just using a different character id method)
+ *
+ * The player will run the `confused` pose. The pose will stop on the last frame.
+ * Once the player moves, the pose will end. The player can move during this pose
+ * and the next event command will run immediatly after this command with no
+ * wait.
+ *
+ *
+ * ~~~
+ *   qSprite 1 play hug wait
+ *   qSprite e1 play hug wait
+ *   qSprite event1 play hug wait
+ * ~~~
+ * Event 1 will run the hug pose. The event can't move until the pose is
+ * complete, and the next event command will run once the pose is complete.
+ * ============================================================================
+ * ## Links
+=======
  * Testing about
  * next line
  * ----------------------------------------------------------------------------
@@ -45,17 +226,23 @@ if (!Imported.QPlus) {
  * Testing another section
  * ----------------------------------------------------------------------------
  * ** Links
+>>>>>>> origin/master
  * ============================================================================
- * For a guide on how to use this plugin go to:
+ * RPGMakerWebs:
  *
- *   http://forums.rpgmakerweb.com/index.php?/topic/57648-quasi-sprite/
+ *   http://forums.rpgmakerweb.com/----
  *
  * Sprite App:
+ *
  *   https://github.com/quxios/SpriteAnimator
  *
  * Terms of use:
- *   https://github.com/quxios/somerepo/readme.md#terms
  *
+<<<<<<< HEAD
+ *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *
+=======
+>>>>>>> origin/master
  * @tags character, sprite, animation
  */
 //=============================================================================
@@ -92,8 +279,8 @@ QSprite.json = null;
       }
     }
     xhr.onerror = function() {
+      QSprite.json = {};
       alert('Error: data/SpriteAnim.json could not be loaded.');
-      throw new Error('data/SpriteAnim.json could not be loaded.')
     }
     xhr.send();
   })()
@@ -149,6 +336,15 @@ QSprite.json = null;
     if (cmd === 'clear') {
       chara.clearPose();
     }
+    if (cmd === 'addidleaz') {
+      chara.addRandIdle(args2[0]);
+    }
+    if (cmd === 'removeidleaz') {
+      chara.removeRandIdle(args2[0]);
+    }
+    if (cmd === 'changeidle') {
+      chara.changeIdle(args2[0]);
+    }
   };
 
   Game_Interpreter.prototype.qSpriteCommandOld = function(args) { // backwards compatibility
@@ -187,6 +383,7 @@ QSprite.json = null;
   Game_CharacterBase.prototype.initMembers = function() {
     Alias_Game_CharacterBase_initMembers.call(this);
     this._pose = '';
+    this._idlePose = 'idle';
     this._availableIdlePoses = [];
     this._idleTimer = 0;
     this._idleIntervalWait = Math.randomIntBetween(_idleInterval);
@@ -250,29 +447,25 @@ QSprite.json = null;
     if (Imported.Quasi_Movement && this.isDiagonal()) {
       var diag = this.isDiagonal();
     }
-    if (!isMoving && this.hasPose('idle' + dir)) {
+    if (!isMoving && this.hasPose(this._idlePose + dir)) {
       this.updateIdlePose(dir, diag);
     } else {
       this.updateSteppingPose(isMoving, wasMoving);
       if (this._posePlaying) return;
-      if (this.isDashing() && isMoving) {
-        this.updateDashingPose(dir, diag);
-      } else {
-        this.updateMovingPose(dir, diag);
-      }
+      this.updateMovingPose(dir, diag, isMoving);
     }
   };
 
   Game_CharacterBase.prototype.updateIdlePose = function(dir, diag) {
-    if (diag && this.hasPose('idle' + diag)) {
+    if (diag && this.hasPose(this._idlePose + diag)) {
       dir = diag;
     }
-    if (this._pose !== 'idle' + dir) {
+    if (this._pose !== this._idlePose + dir) {
       this._pattern = 0;
       this._animationCount = 0;
       this._isIdle = true;
     }
-    this._pose = 'idle' + dir;
+    this._pose = this._idlePose + dir;
     this.updateIdleInterval();
   };
 
@@ -310,10 +503,17 @@ QSprite.json = null;
     }
     if (this.hasPose('dash' + dir)) {
       this._pose = 'dash' + dir;
+      return true;
     }
+    return false;
   };
 
-  Game_CharacterBase.prototype.updateMovingPose = function(dir, diag) {
+  Game_CharacterBase.prototype.updateMovingPose = function(dir, diag, isMoving) {
+    if (this.isDashing() && isMoving) {
+      if (this.updateDashingPose(dir, diag)) {
+        return;
+      }
+    }
     if (diag && this.hasPose('move' + diag)) {
       dir = diag;
     }
@@ -392,14 +592,48 @@ QSprite.json = null;
     if (this.isQCharacter()) {
       var poses = this.qSprite().poses;
       for (var pose in poses) {
-        if (/^idle[a-zA-Z][12346789]$/.test(pose)) {
+        var match = /^idle[a-zA-Z]([0-9]+x)?[12346789]$/.exec(pose);
+        if (match) {
           var name = pose.slice(0, -1);
           if (!this._availableIdlePoses.contains(name)) {
-            this._availableIdlePoses.push(name);
+            var x = 1;
+            if (match[1]) {
+              x = Number(match[1].slice(0, -1));
+            }
+            for (var i = 0; i < x; i++) {
+              this._availableIdlePoses.push(name);
+            }
           }
         }
       }
     }
+  };
+
+  Game_CharacterBase.prototype.addRandIdle = function(pose) {
+    var match = /^(.*)[a-zA-Z]([0-9]+x)?$/.exec(pose);
+    if (match) {
+      if (!this._availableIdlePoses.contains(pose)) {
+        var x = 1;
+        if (match[2]) {
+          x = Number(match[2].slice(0, -1));
+        }
+        for (var i = 0; i < x; i++) {
+          this._availableIdlePoses.push(pose);
+        }
+      }
+    }
+  };
+
+  Game_CharacterBase.prototype.removeRandIdle = function(pose) {
+    for (var i = this._availableIdlePoses.length - 1; i >= 0; i--) {
+      if (this._availableIdlePoses[i] === pose) {
+        this._availableIdlePoses.splice(i, 1);
+      }
+    }
+  };
+
+  Game_CharacterBase.prototype.changeIdle = function(pose) {
+    this._idlePose = pose;
   };
 
   Game_CharacterBase.prototype.playPose = function(pose, lock, pause, looping, canBreak) {
@@ -471,15 +705,13 @@ QSprite.json = null;
   // The game object class for an event. It contains functionality for event page
   // switching and running parallel process events.
 
-  var Alias_Game_Event_clearPageSettings = Game_Event.prototype.clearPageSettings;
-  Game_Event.prototype.clearPageSettings = function() {
-    Alias_Game_Event_clearPageSettings.call(this);
-    this._prevPageDirection = null;
-  };
-
   var Alias_Game_Event_setupPageSettings = Game_Event.prototype.setupPageSettings;
   Game_Event.prototype.setupPageSettings = function() {
     Alias_Game_Event_setupPageSettings.call(this);
+    var match = /<direction:(\d+?)>/i.exec(this.comments());
+    if (match) {
+      this.setDirection(Number(match[1]));
+    }
   };
 
   //-----------------------------------------------------------------------------
@@ -498,6 +730,50 @@ QSprite.json = null;
     }
   };
 
+  Sprite_Character.prototype.updateCharacterFrame = function() {
+    var pw = this.patternWidth();
+    var ph = this.patternHeight();
+    var sx = (this.characterBlockX() + this.characterPatternX()) * pw;
+    var sy = (this.characterBlockY() + this.characterPatternY()) * ph;
+    this.updateHalfBodySprites();
+    if (this._bushDepth > 0) {
+      var offsetA = Math.round(ph - ph * this.anchor.y);
+      var d = this._bushDepth + offsetA;
+      this._upperBody.setFrame(sx, sy, pw, ph - d);
+      this._lowerBody.setFrame(sx, sy + ph - d, pw, d);
+      this.setFrame(sx, sy, 0, ph);
+    } else {
+      this.setFrame(sx, sy, pw, ph);
+    }
+  };
+
+  var Alias_Sprite_Character_updateHalfBodySprites = Sprite_Character.prototype.updateHalfBodySprites;
+  Sprite_Character.prototype.updateHalfBodySprites = function() {
+    Alias_Sprite_Character_updateHalfBodySprites.call(this);
+    if (this._bushDepth > 0) {
+      var ph = this.patternHeight();
+      var offsetA = Math.round(ph - ph * this.anchor.y);
+      var offsetB = ph - offsetA;
+      this._upperBody.y = -offsetB;
+      this._lowerBody.y = -this._bushDepth;
+    }
+  };
+
+  var Alias_Sprite_Character_createHalfBodySprites = Sprite_Character.prototype.createHalfBodySprites;
+  Sprite_Character.prototype.createHalfBodySprites = function() {
+    var upper = this._upperBody;
+    var lower = this._lowerBody;
+    Alias_Sprite_Character_createHalfBodySprites.call(this);
+      if (!upper) {
+        this._upperBody.anchor.x = this.anchor.x;
+        this._upperBody.anchor.y = 0;
+      }
+      if (!lower) {
+        this._lowerBody.anchor.x = this.anchor.x;
+        this._lowerBody.anchor.y = 0;
+        this._lowerBody.opacity = 128;
+      }
+  };
   var Alias_Sprite_Character_characterBlockX = Sprite_Character.prototype.characterBlockX;
   Sprite_Character.prototype.characterBlockX = function() {
     if (this._character.isQCharacter()) return 0;

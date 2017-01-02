@@ -17,6 +17,8 @@ if (!Imported.QInput) {
  * Quasi Input addon: Adds Keyboard Input to Name Input Scene
  * @author Quxios  | Version 2.0.0
  *
+ * @requires QInput
+ *
  * @param Show Window with Keys
  * @desc Set to true or false to display the old input window.
  * Default: true
@@ -29,14 +31,26 @@ if (!Imported.QInput) {
  *
  * @help
  * ============================================================================
- * ** Links
+ * ## About
  * ============================================================================
- * For a guide on how to use this plugin go to:
+ * Adds Keyboard support to the Name Input Scene.
+ * ============================================================================
+ * ## How to use
+ * ============================================================================
+ * Place somewhere below QInput plugin.
+ *
+ * ============================================================================
+ * ## Links
+ * ============================================================================
+ * RPGMakerWebs:
+ *
  *   -rmwlink-
  *
  * Terms of use:
- *   https://github.com/quxios/somerepo/readme.md#terms
  *
+ *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *
+ * @tags input
  */
 //=============================================================================
 

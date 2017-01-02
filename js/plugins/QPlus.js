@@ -21,6 +21,102 @@ Imported.QPlus = '1.0.0';
  * Each switch should be seperated by a comma.
  * @default
  *
+ * @help
+ * ============================================================================
+ * ## About
+ * ============================================================================
+ * This plugin is the core for most of the QPlugins. It also adds a few new
+ * functionality to RPG Maker MV to improve it.
+ *
+ * ============================================================================
+ * ## Notetags / Comments
+ * ============================================================================
+ * **Event retain direction**
+ * ----------------------------------------------------------------------------
+ * Adding the following to the notes or in a comment will make that event retain
+ * its direction when changing pages.
+ * ~~~
+ *   <retainDir>
+ * ~~~
+ * This will be ignored if the next page has direction fix enabled
+ *
+ * ============================================================================
+ * ## Plugin Commands
+ * ============================================================================
+ * **Random wait between X Y**
+ * ----------------------------------------------------------------------------
+ * This plugin command will insert a random wait between x and y frames.
+ * ~~~
+ *   wait X Y
+ * ~~~
+ * If Y is left empty, it will make a random wait between 0 - X
+ *
+ * ----------------------------------------------------------------------------
+ * **Global Lock**
+ * ----------------------------------------------------------------------------
+ * This plugin command will 'lock' all characters or certain characters. By
+ * locking I mean you can lock their movement, or movement and character
+ * animation.
+ * ~~~
+ *  globalLock LEVEL [CHARACTERS] [options]
+ * ~~~
+ * LEVEL - The level of global lock
+ *
+ *  - 0 - clears the global lock
+ *  - 1 - locks the characters movement
+ *  - 2 - locks the characters movement and animation
+ *
+ * [CHARACTERS] - optional, list of `Character Ids` to apply to or ignore.
+ * seperated by a space.
+ *
+ * Character Ids
+ *
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID or eventEVENTID
+ * (replace EVENTID with a number)
+ *
+ * Possible options:
+ *
+ *  - only  - Will only apply to the characters listed
+ *
+ * ----------------------------------------------------------------------------
+ * **Examples**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ *   globalLock 2
+ * ~~~
+ * Will lock all characters movement and animations.
+ *
+ * ~~~
+ *   globalLock 1 0 1 4
+ *   globalLock 1 p e1 e4
+ *   globalLock 1 player event1 event4
+ * ~~~
+ * (Note: All 3 are the same, just using a different character id method)
+ *
+ * Will Lock the movements for all characters except:
+ * Player, event 1 and event 4
+ *
+ * ~~~
+ *   globalLock 1 0 1 4 only
+ *   globalLock 1 p e1 e4 only
+ *   globalLock 1 player event1 event4 only
+ * ~~~
+ * Will Lock the movements for only these characters:
+ * Player, event 1 and event 4
+ *
+ * ============================================================================
+ * ## Links
+ * ============================================================================
+ * RPGMakerWebs:
+ *
+ *   http://forums.rpgmakerweb.com/----
+ *
+ * Terms of use:
+ *
+ *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *
+ * @tags core, character
  */
 //=============================================================================
 
@@ -79,6 +175,14 @@ QPlus.getCharacter = function(string) {
   }
 };
 
+/**
+ * @static QPlus.stringToObj
+ * @param  {string} string
+ *         string in the format:
+ *         key: value
+ *         key2: value2
+ * @return {obj}
+ */
 QPlus.stringToObj = function(string) {
   var lines = string.split('\n');
   var obj = {};
@@ -93,25 +197,39 @@ QPlus.stringToObj = function(string) {
           i++;
         }
       }
-      obj[newKey] = QPlus.stringToAry(match[2], true);
+      obj[newKey] = QPlus.stringToAry(match[2].trim())[0] || '';
     }
   })
   return obj;
 };
 
-QPlus.stringToAry = function(string, returnString) {
-  var arr = string.split(',').map(function(s) {
+/**
+ * @static QPlus.stringToAry
+ * @param  {string} string
+ *         Separate values with a comma
+ * @return {array}
+ *         Values will be trimmed, and auto converted to
+ *         Number, true, false or null
+ */
+QPlus.stringToAry = function(string) {
+  return string.split(',').map(function(s) {
     s = s.trim();
     if (/^-?\d+\.?\d*$/.test(s)) return Number(s);
-    if (s === "true") return true;
-    if (s === "false") return false;
-    if (s === "null" || s === "") return null;
+    if (s === 'true') return true;
+    if (s === 'false') return false;
+    if (s === 'null' || s === '') return null;
     return s;
   })
-  if (returnString && arr.length === 1) return arr[0];
-  return arr;
 };
 
+/**
+ * @static QPlus.pointToIndex
+ * Converts a point to a 1D point (an index)
+ * @param  {point} point
+ * @param  {int} maxCols
+ * @param  {int} maxRows
+ * @return {int} index value
+ */
 QPlus.pointToIndex = function(point, maxCols, maxRows) {
   if (point.x >= maxCols) return -1;
   if (maxRows && point.y >= maxRows) return -1;
@@ -119,6 +237,16 @@ QPlus.pointToIndex = function(point, maxCols, maxRows) {
   return index + ((maxCols * maxRows) * point.z);
 };
 
+/**
+ * @static QPlus.indexToPoint
+ * Converts a 1D point (an index) to a 2D or 3D point
+ * @param  {int} index
+ * @param  {int} maxCols
+ * @param  {int} maxRows
+ * @return {point}
+ *         2D point if index is within maxCols * maxRows
+ *         3D point if index is out of maxCols * maxRows
+ */
 QPlus.indexToPoint = function(index, maxCols, maxRows) {
   if (index < 0) return new Point(-1, -1);
   var x = index % maxCols;
@@ -131,6 +259,31 @@ QPlus.indexToPoint = function(index, maxCols, maxRows) {
   return new Point(x, y, z);
 };
 
+/**
+ * @static QPlus.freeImgCache
+ * @param  {string or array} files
+ *         List of files to remove from cache
+ *         If a string, separate with commas
+ *         Is case sensative, but only checking if any file
+ *         contains string(s) passed. Not checking if it's equal
+ *         So passing img/ will free all images, since they all begin
+ *         with img/
+ */
+QPlus.freeImgCache = function(files) {
+  if (typeof files === 'string') {
+    files = files.split(',').map(function(s) { return s.trim() });
+  }
+  for (var key in ImageManager.cache._inner) {
+    if (!ImageManager.cache._inner.hasOwnProperty(key)) continue;
+    var found = files.some(function(file) {
+      return key.contains(file);
+    })
+    if (found) {
+      ImageManager.cache._inner[key].free();
+    }
+  }
+};
+
 //=============================================================================
 // QPlus edits to existing classes
 
@@ -141,6 +294,23 @@ QPlus.indexToPoint = function(index, maxCols, maxRows) {
   var _params    = QPlus.getParams('<QPlus>');
   var _quickTest = _params['Quick Test'].toLowerCase() == 'true';
   var _switches  = _params['Default Enabled Switches'].split(',').map(Number);
+
+  //-----------------------------------------------------------------------------
+  // Graphics
+
+  var Alias_Graphics__makeErrorHtml = Graphics._makeErrorHtml;
+  Graphics._makeErrorHtml = function(name, message) {
+    var msg = Alias_Graphics__makeErrorHtml.call(this, name, message);
+    var extraMsg = '';
+    if (Utils.isNwjs()) {
+      var consoleKey = 'F8';
+      if (Imported.QInput) {
+        consoleKey = QInput.remapped.console.toUpperCase();
+      }
+      extraMsg = `<br /><font color="white">For more information, push ${consoleKey}</font>`;
+    }
+    return msg + extraMsg;
+  };
 
   //-----------------------------------------------------------------------------
   // Math
@@ -194,13 +364,22 @@ QPlus.indexToPoint = function(index, maxCols, maxRows) {
       SoundManager.preloadImportantSounds();
       this.checkPlayerLocation();
       DataManager.setupNewGame();
-      for (var i = 0; i < _switches.length; i++) {
-        $gameSwitches.setValue(_switches[i], true);
-      }
+
       SceneManager.goto(Scene_Map);
       this.updateDocumentTitle();
     } else {
       Alias_Scene_Boot_start.call(this);
+    }
+  };
+
+  //-----------------------------------------------------------------------------
+  // DataManager
+
+  var Alias_DataManager_setupNewGame = DataManager.setupNewGame;
+  DataManager.setupNewGame = function() {
+    Alias_DataManager_setupNewGame.call(this);
+    for (var i = 0; i < _switches.length; i++) {
+      $gameSwitches.setValue(_switches[i], true);
     }
   };
 
@@ -258,7 +437,7 @@ QPlus.indexToPoint = function(index, maxCols, maxRows) {
     if (mode === 0) {
       $gamePlayer._globalLocked = !charas.contains($gamePlayer) ? level : 0;
       this.events().forEach(function(event) {
-        if (ignore.contains(event)) return;
+        if (charas.contains(event)) return;
         event._globalLocked = level;
       })
     } else {
@@ -282,7 +461,7 @@ QPlus.indexToPoint = function(index, maxCols, maxRows) {
   Game_CharacterBase.prototype.initMembers = function() {
     Alias_Game_CharacterBase_initMembers.call(this);
     this._globalLocked = 0;
-    this._comments = "";
+    this._comments = '';
   };
 
   var Alias_Game_CharacterBase_updateAnimation = Game_CharacterBase.prototype.updateAnimation;
@@ -361,16 +540,20 @@ QPlus.indexToPoint = function(index, maxCols, maxRows) {
   //-----------------------------------------------------------------------------
   // Game_Event
 
+  var Alias_Game_Event_initMembers = Game_Event.prototype.initMembers;
+  Game_Event.prototype.initMembers = function() {
+    Alias_Game_Event_initMembers.call(this);
+    this._comments = null;
+    this._prevDir  = null;
+  };
+
   Game_Event.prototype.comments = function() {
-    if (this._comments === null) {
-      this.setupComments();
-    }
     return this._comments;
   };
 
   Game_Event.prototype.setupComments = function() {
     if (!this.page() || !this.list()) {
-      this._comments = "";
+      this._comments = '';
     } else {
       this._comments = this.list().filter(function(list) {
         return list.code === 108 || list.code === 408;
@@ -378,12 +561,26 @@ QPlus.indexToPoint = function(index, maxCols, maxRows) {
         return list.parameters;
       }).join('\n')
     }
+    if (this.event()) {
+      this._comments += `\n${this.event().note}`;
+    }
+  };
+
+  var Alias_Game_Event_setupPage = Game_Event.prototype.setupPage;
+  Game_Event.prototype.setupPage = function() {
+    var firstTime = this._prevDir === null;
+    this._prevDir = this.direction();
+    Alias_Game_Event_setupPage.call(this);
+    var retainDir = /<retainDir>/i.test(this.comments());
+    if (!firstTime && retainDir) {
+      this.setDirection(this._prevDir);
+    }
   };
 
   var Alias_Game_Event_clearPageSettings = Game_Event.prototype.clearPageSettings;
   Game_Event.prototype.clearPageSettings = function() {
     Alias_Game_Event_clearPageSettings.call(this);
-    this._comments = "";
+    this._comments = '';
   };
 
   var Alias_Game_Event_setupPageSettings = Game_Event.prototype.setupPageSettings;
@@ -391,4 +588,5 @@ QPlus.indexToPoint = function(index, maxCols, maxRows) {
     Alias_Game_Event_setupPageSettings.call(this);
     this.setupComments();
   };
+
 })()

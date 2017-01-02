@@ -14,6 +14,3 @@ js/rpg_objects.js
 js/rpg_scenes.js
 js/rpg_sprites.js
 js/rpg_windows.js
-
-# Ignore my js base file
-js/plugins/QBase.js

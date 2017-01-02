@@ -5,23 +5,117 @@
 var Imported = Imported || {};
 Imported.QAudio = '2.0.0';
 
+if (!Imported.QPlus) {
+  var msg = 'Error: QAudio requires QPlus to work.';
+  alert(msg);
+  throw new Error(msg);
+}
+
 //=============================================================================
  /*:
  * @plugindesc <QAudio>
  * Few new audio features
  * @author Quxios  | Version 2.0.0
  *
+ * @requires QPlus
+ *
  * @help
  * ============================================================================
- * ** Links
+ * ## About
  * ============================================================================
- * For a guide on how to use this plugin go to:
+ * This plugin allows you to play an audio (bgm, bgs, me or se) at a fixed
+ * position. The volume and panning will be dynamically updated based off of
+ * the players distance from that audios location.
+ *
+ * ============================================================================
+ * ## Plugin Commands
+ * ============================================================================
+ * **Playing / Looping**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ *   qAudio start [AUDIONAME] [list of options]
+ * ~~~
+ * AUDIONAME - The name of the audio you want to play
+ *
+ * Possible options:
+ *
+ *  - loop    - this audio will loop
+ *  - pan     - this audio will update its pan
+ *  - idX     - where X the ID for the audio (used for stopping)
+ *  - type    - bgm, bgs, me, or se (Default: bgm)
+ *  - maxV    - where V is the max volume for this audio, between 0-100
+ *  - xX      - where X is the x position for the audio
+ *  - xY      - where Y is the y position for the audio
+ *  - radiusR - where R is the max radius for the audio
+ *  - bindToCHARAID - where CHARAID is the character to bind to
+ *
+ * CHARAID - The character identifier.
+ *
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID or eventEVENTID
+ *  (replace EVENTID with a number)
+ *
+ * (Note: If no x, y or bindTo are set, it will play at players position)
+ * ----------------------------------------------------------------------------
+ * **Examples**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ *   qAudio start Battle1
+ * ~~~
+ * Will play bgm Battle1 at the players location. Recommended not to do it this
+ * way, best to set options.
+ *
+ * ~~~
+ *   qAudio start City bgs max80 radius10 x5 y5
+ * ~~~
+ * Will play bgs City at position (5, 5) with a radius of 10 and max volume of
+ * 80
+ *
+ * ~~~
+ *   qAudio start City bgs radius5 bindTo1 loop
+ *   qAudio start City bgs radius5 bindToE1 loop
+ *   qAudio start City bgs radius5 bindToEvent1 loop
+ * ~~~
+ * (Note: All 3 are the same, just using a different character id method)
+ *
+ * Will play bgs City at event 1s position and move with that event. It also has
+ * a radius of 5 and it will keep looping
+ * ----------------------------------------------------------------------------
+ * **Stoping a QAudio**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ *   qAudio stop ID
+ * ~~~
+ * ID - the ID you set for the audio
+ *
+ *
+ * To stop all qAudios
+ * ~~~
+ *   qAudio clear
+ * ~~~
+ * ----------------------------------------------------------------------------
+ * **Examples**
+ * ----------------------------------------------------------------------------
+ * First make a qAudio with an Id like:
+ * ~~~
+ *   qAudio start Battle1 idAb1
+ * ~~~
+ * Then when you want to clear it:
+ * ~~~
+ *   qAudio clear Ab1
+ * ~~~
+ * ============================================================================
+ * ## Links
+ * ============================================================================
+ * RPGMakerWebs:
  *
  *   -rmwlink-
  *
  * Terms of use:
- *   https://github.com/quxios/somerepo/readme.md#terms
  *
+ *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *
+ * @tags audio, character, proximity
  */
 //=============================================================================
 
@@ -48,7 +142,7 @@ Imported.QAudio = '2.0.0';
       this.qAudioCommandOld(cmd, args)
     }
     if (cmd === 'start') {
-      var name = args[1];
+      var name  = args[1];
       var args2 = args.slice(2);
       var loop     = !!QPlus.getArg(args2, /loop/i);
       var needsPan = !!QPlus.getArg(args2, /pan/i);
@@ -56,10 +150,10 @@ Imported.QAudio = '2.0.0';
       id = id === '*' ? this.getUniqueQAudioId() : id;
       var type = QPlus.getArg(args2, /(bgm|bgs|me|se)/i) || 'bgm';
       type = type.toLowerCase();
-      var max = QPlus.getArg(args2, /(m|max)(\d+)/i) || 100;
+      var max = QPlus.getArg(args2, /(max)(\d+)/i) || 100;
       max /= 100;
-      var radius = QPlus.getArg(args2, /(r|radius)(\d+)/i) || 1;
-      var bindTo = QPlus.getArg(args2, /(b|bindTo)(.+)/i);
+      var radius = QPlus.getArg(args2, /(radius)(\d+)/i) || 1;
+      var bindTo = QPlus.getArg(args2, /(bindTo)(.+)/i);
       if (bindTo) {
         bindTo = QPlus.getCharacter(bindTo);
       }
@@ -154,20 +248,6 @@ Imported.QAudio = '2.0.0';
 
   AudioManager._QAudioBuffers = [];
 
-  // Duplicate of the AudioManager.createNewBuffer from rpg_managers.js
-  // TDDP PreloadManager overrides this to cache, but that will not
-  // let you use multiple of the same audio file, so I copied this function over
-  AudioManager.createNewBuffer = function(folder, name) {
-    var ext = this.audioFileExt();
-    var url = this._path + folder + '/' + encodeURIComponent(name) + ext;
-    if (this.shouldUseHtml5Audio() && folder === 'bgm') {
-      Html5Audio.setup(url);
-      return Html5Audio;
-    } else {
-      return new WebAudio(url);
-    }
-  };
-
   AudioManager.playQAudio = function(id, audio, options) {
     if (audio.name) {
       this._QAudioBuffers = this._QAudioBuffers.filter(function(audio) {
@@ -180,19 +260,19 @@ Imported.QAudio = '2.0.0';
         }
         return audio._autoPlay || audio.isPlaying();
       })
-      var buffer = this.createNewBuffer(options.type, audio.name);
+      var buffer = this.createBuffer(options.type, audio.name);
       if (options.bindTo) {
+        buffer.bindTo = options.bindTo;
         Object.defineProperty(buffer, 'mapX', {
           get: function() {
-            return options.bindTo._realX;
+            return this.bindTo._realX;
           }
         });
         Object.defineProperty(buffer, 'mapY', {
           get: function() {
-            return options.bindTo._realY;
+            return this.bindTo._realY;
           }
         });
-        options.bindTo = null;
       } else {
         buffer.mapX = options.x;
         buffer.mapY = options.y;
@@ -223,8 +303,8 @@ Imported.QAudio = '2.0.0';
     var y2 = buffer.mapY;
     var radius  = buffer.radius;
     var radian = Math.atan2(y2 - y1, x2 - x1);
-    var dx = x2 - x1;
-    var dy = y2 - y1;
+    var dx = $gameMap.deltaX(x2, x1);
+    var dy = $gameMap.deltaY(y2, y1);
     var dist = Math.sqrt(dx * dx + dy * dy);
     var volume = Math.max((radius - dist) / radius, 0);
     var typeVolume = 100;

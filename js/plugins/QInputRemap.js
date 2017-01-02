@@ -17,6 +17,8 @@ if (!Imported.QInput) {
  * Quasi Input Addon: Adds Key remapping to Options menu
  * @author Quxios  | Version 1.0.0
  *
+ * @requires QInput
+ *
  * @param Hide Keys
  * @desc Which keys to not show in Input Config
  * Default:
@@ -88,14 +90,27 @@ if (!Imported.QInput) {
  *
  * @help
  * ============================================================================
- * ** Links
+ * ## About
  * ============================================================================
- * For a guide on how to use this plugin go to:
+ * This plugin adds an input remapping window to the Scene_Options. This lets
+ * players change their keybinds ingame.
+ * ============================================================================
+ * ## How to use
+ * ============================================================================
+ * Place this anywhere below QInput plugin. Input configs are saved into the
+ * `saves/config.rpgsave` file
+ * ============================================================================
+ * ## Links
+ * ============================================================================
+ * RPGMakerWebs:
+ *
  *   -rmwlink-
  *
  * Terms of use:
- *   https://github.com/quxios/somerepo/readme.md#terms
  *
+ *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *
+ * @tags input, options
  */
 //=============================================================================
 
