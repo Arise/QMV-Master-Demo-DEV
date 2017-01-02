@@ -13,6 +13,7 @@ const syncOutput = '../QMV-Master-Demo'
 const rmwOutput  = './'
 const pluginsPath = 'js/plugins/'
 const repo = 'https://github.com/quxios/QMV-Master-Demo/tree/master/js/plugins'
+const site = 'https://quxios.github.io/#/plugins/'
 
 const ignore = ['QBase.js']
 const pluginFiles  = fs.readdirSync(pluginsPath).filter((name) => {
@@ -110,7 +111,7 @@ gulp.task('docs', function() {
   })
   fs.writeFileSync(path.join(docOutput, 'plugins.json'), JSON.stringify(plugins, null, 2))
   fs.writeFileSync(path.join(docOutput, 'tags.json'), JSON.stringify(tags))
-  console.log('Exported to: ', path.join(__dirname, docOutput));
+  console.log('Exported to: ', path.join(__dirname, docOutput))
 });
 
 gulp.task('rmw', function() {
@@ -122,13 +123,14 @@ gulp.task('rmw', function() {
       plugin.about = plugin.about.replace(/\r/g, '\n')
       plugin.about = plugin.about.replace(/(\n)+/g, '\n')
       plugin.about = plugin.about.replace(/(\n)/g, ' ')
-      text += `${plugin.name} - v${plugin.version}\n`
-      text += `Download - ${plugin.download}\n`
-      text += `${plugin.about.trim()}\n\n`
+      const link = site + plugin.name
+      text += `<b><a href='${link}'>${plugin.name}</a> - v${plugin.version}</b><br>\n`
+      text += `Download - <a href='${plugin.download}'>${plugin.download}</a><br>\n`
+      text += `${plugin.about.trim()}<br><br>\n\n`
     }
   })
-  fs.writeFileSync(path.join(rmwOutput, 'rmw.txt'), text)
-  console.log('Exported to: ', path.join(__dirname, rmwOutput));
+  fs.writeFileSync(path.join(rmwOutput, 'rmw.html'), text)
+  console.log('Exported to: ', path.join(__dirname, rmwOutput))
 });
 
 gulp.task('sync', function() {
@@ -138,7 +140,7 @@ gulp.task('sync', function() {
   ]
   syncy(glob, syncOutput, { updateAndDelete: false })
     .then(() => {
-      console.log('Done!');
+      console.log('Done!')
     })
     .catch(console.error);
 })
