@@ -4,10 +4,13 @@ yarn.lock
 
 # Ignore unchanged MV folders
 audio/*
-img/*
+img/*/*
 icon/
 fonts/
 movies/
+
+# Include new imgs
+!img/characters/%test-Actor1.png
 
 # Ignore default js
 js/libs/

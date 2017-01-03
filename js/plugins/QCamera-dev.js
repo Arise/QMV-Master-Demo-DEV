@@ -68,6 +68,63 @@ function Sprite_Bars() {
   var _delay = 15;
 
   //-----------------------------------------------------------------------------
+  // Game_Interpreter
+
+  var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+  Game_Interpreter.prototype.pluginCommand = function(command, args) {
+    if (command.toLowerCase() === 'qplugin') {
+      this.qPluginCommand(args);
+      return;
+    }
+    Alias_Game_Interpreter_pluginCommand.call(this, command, args);
+  };
+
+  Game_Interpreter.prototype.qPluginCommand = function(args) {
+    //var args2 = args.slice(2);
+    //QPlus.getCharacter(args[0]);
+    //QPlus.getArg(args2, /lock/i)
+  };
+
+  //-----------------------------------------------------------------------------
+  // Spriteset_Map
+
+  var Alias_Spriteset_Map_updatePosition = Spriteset_Map.prototype.updatePosition;
+  Spriteset_Map.prototype._updatePosition = function() {
+    var oldScale = this.scale.x;
+    Alias_Spriteset_Map_updatePosition.call(this);
+    var s = this.scale.x - 1;
+    var ox = Graphics.width / 2;
+    var oy = Graphics.height / 2;
+    this._tilemap.x = ox - this._tilemap._margin;
+    this._tilemap.x += this._tilemap.x * s;
+    this._tilemap.y = oy - this._tilemap._margin;
+    this._tilemap.y += this._tilemap.y * s;
+    if (oldScale !== this.scale.x) {
+      var w = (Graphics.width + this._tilemap._margin * 2);
+      w += w / Math.abs(s);
+      var h = (Graphics.height + this._tilemap._margin * 2);
+      h += h / Math.abs(s);
+      console.log(w, h);
+      this._tilemap.width = w;
+      this._tilemap.height = h;
+    }
+  };
+
+  Spriteset_Map.prototype._updateTilemap = function() {
+    var s = this.scale.x - 1;
+    var tileWidth = $gameMap.tileWidth();
+    var tileHeight = $gameMap.tileHeight();
+    var originX = $gameMap._displayX * tileWidth;
+    originX += Graphics.width / 2;
+    var originY = $gameMap._displayY * tileHeight;
+    originY += Graphics.height / 2;
+    this._tilemap.origin.x = originX - this._tilemap._margin * 2;
+    this._tilemap.origin.x += this._tilemap.origin.x * s;
+    this._tilemap.origin.y = originY - this._tilemap._margin * 2;
+    this._tilemap.origin.y += this._tilemap.origin.y * s;
+  };
+
+  //-----------------------------------------------------------------------------
   // Game_Map
 
   var Alias_Game_Map_setupScroll = Game_Map.prototype.setupScroll;
@@ -78,12 +135,54 @@ function Sprite_Bars() {
     this._scrollRadian = null;
   };
 
-  Game_Map.prototype.displayX = function() {
-    return Math.round(this._displayX * this.tileWidth()) / this.tileWidth();
+  Game_Map.prototype._displayX = function() {
+    var s = $gameScreen._zoomScale - 1;
+    var x = this._displayX * this.tileWidth();
+    x += Graphics.width / 2 - 40;
+    x += x * s;
+    return Math.round(x) / this.tileWidth();
   };
 
-  Game_Map.prototype.displayY = function() {
-    return Math.round(this._displayY * this.tileHeight()) / this.tileHeight();
+  Game_Map.prototype._displayY = function() {
+    var s = $gameScreen._zoomScale - 1;
+    var y = this._displayY * this.tileHeight();
+    y += Graphics.height / 2 - 40;
+    y += y * s;
+    return Math.round(y) / this.tileHeight();
+  };
+
+  Game_Map.prototype._adjustX = function(x) {
+    if (this.isLoopHorizontal() && x < this.displayX() -
+        (this.width() - this.screenTileX()) / 2) {
+      return x - this.displayX() + $dataMap.width;
+    } else {
+      return x - this.displayX();
+    }
+  };
+
+  Game_Map.prototype._adjustY = function(y) {
+    if (this.isLoopVertical() && y < this.displayY() -
+        (this.height() - this.screenTileY()) / 2) {
+      return y - this.displayY() + $dataMap.height;
+    } else {
+      return y - this.displayY();
+    }
+  };
+
+  Game_Map.prototype.canvasToMapX = function(x) {
+    var tileWidth = this.tileWidth() * $gameScreen._zoomScale;
+    var originX = this._displayX * tileWidth;
+    originX += Graphics.width / 2 * ($gameScreen._zoomScale - 1);
+    var mapX = Math.floor((originX + x) / tileWidth);
+    return this.roundX(mapX);
+  };
+
+  Game_Map.prototype.canvasToMapY = function(y) {
+    var tileHeight = this.tileHeight() * $gameScreen._zoomScale;
+    var originY = this._displayY * tileHeight;
+    originY += Graphics.height / 2 * ($gameScreen._zoomScale - 1);
+    var mapY = Math.floor((originY + y) / tileHeight);
+    return this.roundY(mapY);
   };
 
   var Alias_Game_Map_startScroll = Game_Map.prototype.startScroll;
@@ -210,11 +309,11 @@ function Sprite_Bars() {
     this._lastY = this._realY;
   };
 
-  var Alias_Game_Character_update = Game_Character.prototype.update;
-  Game_Character.prototype.update = function() {
+  var Alias_Game_CharacterBase_update = Game_CharacterBase.prototype.update;
+  Game_CharacterBase.prototype.update = function() {
     var lastScrolledX  = this.scrolledX();
     var lastScrolledY  = this.scrolledY();
-    Alias_Game_Character_update.call(this);
+    Alias_Game_CharacterBase_update.call(this);
     if ($gameMap._scrollTarget === this) {
       if (_offset === 0) {
         this.updateNormalScroll(lastScrolledX, lastScrolledY)
@@ -224,7 +323,7 @@ function Sprite_Bars() {
     }
   };
 
-  Game_Character.prototype.updateQScroll = function() {
+  Game_CharacterBase.prototype.updateQScroll = function() {
     if ($gameMap._scrollTarget === this) {
       var x1 = this._lastX;
       var y1 = this._lastY;
@@ -256,7 +355,7 @@ function Sprite_Bars() {
     }
   };
 
-  Game_Character.prototype.updateNormalScroll = function(lastScrolledX, lastScrolledY) {
+  Game_CharacterBase.prototype.updateNormalScroll = function(lastScrolledX, lastScrolledY) {
     var x1 = lastScrolledX;
     var y1 = lastScrolledY;
     var x2 = this.scrolledX();
@@ -276,7 +375,7 @@ function Sprite_Bars() {
     }
   };
 
-  Game_Character.prototype._updateScrollTarget = function(wasMoving) {
+  Game_CharacterBase.prototype._updateScrollTarget = function(wasMoving) {
     if ($gameMap._scrollTarget === this) {
       var x1 = this._lastX;
       var y1 = this._lastY;

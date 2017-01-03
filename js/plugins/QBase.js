@@ -71,5 +71,23 @@ function NewClass() {
 // QName
 
 (function() {
+  //-----------------------------------------------------------------------------
+  // Game_Interpreter
+  //
+  // The interpreter for running event commands.
 
+  var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+  Game_Interpreter.prototype.pluginCommand = function(command, args) {
+    if (command.toLowerCase() === 'qplugin') {
+      this.qPluginCommand(args);
+      return;
+    }
+    Alias_Game_Interpreter_pluginCommand.call(this, command, args);
+  };
+
+  Game_Interpreter.prototype.qPluginCommand = function(args) {
+    //var args2 = args.slice(2);
+    //QPlus.getCharacter(args[0]);
+    //QPlus.getArg(args2, /lock/i)
+  };
 })()
