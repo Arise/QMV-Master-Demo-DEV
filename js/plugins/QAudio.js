@@ -262,15 +262,15 @@ if (!Imported.QPlus) {
 
   AudioManager.playQAudio = function(id, audio, options) {
     if (audio.name) {
-      this._QAudioBuffers = this._QAudioBuffers.filter(function(audio) {
-        if (audio.uid === id) {
-          audio.stop();
-          audio.mapX = null;
-          audio.mapY = null;
-          audio = null;
+      this._QAudioBuffers = this._QAudioBuffers.filter(function(a) {
+        if (a.uid === id) {
+          a.stop();
+          a.mapX = null;
+          a.mapY = null;
+          a = null;
           return false;
         }
-        return audio._autoPlay || audio.isPlaying();
+        return a._autoPlay || a.isPlaying();
       })
       var buffer = this.createBuffer(options.type, audio.name);
       if (options.bindTo) {
@@ -294,6 +294,7 @@ if (!Imported.QPlus) {
       buffer.radius = options.radius;
       buffer.maxVolume = options.maxVolume;
       buffer.doPan = options.doPan;
+      this.updateQAudioParameters(buffer, audio);
       this.updateQAudioDistance(buffer);
       buffer.play(options.loop, 0);
       if (!options.loop) {
@@ -304,8 +305,13 @@ if (!Imported.QPlus) {
     }
   };
 
-  AudioManager.updateQAudioParameters = function(buffer, maxVolume, audio) {
-    this.updateBufferParameters(buffer, maxVolume, audio);
+  AudioManager.updateQAudioParameters = function(buffer, audio) {
+    var volume = 100;
+    if (buffer.type === 'bgm') volume = this._bgmVolume;
+    if (buffer.type === 'bgs') volume = this._bgsVolume;
+    if (buffer.type === 'me')  volume = this._meVolume;
+    if (buffer.type === 'se')  volume = this._seVolume;
+    this.updateBufferParameters(buffer, volume, audio);
   };
 
   AudioManager.updateQAudioDistance = function(buffer) {

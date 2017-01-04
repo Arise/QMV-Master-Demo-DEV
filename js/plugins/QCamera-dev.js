@@ -292,7 +292,6 @@ function Sprite_Bars() {
   Game_CharacterBase.prototype.initMembers = function() {
     Alias_Game_CharacterBase_initMembers.call(this);
     this._cameraCounter = 0;
-    this._lastFrameDist = this.distancePerFrame();
   };
 
   var Alias_Game_CharacterBase_setPosition = Game_CharacterBase.prototype.setPosition;
@@ -337,16 +336,10 @@ function Sprite_Bars() {
         } else if (this._cameraCounter > _delay) {
           this._cameraCounter--;
         }
-        if (this.distancePerFrame() !== this._lastFrameDist) {
-          var ratio = this.distancePerFrame() / this._lastFrameDist;
-          var frames = Math.round(_offset / this.distancePerFrame());
-          this._cameraCounter = (_delay + frames) * ratio;
-        }
         if ($gameMap.isScrolling()) return;
         this._lastX = x2;
         this._lastY = y2;
-        this._lastFrameDist = this.distancePerFrame();
-        var frames = _offset / this.distancePerFrame();
+        var frames = _offset / 0.0625; // 0.0625 is the distance per frame at speed 4
         frames *= this._cameraCounter / _delay;
         $gameMap.scrollTo(this, null, Math.round(frames) || 1);
       } else {
@@ -372,32 +365,6 @@ function Sprite_Bars() {
     }
     if (y2 < y1 && y2 < this.centerY()) {
       $gameMap.scrollUp(y1 - y2);
-    }
-  };
-
-  Game_CharacterBase.prototype._updateScrollTarget = function(wasMoving) {
-    if ($gameMap._scrollTarget === this) {
-      var x1 = this._lastX;
-      var y1 = this._lastY;
-      var x2 = this._realX;
-      var y2 = this._realY;
-      var dx = $gameMap.deltaX(x2, x1);
-      var dy = $gameMap.deltaY(y2, y1);
-      if (this.isMoving()) {
-        if (dx !== 0 && Math.abs(dx) < _offset) {
-          return;
-        }
-        if (dy !== 0 && Math.abs(dy) < _offset) {
-          return;
-        }
-      }
-      if ($gameMap.isScrolling()) return;
-      if (dx !== 0 || dy !== 0) {
-        this._lastX = x2;
-        this._lastY = y2;
-        var frames = _offset / this.distancePerFrame();
-        $gameMap.scrollTo(this, null, Math.round(frames) || 1);
-      }
     }
   };
 
