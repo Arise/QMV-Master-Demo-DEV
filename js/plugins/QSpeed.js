@@ -204,10 +204,10 @@ if (!Imported.QPlus) {
   };
 
   var Alias_Game_CharacterBase_setMoveSpeed = Game_CharacterBase.prototype.setMoveSpeed;
-  Game_CharacterBase.prototype.setMoveSpeed = function(moveSpeed, accel) {
+  Game_CharacterBase.prototype.setMoveSpeed = function(moveSpeed) {
     Alias_Game_CharacterBase_setMoveSpeed.call(this, moveSpeed);
     var duration = this._moveSpeedDuration;
-    if (!accel || !this._useAccel) {
+    if (!this._useAccel) {
       this._moveSpeedSpd = moveSpeed;
       return;
     }
@@ -230,13 +230,14 @@ if (!Imported.QPlus) {
     } else if (this._realMoveSpeed > this._moveSpeed) {
       this._realMoveSpeed = Math.max(this._realMoveSpeed - this._moveSpeedSpd, this._moveSpeed);
     }
-    if (!this._wasDashing && this.isDashing()) {
-      this.setMoveSpeed(this._moveSpeed + 1, true);
+    var isDashing = this.isDashing();
+    if (!this._wasDashing && isDashing) {
+      this.setMoveSpeed(this._moveSpeed + 1);
     }
-    if (this._wasDashing && !this.isDashing()) {
-      this.setMoveSpeed(this._moveSpeed - 1, true);
+    if (this._wasDashing && !isDashing) {
+      this.setMoveSpeed(this._moveSpeed - 1);
     }
-    this._wasDashing = this.isDashing();
+    this._wasDashing = isDashing;
   };
 
   //-----------------------------------------------------------------------------
