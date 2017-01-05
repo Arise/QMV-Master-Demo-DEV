@@ -280,8 +280,8 @@ function Sprite_Bars() {
     this.startQScroll(distanceX, distanceY, speed, frames);
   };
 
-  Game_Map.prototype.focusOn = function(target) {
-    this.scrollTo(target, null, 15);
+  Game_Map.prototype.focusOn = function(target, duration) {
+    this.scrollTo(target, null, duration || 15);
     this._scrollTarget = target;
   };
 

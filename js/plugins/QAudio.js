@@ -3,10 +3,14 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QAudio = '2.0.2';
+Imported.QAudio = '2.0.3';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QAudio requires QPlus to work.';
+  alert(msg);
+  throw new Error(msg);
+} else if (!QPlus.versionCheck(Imported.QPlus, '1.0.1')) {
+  var msg = 'Error: QAudio requires QPlus 1.0.1 or newer to work.';
   alert(msg);
   throw new Error(msg);
 }
@@ -15,7 +19,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QAudio>
  * Few new audio features
- * @author Quxios  | Version 2.0.2
+ * @author Quxios  | Version 2.0.3
  *
  * @requires QPlus
  *
@@ -43,7 +47,8 @@ if (!Imported.QPlus) {
  * ~~~
  *   qAudio start [AUDIONAME] [list of options]
  * ~~~
- * AUDIONAME - The name of the audio you want to play
+ * AUDIONAME - The name of the audio you want to play. If file has spaces in it
+ * wrap the name with "". Ex. If audio name was: Some File, then use "Some File"
  *
  * Possible options:
  *
@@ -149,6 +154,7 @@ if (!Imported.QPlus) {
   };
 
   Game_Interpreter.prototype.qAudioCommand = function(args) {
+    args = QPlus.makeArgs(args.join(' '));
     var cmd = args[0].toLowerCase();
     if (cmd === 'loop' || cmd === 'play') {
       this.qAudioCommandOld(cmd, args)

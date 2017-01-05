@@ -26,7 +26,8 @@ const selectedPlugins = [
   'QAudio.js',
   'QInput.js',
   'QInputRemap.js',
-  'QNameInput.js'
+  'QNameInput.js',
+  'QSpeed.js'
 ]
 
 class Plugin {
