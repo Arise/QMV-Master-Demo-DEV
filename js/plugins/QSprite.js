@@ -63,6 +63,7 @@ if (!Imported.QPlus) {
  *  - dashX
  *  - idleX
  *  - idle[A-Z]X ( more info for this below )
+ *  - default
  *
  * Where X is the direction:
  *
@@ -76,6 +77,10 @@ if (!Imported.QPlus) {
  *  - 9 - upper right
  *
  * (Diagonals only work if you are using this with Quasi Movement)
+ *
+ * Default pose is used when and idleX or moveX is not found. Note that default
+ * does not have an X at the end, it's just default. Has no directions tied to
+ * it.
  *
  * ----------------------------------------------------------------------------
  * **idle[A-Z]X**

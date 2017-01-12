@@ -48,7 +48,7 @@ if (!Imported.QPlus) {
  *  - yY      - Set Y to the distance, in grid tiles, to travel in y direction
  *  - speedX  - Set X to the camera speed value. Default: 4
  *  - framesX - Set X to the amount of time, in frames, it takes to reach the
- *              scroll. Ignores speedX if frames is set.
+ *    scroll. Ignores speedX if frames is set.
  * ----------------------------------------------------------------------------
  * **Scroll to**
  * ----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ if (!Imported.QPlus) {
  *
  *  - speedX  - Set X to the camera speed value. Default: 4
  *  - framesX - Set X to the amount of time, in frames, it takes to reach the
- *              scroll. Ignores speedX if frames is set.
+ *    scroll. Ignores speedX if frames is set.
  * ----------------------------------------------------------------------------
  * **Focus**
  * ----------------------------------------------------------------------------
@@ -84,7 +84,7 @@ if (!Imported.QPlus) {
  *
  *  - speedX  - Set X to the camera speed value. (Default is 4)
  *  - framesX - Set X to the amount of time, in frames, it takes to reach the
- *              scroll. Ignores speedX if frames is set. Default: 15
+ *    scroll. Ignores speedX if frames is set. Default: 15
  * ----------------------------------------------------------------------------
  * **Bars**
  * ----------------------------------------------------------------------------
@@ -96,7 +96,7 @@ if (!Imported.QPlus) {
  * Possible options:
  *  - heightX - Set X to the height of the bars in pixels. Default: 0
  *  - framesX - Set X to the amount of time, in frames, it takes to reach the
- *              scroll.
+ *    scroll.
  * ============================================================================
  * ## Links
  * ============================================================================

@@ -96,7 +96,7 @@ class Plugin {
 gulp.task('docs', function() {
   let plugins = []
   let tags = {}
-  pluginFiles.forEach((pluginName) => {
+  selectedPlugins.forEach((pluginName) => {
     if (/^Q/.test(pluginName)) {
       const plugin = Plugin.get(pluginName);
       if (plugin.tags) {
