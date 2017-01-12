@@ -41,6 +41,7 @@ class Plugin {
       version:  this.getVersion(header),
       download: this.getParam('download', header),
       requires: this.getParam('requires', header),
+      video: this.getParam('video', header),
       tags: this.getParam('tags', header),
       about: '', // first section of help
       help: ''
