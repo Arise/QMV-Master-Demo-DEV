@@ -20,10 +20,12 @@ const pluginFiles  = fs.readdirSync(pluginsPath).filter((name) => {
   return ignore.indexOf(name) === -1
 })
 
+// default sorting
 const selectedPlugins = [
   'QPlus.js',
   'QSprite.js',
   'QAudio.js',
+  'QCamera.js',
   'QInput.js',
   'QInputRemap.js',
   'QNameInput.js',
