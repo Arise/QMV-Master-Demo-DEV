@@ -4,12 +4,11 @@
 // sync
 
 const gulp  = require('gulp')
-const syncy = require('syncy');
 const fs    = require('fs')
 const path  = require('path')
 
 const docOutput  = '../quxios.github.io/data'
-const syncOutput = '../QMV-Master-Demo'
+const syncOutput = '../QMV-Master-Demo/js/plugins'
 const rmwOutput  = './'
 const pluginsPath = 'js/plugins/'
 const repo = 'https://github.com/quxios/QMV-Master-Demo/tree/master/js/plugins'
@@ -23,6 +22,7 @@ const pluginFiles  = fs.readdirSync(pluginsPath).filter((name) => {
 // default sorting
 const selectedPlugins = [
   'QPlus.js',
+  'QUpdate.js',
   'QSprite.js',
   'QAudio.js',
   'QCamera.js',
@@ -138,13 +138,9 @@ gulp.task('rmw', function() {
 });
 
 gulp.task('sync', function() {
-  const glob = [
-    'data/**',
-    'js/plugins/!(QBase.js|*dev.js)'
-  ]
-  syncy(glob, syncOutput, { updateAndDelete: false })
-    .then(() => {
-      console.log('Done!')
-    })
-    .catch(console.error);
+  selectedPlugins.forEach((pluginName) => {
+    var current = fs.readFileSync(pluginsPath + pluginName, 'utf8')
+    fs.writeFileSync(path.join(syncOutput, pluginName), current);
+  })
+
 })

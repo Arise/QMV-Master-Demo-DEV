@@ -14,7 +14,7 @@ if (!Imported.QPlus) {
 //=============================================================================
  /*:
  * @plugindesc <QCamera>
- * desc
+ * Better Camera control
  * @author Quxios  | Version 1.0.0
  *
  * @requires QPlus
@@ -23,16 +23,19 @@ if (!Imported.QPlus) {
  * @desc
  * @default
  *
- * @video
- *
  * @help
  * ============================================================================
  * ## About
  * ============================================================================
- *
+ * Improved camaera control for RPG Maker MV. Lets you scroll diagonally,
+ * towards a character, set the time it takes to scroll in frames, change who
+ * the camera is following and smooth scrolling which makes the camera 'lag'
+ * behind the player or target.
  * ============================================================================
- * ## How to use
+ * ## Plugin Commands
  * ============================================================================
+ * **Sub section**
+ * ----------------------------------------------------------------------------
  *
  * ----------------------------------------------------------------------------
  * **Sub section**
@@ -72,56 +75,17 @@ function Sprite_Bars() {
 
   var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
-    if (command.toLowerCase() === 'qplugin') {
-      this.qPluginCommand(args);
+    if (command.toLowerCase() === 'qcamera') {
+      this.qCameraCommand(args);
       return;
     }
     Alias_Game_Interpreter_pluginCommand.call(this, command, args);
   };
 
-  Game_Interpreter.prototype.qPluginCommand = function(args) {
+  Game_Interpreter.prototype.qCameraCommand = function(args) {
     //var args2 = args.slice(2);
     //QPlus.getCharacter(args[0]);
     //QPlus.getArg(args2, /lock/i)
-  };
-
-  //-----------------------------------------------------------------------------
-  // Spriteset_Map
-
-  var Alias_Spriteset_Map_updatePosition = Spriteset_Map.prototype.updatePosition;
-  Spriteset_Map.prototype._updatePosition = function() {
-    var oldScale = this.scale.x;
-    Alias_Spriteset_Map_updatePosition.call(this);
-    var s = this.scale.x - 1;
-    var ox = Graphics.width / 2;
-    var oy = Graphics.height / 2;
-    this._tilemap.x = ox - this._tilemap._margin;
-    this._tilemap.x += this._tilemap.x * s;
-    this._tilemap.y = oy - this._tilemap._margin;
-    this._tilemap.y += this._tilemap.y * s;
-    if (oldScale !== this.scale.x) {
-      var w = (Graphics.width + this._tilemap._margin * 2);
-      w += w / Math.abs(s);
-      var h = (Graphics.height + this._tilemap._margin * 2);
-      h += h / Math.abs(s);
-      console.log(w, h);
-      this._tilemap.width = w;
-      this._tilemap.height = h;
-    }
-  };
-
-  Spriteset_Map.prototype._updateTilemap = function() {
-    var s = this.scale.x - 1;
-    var tileWidth = $gameMap.tileWidth();
-    var tileHeight = $gameMap.tileHeight();
-    var originX = $gameMap._displayX * tileWidth;
-    originX += Graphics.width / 2;
-    var originY = $gameMap._displayY * tileHeight;
-    originY += Graphics.height / 2;
-    this._tilemap.origin.x = originX - this._tilemap._margin * 2;
-    this._tilemap.origin.x += this._tilemap.origin.x * s;
-    this._tilemap.origin.y = originY - this._tilemap._margin * 2;
-    this._tilemap.origin.y += this._tilemap.origin.y * s;
   };
 
   //-----------------------------------------------------------------------------
@@ -133,40 +97,6 @@ function Sprite_Bars() {
     this._scrollTarget = $gamePlayer;
     this._scrollFrames = null;
     this._scrollRadian = null;
-  };
-
-  Game_Map.prototype._displayX = function() {
-    var s = $gameScreen._zoomScale - 1;
-    var x = this._displayX * this.tileWidth();
-    x += Graphics.width / 2 - 40;
-    x += x * s;
-    return Math.round(x) / this.tileWidth();
-  };
-
-  Game_Map.prototype._displayY = function() {
-    var s = $gameScreen._zoomScale - 1;
-    var y = this._displayY * this.tileHeight();
-    y += Graphics.height / 2 - 40;
-    y += y * s;
-    return Math.round(y) / this.tileHeight();
-  };
-
-  Game_Map.prototype._adjustX = function(x) {
-    if (this.isLoopHorizontal() && x < this.displayX() -
-        (this.width() - this.screenTileX()) / 2) {
-      return x - this.displayX() + $dataMap.width;
-    } else {
-      return x - this.displayX();
-    }
-  };
-
-  Game_Map.prototype._adjustY = function(y) {
-    if (this.isLoopVertical() && y < this.displayY() -
-        (this.height() - this.screenTileY()) / 2) {
-      return y - this.displayY() + $dataMap.height;
-    } else {
-      return y - this.displayY();
-    }
   };
 
   Game_Map.prototype.canvasToMapX = function(x) {
