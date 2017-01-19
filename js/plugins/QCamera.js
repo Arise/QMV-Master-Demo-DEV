@@ -9,6 +9,10 @@ if (!Imported.QPlus) {
   var msg = 'Error: QCamera requires QPlus to work.';
   alert(msg);
   throw new Error(msg);
+} else if (!QPlus.versionCheck(Imported.QPlus, '1.0.2')) {
+  var msg = 'Error: QCamera requires QPlus 1.0.2 or newer to work.';
+  alert(msg);
+  throw new Error(msg);
 }
 
 //=============================================================================

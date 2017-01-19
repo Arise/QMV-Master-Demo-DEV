@@ -1,32 +1,32 @@
 //=============================================================================
-/*:
-* @plugindesc <QUpdate>
-* Checks QPlugins for updates
-* @author Quxios  | Version 1.0.0
-*
-* @help
-* ============================================================================
-* ## About
-* ============================================================================
-* A Plugin to check if your QPlugins are up to date. Only works during local
-* playtesting. Please remove / delete this plugin before deploying.
-* ============================================================================
-* ## How to use
-* ============================================================================
-*
-* ============================================================================
-* ## Links
-* ============================================================================
-* RPGMakerWebs:
-*
-*   http://forums.rpgmakerweb.com/index.php?/topic/73023-qplugins/
-*
-* Terms of use:
-*
-*   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
-*
-* @tags updater
-*/
+ /*:
+ * @plugindesc <QUpdate>
+ * Checks QPlugins for updates
+ * @author Quxios  | Version 1.0.0
+ *
+ * @help
+ * ============================================================================
+ * ## About
+ * ============================================================================
+ * A Plugin to check if your QPlugins are up to date. Only works during local
+ * playtesting. Please remove / delete this plugin before deploying.
+ * ============================================================================
+ * ## How to use
+ * ============================================================================
+ *
+ * ============================================================================
+ * ## Links
+ * ============================================================================
+ * RPGMakerWebs:
+ *
+ *   http://forums.rpgmakerweb.com/index.php?/topic/73023-qplugins/
+ *
+ * Terms of use:
+ *
+ *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *
+ * @tags updater
+ */
 //=============================================================================
 
 if (!Utils.isNwjs() && !Utils.isOptionValid('test')) {

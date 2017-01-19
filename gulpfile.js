@@ -81,7 +81,7 @@ class Plugin {
   static getHelp(header) {
     let help = /@help([\s\S]*?)(\@|\*\/)/.exec(header)
     if (help) {
-      help = help[1].replace(/^ \*( |)/gm, '')
+      help = help[1].replace(/^\s*\*\s*/gm, '')
       help = help.replace(/\-{70,90}/g, '')
       help = help.replace(/\={70,90}(\n|\n\r|\r|\r\n)\#\#/g, '--SECTION--\n##')
       help = help.replace(/\={70,90}/g, '')
@@ -144,3 +144,5 @@ gulp.task('sync', function() {
   })
 
 })
+
+gulp.task('mv', ['docs', 'rmw', 'sync'])
