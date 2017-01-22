@@ -81,7 +81,7 @@ class Plugin {
   static getHelp(header) {
     let help = /@help([\s\S]*?)(\@|\*\/)/.exec(header)
     if (help) {
-      help = help[1].replace(/^\s*\*\s*/gm, '')
+      help = help[1].replace(/^\s*\*( |)/gm, '')
       help = help.replace(/\-{70,90}/g, '')
       help = help.replace(/\={70,90}(\n|\n\r|\r|\r\n)\#\#/g, '--SECTION--\n##')
       help = help.replace(/\={70,90}/g, '')
@@ -143,6 +143,38 @@ gulp.task('sync', function() {
     fs.writeFileSync(path.join(syncOutput, pluginName), current);
   })
 
+})
+
+function removeIgnore(string) {
+  const regex = /\/\*\*:ignore\*\/(?:[\s\S]+?)\/\*\*:endignore\*\/[\n|\r|\r\n]*/ig;
+  for (;;) {
+    var match = regex.exec(string);
+    if (match) {
+      string = string.replace(match[0], '');
+    } else {
+      break;
+    }
+  }
+  return string;
+}
+
+gulp.task('merge', function() {
+  const baseFile = process.argv[3].slice(1) + '.js';
+  let contents = '';
+  const base = fs.readFileSync(pluginsPath + baseFile, 'utf8');
+  const params = /\/\*\*:merge([\s\S]*?)>([\s\S]*?)\*\/[\n|\r|\r\n]*/i.exec(base);
+  //const params = /\/\*\*:([a-z0-9]+)\s*>\s*([a-z0-9]+)\.js\*\/[\n|\r|\r\n]*/i.exec(base);
+  if (!params) return null;
+  const outputPath = path.join(pluginsPath, params[2].trim());
+  const files = params[1].split(',').map((s) => { return s.trim() });
+  contents += base.replace(params[0], '');
+  contents = removeIgnore(contents);
+  files.forEach((file) => {
+    const filePath = path.join(pluginsPath, file);
+    const section = fs.readFileSync(filePath, 'utf8');
+    contents += removeIgnore(section);
+  })
+  fs.writeFileSync(outputPath, contents);
 })
 
 gulp.task('mv', ['docs', 'rmw', 'sync'])

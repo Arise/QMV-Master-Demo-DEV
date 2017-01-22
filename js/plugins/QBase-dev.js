@@ -1,9 +1,21 @@
+/**:merge
+  FOLDER/file1,
+  FOLDER/file2
+    >
+  OUTPUT.js
+*/
+/**:ignore*/
+function something() {
+
+}
+/**:endignore*/
 //=============================================================================
 // QName
 //=============================================================================
 
 var Imported = Imported || {};
 Imported.QName = '1.0.0';
+
 
 if (!Imported.QPlus) {
   var msg = 'Error: QName requires QPlus to work.';
@@ -57,14 +69,14 @@ if (!Imported.QPlus) {
 // QName Static Class
 
 function QName() {
-  throw new Error('This is a static class');
+ throw new Error('This is a static class');
 }
 
 //=============================================================================
 // New Classes
 
 function NewClass() {
-  this.initialize.apply(this, arguments);
+ this.initialize.apply(this, arguments);
 }
 
 //=============================================================================
