@@ -2,6 +2,11 @@
 node_modules
 yarn.lock
 
+# gulp
+gulpfilejs
+package.json
+rmw.html
+
 # Ignore unchanged MV folders
 audio/*
 img/*/*
@@ -27,3 +32,4 @@ js/rpg_windows.js
 js/plugins/QMovement/*
 js/plugins/QMovement-dev.js
 js/plugins/QMovement.js
+js/plugins/QuasiMovement.js
