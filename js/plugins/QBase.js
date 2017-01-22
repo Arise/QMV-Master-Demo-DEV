@@ -9,6 +9,10 @@ if (!Imported.QPlus) {
   var msg = 'Error: QName requires QPlus to work.';
   alert(msg);
   throw new Error(msg);
+} else if (!QPlus.versionCheck(Imported.QPlus, 'x.y.z')) {
+  var msg = 'Error: QName requires QPlus x.y.z or newer to work.';
+  alert(msg);
+  throw new Error(msg);
 }
 
 //=============================================================================

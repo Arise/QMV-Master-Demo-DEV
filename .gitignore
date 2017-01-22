@@ -22,3 +22,8 @@ js/rpg_scenes.js
 js/rpg_sprites.js
 js/rpg_windows.js
 *.rpgsave
+
+# Ignore QMovement for now
+js/plugins/QMovement/*
+js/plugins/QMovement-dev.js
+js/plugins/QMovement.js
