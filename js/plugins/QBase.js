@@ -77,8 +77,6 @@ function NewClass() {
 (function() {
   //-----------------------------------------------------------------------------
   // Game_Interpreter
-  //
-  // The interpreter for running event commands.
 
   var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {

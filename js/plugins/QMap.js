@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMap = '0.9.0';
+Imported.QMap = '1.0.0';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QMap requires QPlus to work.';
@@ -15,15 +15,11 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QMap>
  * Creates maps made with QMap Editor
- * @author Quxios  | Version 0.9.0
+ * @author Quxios  | Version 1.0.0
  *
  * @requires QPlus
  *
- * @param
- * @desc
- * @default
- *
- * @video
+ * @video https://www.youtube.com/watch?v=x7vcK96aW28
  *
  * @help
  * ============================================================================
@@ -34,8 +30,8 @@ if (!Imported.QPlus) {
  * ============================================================================
  * ## How to use
  * ============================================================================
- * Create a map using the [QMap Editor](-link-). And that's it, no setup
- * required.
+ * Create a map using the [QMap Editor](https://github.com/quxios/QMapEditor).
+ * And that's it, no setup required.
  * ============================================================================
  * ## QMap Editor Notes
  * ============================================================================
@@ -50,11 +46,11 @@ if (!Imported.QPlus) {
  * ~~~
  *  <collider:SHAPE,WIDTH,HEIGHT,OX,OY>
  * ~~~
- * SHAPE  - box or circle (only box works unless QMovement is installed)
- * WIDTH  - The width of the collider, in pixels
- * HEIGHT - The height of the collider, in pixels
- * OX     - The X Offset of the collider, in pixels
- * OY     - The Y Offset of the collider, in pixels
+ * - SHAPE  - box or circle (only box works unless QMovement is installed)
+ * - WIDTH  - The width of the collider, in pixels
+ * - HEIGHT - The height of the collider, in pixels
+ * - OX     - The X Offset of the collider, in pixels
+ * - OY     - The Y Offset of the collider, in pixels
  *
  * This will set the default collider to these settings.
  *
@@ -69,15 +65,15 @@ if (!Imported.QPlus) {
  * You can include as many different colliders as you want, as long as TYPE
  * is different on each line.
  *
- * TYPE   - When this collider will be used. Set to default when you want that
+ * - TYPE   - When this collider will be used. Set to default when you want that
  *  collider to be used when ever the type isn't found. Set to collision, for
  *  that collider to be used as a collision. Set to other values if needed
  *  for example, if a certain type is needed for a plugin feature.
- * SHAPE  - Box or circle (only box works unless QMovement is installed)
- * WIDTH  - The width of the collider, in pixels
- * HEIGHT - The height of the collider, in pixels
- * OX     - The X Offset of the collider, in pixels
- * OY     - The Y Offset of the collider, in pixels
+ * - SHAPE  - Box or circle (only box works unless QMovement is installed)
+ * - WIDTH  - The width of the collider, in pixels
+ * - HEIGHT - The height of the collider, in pixels
+ * - OX     - The X Offset of the collider, in pixels
+ * - OY     - The Y Offset of the collider, in pixels
  * ----------------------------------------------------------------------------
  * **OnPlayer**
  * ----------------------------------------------------------------------------
@@ -102,7 +98,7 @@ if (!Imported.QPlus) {
  *
  *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
- * @tags sprite, map
+ * @tags sprite, map, parallax
  */
 //=============================================================================
 
@@ -123,7 +119,42 @@ $dataQMap = null;
 // QMap
 
 (function() {
-  var _hasQMovement = !!Imported.QMovement;
+  //-----------------------------------------------------------------------------
+  // Game_Interpreter
+
+  var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+  Game_Interpreter.prototype.pluginCommand = function(command, args) {
+    if (command.toLowerCase() === 'qmap') {
+      this.qMapCommand(args);
+      return;
+    }
+    Alias_Game_Interpreter_pluginCommand.call(this, command, args);
+  };
+
+  Game_Interpreter.prototype.qMapCommand = function(args) {
+    var cmd = args.shift();
+    if (cmd.toLowerCase() === 'free') {
+      // freeing image cache, seems like its  not doing anything
+      // does remove it from image cache, but memory usage doesn't
+      // change
+      if (!args[0]) return;
+      var id = Number(args[0]);
+      var mapObjs = $dataQMap[id];
+      if (mapObjs) {
+        var files = [];
+        for (var i = 0; i < mapObjs.length; i++) {
+          var img = mapObjs[i].filePath;
+          img = encodeURIComponent(img);
+          img = img.replace(/%5C/g, '/');
+          if (files.indexOf(img) === -1) {
+            files.push(img);
+          }
+        }
+        QPlus.freeImgCache(files);
+
+      }
+    }
+  };
 
   //-----------------------------------------------------------------------------
   // DataManager
@@ -168,16 +199,6 @@ $dataQMap = null;
     }
   };
 
-  Game_Map.prototype.mapObjs = function() {
-    return this._mapObjs.filter(function(obj) {
-      return !!obj;
-    });
-  };
-
-  Game_Map.prototype.mapObjsWithCollider = function() {
-    return this._mapObjsWithColliders;
-  };
-
   var Alias_Game_Map_updateEvents = Game_Map.prototype.updateEvents;
   Game_Map.prototype.updateEvents = function() {
     Alias_Game_Map_updateEvents.call(this);
@@ -185,22 +206,23 @@ $dataQMap = null;
   };
 
   Game_Map.prototype.updateMapObjs = function() {
-    var mapObjs = this.mapObjs();
+    var mapObjs = this._mapObjs;
     for (var i = 0; i < mapObjs.length; i++) {
-      mapObjs[i].update();
+      if (mapObjs[i]) mapObjs[i].update();
     }
   };
 
   //-----------------------------------------------------------------------------
   // Game_CharacterBase
 
+  // todo, add a patch for QMovement collision checking
   var Alias_Game_CharacterBase_isCollidedWithCharacters = Game_CharacterBase.prototype.isCollidedWithCharacters;
   Game_CharacterBase.prototype.isCollidedWithCharacters = function(x, y) {
     return Alias_Game_CharacterBase_isCollidedWithCharacters.call(this, x, y) || this.isCollidedWithMapObj(x, y);
   };
 
   Game_CharacterBase.prototype.isCollidedWithMapObj = function(x, y) {
-    var mapObjs = $gameMap.mapObjsWithCollider();
+    var mapObjs = $gameMap._mapObjsWithColliders;
     return mapObjs.some(function(mapObj) {
       return mapObj.intersectsWithSimple('collision', x, y);
     });
@@ -313,7 +335,7 @@ $dataQMap = null;
   };
 
   Game_MapObj.prototype.convertToCollider = function(arr) {
-    if (!_hasQMovement) {
+    if (!Imported.QMovement) {
       return this.toSimpleCollider(arr);
     }
     var type = arr[0];
@@ -367,14 +389,6 @@ $dataQMap = null;
       return this.getSimpleColliderBounds(type);
     }
     var bounds = collider.gridEdge();
-    if (bounds.constructor === Array) {
-      return {
-        x1: bounds[0],
-        x2: bounds[1],
-        y1: bounds[2],
-        y2: bounds[3]
-      }
-    }
     return bounds;
   };
 
@@ -421,7 +435,7 @@ $dataQMap = null;
   };
 
   Game_MapObj.prototype.intersectsWith = function(type, chara) {
-    if (!_hasQMovement) {
+    if (!Imported.QMovement) {
       return this.intersectsWithSimple(type, chara._realX, chara._realY);
     }
     return this.collider(type).intersects(chara.collider('collision'));
@@ -495,7 +509,7 @@ $dataQMap = null;
 
   Sprite_MapObject.prototype.updateOther = function() {
     this.alpha = this._mapObj.alpha;
-  }
+  };
 
   //-----------------------------------------------------------------------------
   // Spriteset_Map
@@ -508,9 +522,10 @@ $dataQMap = null;
 
   Spriteset_Map.prototype.createMapObjs = function() {
     this._mapObjs = [];
-    var mapObjs = $gameMap.mapObjs();
+    var mapObjs = $gameMap._mapObjs;
     var i;
     for (i = 0; i < mapObjs.length; i++) {
+      if (!mapObjs[i]) continue;
       this._mapObjs.push(new Sprite_MapObject(mapObjs[i]));
     }
     for (i = 0; i < this._mapObjs.length; i++) {
