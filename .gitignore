@@ -3,6 +3,7 @@ node_modules
 yarn.lock
 
 # gulp
+gulp/*
 gulpfile.js
 package.json
 rmw.html
