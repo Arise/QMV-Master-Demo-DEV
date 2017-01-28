@@ -414,10 +414,6 @@ function Sprite_Bars() {
         this._lastY = y2;
         this._delayCounter = 0;
       } else if (this._delayCounter >= _offset) {
-        $gameMap.scrollTo({
-          _realX: this._lastX,
-          _realY: this._lastY
-        }, null, 1);
         if (dx >= 0) {
           this._lastX += this.distancePerFrame();
         }
@@ -430,6 +426,10 @@ function Sprite_Bars() {
         if (dy <= 0) {
           this._lastY -= this.distancePerFrame();
         }
+        $gameMap.scrollTo({
+          _realX: this._lastX,
+          _realY: this._lastY
+        }, null, 1);
       }
     } else {
       this._delayCounter = 0;
