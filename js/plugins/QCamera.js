@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QCamera = '1.0.2';
+Imported.QCamera = '1.0.3';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QCamera requires QPlus to work.';
@@ -19,7 +19,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QCamera>
  * Better Camera control
- * @author Quxios  | Version 1.0.2
+ * @author Quxios  | Version 1.0.3
  *
  * @requires QPlus
  *
@@ -234,22 +234,6 @@ function Sprite_Bars() {
   Game_Map.prototype.scrollTo = function(chara, speed, frames) {
     var centerX = this.displayCenterX();
     var centerY = this.displayCenterY();
-    if (!this.isLoopHorizontal()) {
-      if (centerX < this.screenTileX() / 2) {
-        centerX = this.screenTileX() / 2;
-      }
-      if (centerX > this.width() - this.screenTileX() / 2) {
-        centerX = this.width() - this.screenTileX() / 2;
-      }
-    }
-    if (!this.isLoopVertical()) {
-      if (centerY < this.screenTileY() / 2) {
-        centerY = this.screenTileY() / 2;
-      }
-      if (centerY > this.height() - this.screenTileY() / 2) {
-        centerY = this.height() - this.screenTileY() / 2;
-      }
-    }
     var distanceX = (chara._realX + 0.5) - centerX;
     var distanceY = (chara._realY + 0.5) - centerY;
     if (Math.abs(distanceX) >= this.width() - 1) {
@@ -269,8 +253,7 @@ function Sprite_Bars() {
   var Alias_Game_Map_scrollDistance = Game_Map.prototype.scrollDistance;
   Game_Map.prototype.scrollDistance = function() {
     if (this._scrollFrames !== null) {
-      var dist = Math.abs(this._scrollDistance / this._scrollFrames);
-      return dist;
+      return Math.abs(this._scrollDistance / this._scrollFrames);
     }
     return Alias_Game_Map_scrollDistance.call(this);
   }
@@ -381,7 +364,7 @@ function Sprite_Bars() {
   var Alias_Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     Alias_Game_CharacterBase_initMembers.call(this);
-    this._cameraCounter = 0;
+    this._delayCounter = 0;
   };
 
   var Alias_Game_CharacterBase_setPosition = Game_CharacterBase.prototype.setPosition;
@@ -402,17 +385,18 @@ function Sprite_Bars() {
   Game_CharacterBase.prototype.update = function() {
     var lastScrolledX  = this.scrolledX();
     var lastScrolledY  = this.scrolledY();
+    var wasMoving = this.isMoving();
     Alias_Game_CharacterBase_update.call(this);
     if ($gameMap._scrollTarget === this.charaId()) {
       if (_offset === 0) {
         this.updateNormalScroll(lastScrolledX, lastScrolledY)
       } else {
-        this.updateQScroll();
+        this.updateQScroll(wasMoving);
       }
     }
   };
 
-  Game_CharacterBase.prototype.updateQScroll = function() {
+  Game_CharacterBase.prototype.updateQScroll = function(wasMoving) {
     var x1 = this._lastX;
     var y1 = this._lastY;
     var x2 = this._realX;
@@ -420,13 +404,35 @@ function Sprite_Bars() {
     var dx = $gameMap.deltaX(x2, x1);
     var dy = $gameMap.deltaY(y2, y1);
     if (dx !== 0 || dy !== 0) {
-      if ($gameMap.isScrolling()) return;
-      this._lastX = x2;
-      this._lastY = y2;
-      var frames = _offset / 0.0625; // 0.0625 is the distance per frame at speed 4
-      $gameMap.scrollTo(this, null, Math.round(frames) || 1);
+      var delay = _offset / 0.0625; // 0.0625 is the distance per frame at speed 4
+      this._delayCounter += 0.0625;
+      if (!this.isMoving() && !wasMoving) {
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var frames = dist / this.distancePerFrame();
+        $gameMap.scrollTo(this, null, frames);
+        this._lastX = x2;
+        this._lastY = y2;
+        this._delayCounter = 0;
+      } else if (this._delayCounter >= _offset) {
+        $gameMap.scrollTo({
+          _realX: this._lastX,
+          _realY: this._lastY
+        }, null, 1);
+        if (dx >= 0) {
+          this._lastX += this.distancePerFrame();
+        }
+        if (dx <= 0) {
+          this._lastX -= this.distancePerFrame();
+        }
+        if (dy >= 0) {
+          this._lastY += this.distancePerFrame();
+        }
+        if (dy <= 0) {
+          this._lastY -= this.distancePerFrame();
+        }
+      }
     } else {
-      this._cameraCounter = 0;
+      this._delayCounter = 0;
     }
   };
 
