@@ -361,12 +361,6 @@ function Sprite_Bars() {
   //-----------------------------------------------------------------------------
   // Game_Character
 
-  var Alias_Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
-  Game_CharacterBase.prototype.initMembers = function() {
-    Alias_Game_CharacterBase_initMembers.call(this);
-    this._delayCounter = 0;
-  };
-
   var Alias_Game_CharacterBase_setPosition = Game_CharacterBase.prototype.setPosition;
   Game_CharacterBase.prototype.setPosition = function(x, y) {
     Alias_Game_CharacterBase_setPosition.call(this, x, y);
@@ -385,18 +379,17 @@ function Sprite_Bars() {
   Game_CharacterBase.prototype.update = function() {
     var lastScrolledX  = this.scrolledX();
     var lastScrolledY  = this.scrolledY();
-    var wasMoving = this.isMoving();
     Alias_Game_CharacterBase_update.call(this);
     if ($gameMap._scrollTarget === this.charaId()) {
       if (_offset === 0) {
         this.updateNormalScroll(lastScrolledX, lastScrolledY)
       } else {
-        this.updateQScroll(wasMoving);
+        this.updateQScroll();
       }
     }
   };
 
-  Game_CharacterBase.prototype.updateQScroll = function(wasMoving) {
+  Game_CharacterBase.prototype.updateQScroll = function() {
     var x1 = this._lastX;
     var y1 = this._lastY;
     var x2 = this._realX;
@@ -404,35 +397,11 @@ function Sprite_Bars() {
     var dx = $gameMap.deltaX(x2, x1);
     var dy = $gameMap.deltaY(y2, y1);
     if (dx !== 0 || dy !== 0) {
-      var delay = _offset / 0.0625; // 0.0625 is the distance per frame at speed 4
-      this._delayCounter += 0.0625;
-      if (!this.isMoving() && !wasMoving) {
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        var frames = dist / this.distancePerFrame();
-        $gameMap.scrollTo(this, null, frames);
-        this._lastX = x2;
-        this._lastY = y2;
-        this._delayCounter = 0;
-      } else if (this._delayCounter >= _offset) {
-        if (dx >= 0) {
-          this._lastX += this.distancePerFrame();
-        }
-        if (dx <= 0) {
-          this._lastX -= this.distancePerFrame();
-        }
-        if (dy >= 0) {
-          this._lastY += this.distancePerFrame();
-        }
-        if (dy <= 0) {
-          this._lastY -= this.distancePerFrame();
-        }
-        $gameMap.scrollTo({
-          _realX: this._lastX,
-          _realY: this._lastY
-        }, null, 1);
-      }
-    } else {
-      this._delayCounter = 0;
+      if ($gameMap.isScrolling()) return;
+      this._lastX = x2;
+      this._lastY = y2;
+      var frames = _offset / 0.0625; // 0.0625 is the distance per frame at speed 4
+      $gameMap.scrollTo(this, null, Math.round(frames) || 1);
     }
   };
 
