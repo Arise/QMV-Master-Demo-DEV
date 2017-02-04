@@ -87,6 +87,31 @@ if (!Imported.QPlus) {
  * ~~~
  * Just add that note to the map object to have this feature, then include
  * a collider.
+ * ----------------------------------------------------------------------------
+ * **Breath**
+ * ----------------------------------------------------------------------------
+ * Adds a breathing effect to the map object. A breathing effect is where the
+ * the sprites scale is increased and decreased in a sin wave.
+ * ~~~
+ *  <breath:OFFSET,DURATION,INITIALTIME?>
+ * ~~~
+ * - OFFSET      - How much to scale. 1 is 100%, 0.5 is 50%. So 0.5 means its
+ *  scale will go between 0.5 and 1.5;
+ * - DURATION    - How long it takes for 1 cycle, in frames. 60 frames = 1 second
+ * - INITIALTIME - (Optional, Default: 0) Which frame should it start at. Ex;
+ *  if DURATION was 60 and this is set at 30, it'll start in the middle of the
+ *  cycle.
+ * ----------------------------------------------------------------------------
+ * **Tone**
+ * ----------------------------------------------------------------------------
+ * Change the tint of the map object. Similar to the Tint Screen event command.
+ * ~~~
+ *  <tint:RED,GREEN,BLUE,GRAY>
+ * ~~~
+ * RED   - Red value of tint, set between -255 to 255. Default: 0
+ * GREEN - Red value of tint, set between -255 to 255. Default: 0
+ * BLUE  - Red value of tint, set between -255 to 255. Default: 0
+ * GRAY  - Red value of tint, set between -255 to 255. Default: 0
  * ============================================================================
  * ## Links
  * ============================================================================
