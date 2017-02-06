@@ -1,6 +1,10 @@
 [
 null,
-{"id":1,"expanded":false,"name":"QIslands","order":1,"parentId":0,"scrollX":996.6666666666666,"scrollY":804.6666666666666},
+{"id":1,"expanded":false,"name":"QIslands","order":1,"parentId":0,"scrollX":1219,"scrollY":997},
 {"id":2,"expanded":false,"name":"QMap","order":2,"parentId":0,"scrollX":823.3333333333334,"scrollY":608.6666666666666},
-{"id":3,"expanded":false,"name":"QScale","order":3,"parentId":0,"scrollX":823.3333333333334,"scrollY":608.6666666666666}
+{"id":3,"expanded":false,"name":"QScale","order":3,"parentId":0,"scrollX":1235,"scrollY":913},
+{"id":4,"expanded":true,"name":"PerformanceTests","order":4,"parentId":0,"scrollX":823.3333333333334,"scrollY":608.6666666666666},
+{"id":5,"expanded":false,"name":"Small","order":5,"parentId":4,"scrollX":1347.2727272727273,"scrollY":996},
+{"id":6,"expanded":false,"name":"Mid","order":6,"parentId":4,"scrollX":1329.818181818182,"scrollY":996},
+{"id":7,"expanded":false,"name":"Large","order":7,"parentId":4,"scrollX":1329.818181818182,"scrollY":978.5454545454546}
 ]
