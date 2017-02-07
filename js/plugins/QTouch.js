@@ -8,7 +8,7 @@ Imported.QTouch = '1.0.0';
 //=============================================================================
  /*:
  * @plugindesc <QTouch>
- * Selects window choice on hover.
+ * Better mouse handling for desktop or web
  * @author Quxios  | Version 1.0.0
  *
  * @video https://youtu.be/nfhSBlwcz8k
@@ -50,20 +50,62 @@ function Sprite_QButton() {
 // QTouch
 
 (function() {
-  var Alias_Scene_Boot_start = Scene_Boot.prototype.start;
-  Scene_Boot.prototype.start = function() {
-    document.getElementById('modeText').style.cursor = 'default';
-    Alias_Scene_Boot_start.call(this);
+  var _mouseDecay = 60;
+  var _cursorImgs = {
+    default: 'icon/cursor-default.png',
+    pointer: 'icon/cursor-pointer.png'
   };
-
 
   //-----------------------------------------------------------------------------
   // TouchInput
+
+  var Alias_TouchInput_clear = TouchInput.clear;
+  TouchInput.clear = function() {
+    Alias_TouchInput_clear.call(this);
+    this._cursor = 'default';
+    this._cursorDecay = _mouseDecay;
+    this._cursorHidden = false;
+    this.setCursor('default');
+  };
+
+  var Alias_TouchInput_update = TouchInput.update;
+  TouchInput.update = function() {
+    Alias_TouchInput_update.call(this);
+    if (_mouseDecay > 0) this.updateCursorDecay();
+  };
+
+  TouchInput.updateCursorDecay = function() {
+    if (this._cursorDecay > 0) {
+      if (this._cursorHidden) {
+        this.showCursor();
+      }
+      this._cursorDecay--;
+    } else {
+      this.hideCursor();
+    }
+  };
 
   TouchInput._onMouseMove = function(event) {
     var x = Graphics.pageToCanvasX(event.pageX);
     var y = Graphics.pageToCanvasY(event.pageY);
     this._onMove(x, y);
+    this._cursorDecay = _mouseDecay;
+  };
+
+  TouchInput.hideCursor = function() {
+    this._cursorHidden = true;
+    document.body.style.cursor = 'none';
+  };
+
+  TouchInput.showCursor = function() {
+    this._cursorHidden = false;
+    this.setCursor('default');
+  };
+
+  TouchInput.setCursor = function(cursor) {
+    this._cursor = cursor;
+    var cursorImg = _cursorImgs[cursor];
+    document.body.style.cursor = `url('${cursorImg}'), ${cursor}`;
   };
 
   //-----------------------------------------------------------------------------
@@ -78,26 +120,26 @@ function Sprite_QButton() {
   };
 
   Scene_Base.prototype.updateMouseCursor = function() {
-    var isPointer = false;
+    var isPointing = false;
     if (this._windowLayer) {
       var windows = this._windowLayer.children;
       for (var i = 0; i < windows.length; i++) {
-        if (typeof windows[i].isPointer === 'function' && windows[i].isPointer()) {
-          isPointer = true;
+        if (typeof windows[i].isPointing === 'function' && windows[i].isPointing()) {
+          isPointing = true;
           break;
         }
       }
     }
     for (var i = 0; i < this.children.length; i++) {
-      if (typeof this.children[i].isPointer === 'function' && this.children[i].isPointer()) {
-        isPointer = true;
+      if (typeof this.children[i].isPointing === 'function' && this.children[i].isPointing()) {
+        isPointing = true;
         break;
       }
     }
-    if (isPointer) {
-      document.body.style.cursor = 'pointer';
+    if (isPointing) {
+      TouchInput.setCursor('pointer');
     } else {
-      document.body.style.cursor = 'default';
+      TouchInput.setCursor('default');
     }
   };
 
@@ -118,11 +160,11 @@ function Sprite_QButton() {
     Alias_Window_Selectable_initialize.call(this, x, y, width, height);
     this._oldTouchX = TouchInput.x;
     this._oldTouchY = TouchInput.y;
-    this._isPointer = true;
+    this._isPointing = true;
   };
 
-  Window_Selectable.prototype.isPointer = function() {
-    return this.active && this.isTouchedInsideFrame() && this._isPointer;
+  Window_Selectable.prototype.isPointing = function() {
+    return this.active && this.isTouchedInsideFrame() && this._isPointing;
   };
 
   Window_Selectable.prototype.processTouch = function() {
@@ -132,10 +174,10 @@ function Sprite_QButton() {
         var y = this.canvasToLocalY(TouchInput.y);
         var hitIndex = this.hitTest(x, y);
         if (hitIndex >= 0 && this.isCursorMovable() && this.mouseMoved()) {
-          this._isPointer = true;
+          this._isPointing = true;
           this.select(hitIndex);
         } else if (hitIndex < 0) {
-          this._isPointer = false;
+          this._isPointing = false;
         }
         if (TouchInput.isTriggered()) {
           if (hitIndex >= 0) {
@@ -238,7 +280,7 @@ function Sprite_QButton() {
     }
   };
 
-  Sprite_QButton.prototype.isPointer = function() {
+  Sprite_QButton.prototype.isPointing = function() {
     return this.isActive() && this.isButtonTouched();
   };
 

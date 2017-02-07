@@ -4,7 +4,8 @@ var $plugins =
 [
 {"name":"QPlus","status":true,"description":"<QPlus> (Should go above all Q Plugins)\r\nSome small changes to MV for easier plugin development.","parameters":{"Quick Test":"true","Default Enabled Switches":""}},
 {"name":"QUpdate","status":true,"description":"<QUpdate>\r\nChecks QPlugins for updates","parameters":{}},
-{"name":"QMovement-dev","status":false,"description":"<QMovement>\r\ndesc","parameters":{"":""}},
+{"name":"QuasiMovement","status":false,"description":"v1.299\nChange the way RPG Maker MV handles Movement.\n<QuasiMovement>","parameters":{"Grid":"1","Off Grid":"true","Tile Size":"48","=====================":"","Smart Move":"0","Old Smart Move Dir":"false","Mid Pass":"false","Move On Click":"true","Diagonal":"true","Diagonal Speed":"0","Collision":"#ff0000","Water Collision":"#00ff00","Deep Water Collision":"#0000ff","Collision Map Scan":"4","Water Terrain Tag":"1","Deep Water Terrain Tag":"2","Player Box":"48,48,0,6","Event Box":"48,48,0,6","Boat Box":"36, 24, 6, 12","Ship Box":"36, 24, 6, 24","Airship Box":"36, 36, 6, 6","JSON folder":"data/","Collision Map folder":"img/parallaxes/","Region Map folder":"img/parallaxes/","Use Regions Boxes":"false","Show Boxes":"true","Draw Tile Boxes":"true","Cache Colliders as Bitmap":"true"}},
+{"name":"QMovement-dev","status":true,"description":"<QMovement>\r\ndesc","parameters":{"":""}},
 {"name":"========================","status":true,"description":"","parameters":{}},
 {"name":"QTouch","status":true,"description":"<QTouch>\nSelects window choice on hover.","parameters":{}},
 {"name":"========================","status":true,"description":"","parameters":{}},

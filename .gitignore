@@ -1,8 +1,6 @@
-# node
+# node / gulp
 node_modules
 yarn.lock
-
-# gulp
 gulp/*
 gulpfile.js
 package.json
@@ -11,12 +9,14 @@ rmw.html
 # Ignore unchanged MV folders
 audio/*
 img/*/*
-icon/
+icon/*
 fonts/
 movies/
 
 # Include new imgs
 !img/characters/%test-Actor1.png
+!icon/cursor-default.png
+!icon/cursor-pointer.png
 
 # Ignore default js
 js/libs/
