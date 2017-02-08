@@ -1,7 +1,7 @@
 # node / gulp
 node_modules
 yarn.lock
-gulp/*
+_tasks/*
 gulpfile.js
 package.json
 rmw.html
