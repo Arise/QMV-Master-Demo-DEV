@@ -5,25 +5,49 @@
 var Imported = Imported || {};
 Imported.QTouch = '1.0.0';
 
+if (!Imported.QPlus) {
+  var msg = 'Error: QTouch requires QPlus to work.';
+  alert(msg);
+  throw new Error(msg);
+}
+
 //=============================================================================
  /*:
  * @plugindesc <QTouch>
- * Better mouse handling for desktop or web
+ * Better mouse handling for MV
  * @author Quxios  | Version 1.0.0
  *
  * @video https://youtu.be/nfhSBlwcz8k
+ *
+ * @param Mouse Decay
+ * @desc Set the duration until mouse cursor is hidden while its not moving.
+ * Default: 60      Set to 0 to disable      Value is in frames
+ * @default 60
+ *
+ * @param Default Cursor
+ * @desc Set the image to use for the default cursor.
+ * Leave blank to use default cursor.
+ * @default
+ *
+ * @param Pointer Cursor
+ * @desc Set the image to use for the pointer cursor.
+ * Leave blank to use pointer cursor.
+ * @default
  *
  * @help
  * ============================================================================
  * ## About
  * ============================================================================
- * This plugin makes selectable windows feel more natural. Window choices will
+ * This plugin extands the mouse features of MV to make it feel more natural.
+ * You are able to change the image used for the cursor. Cursor will change
+ * to pointing cursor when hovering over a selectable item. You can make
+ * the cursor hide when it's inactive for X frames. Window choices will
  * get selected / highlighted when the mouse is over them. And clicking on
  * them once will run that choice.
  * ============================================================================
  * ## How to use
  * ============================================================================
- * Just install this plugin. No configuration needed.
+ * Just install this plugin and configure the plugin parameters.
  * ============================================================================
  * ## Links
  * ============================================================================
@@ -50,10 +74,11 @@ function Sprite_QButton() {
 // QTouch
 
 (function() {
-  var _mouseDecay = 60;
+  var _params = QPlus.getParams('<QTouch>');
+  var _mouseDecay = Number(_params['Mouse Decay']) || 0;
   var _cursorImgs = {
-    default: 'icon/cursor-default.png',
-    pointer: 'icon/cursor-pointer.png'
+    default: _params['Default Cursor'],//'icon/cursor-default.png',
+    pointer: _params['Pointer Cursor']//'icon/cursor-pointer.png'
   };
 
   //-----------------------------------------------------------------------------
@@ -65,7 +90,7 @@ function Sprite_QButton() {
     this._cursor = 'default';
     this._cursorDecay = _mouseDecay;
     this._cursorHidden = false;
-    this.setCursor('default');
+    this.setCursor();
   };
 
   var Alias_TouchInput_update = TouchInput.update;
@@ -80,7 +105,7 @@ function Sprite_QButton() {
         this.showCursor();
       }
       this._cursorDecay--;
-    } else {
+    } else if (!this._cursorHidden) {
       this.hideCursor();
     }
   };
@@ -99,13 +124,18 @@ function Sprite_QButton() {
 
   TouchInput.showCursor = function() {
     this._cursorHidden = false;
-    this.setCursor('default');
+    this.setCursor();
   };
 
   TouchInput.setCursor = function(cursor) {
-    this._cursor = cursor;
-    var cursorImg = _cursorImgs[cursor];
-    document.body.style.cursor = `url('${cursorImg}'), ${cursor}`;
+    if (this._cursor === cursor) return;
+    this._cursor = cursor || this._cursor;
+    var cursorImg = _cursorImgs[this._cursor];
+    if (cursorImg) {
+      document.body.style.cursor = `url('${cursorImg}'), ${this._cursor}`;
+    } else {
+      document.body.style.cursor = this._cursor;
+    }
   };
 
   //-----------------------------------------------------------------------------
