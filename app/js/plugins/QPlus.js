@@ -533,7 +533,7 @@ QPlus.freeImgCache = function(files) {
     if (dir === 6) return 0;
     if (dir === 8) return Math.PI / 2;
     if (dir === 1) return Math.PI * 5 / 4;
-    if (dir === 3) return Math.PI * 7 / 2;
+    if (dir === 3) return Math.PI * 7 / 4;
     if (dir === 7) return Math.PI * 3 / 4;
     if (dir === 9) return Math.PI / 4;
     return 0;

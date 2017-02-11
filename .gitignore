@@ -3,34 +3,36 @@ node_modules
 yarn.lock
 _tasks/*
 gulpfile.js
+tasks.js
 package.json
-rmw.html
 
 # Ignore unchanged MV folders
-audio/*
-img/*/*
-icon/*
-fonts/
-movies/
+app/audio/*
+app/img/*/*
+app/icon/*
+app/fonts/
+app/movies/
 
 # Include new imgs
-!img/characters/%test-Actor1.png
-!icon/cursor-default.png
-!icon/cursor-pointer.png
+!app/img/characters/%test-Actor1.png
+!app/icon/cursor-default.png
+!app/icon/cursor-pointer.png
 
 # Ignore default js
-js/libs/
-js/main.js
-js/rpg_core.js
-js/rpg_managers.js
-js/rpg_objects.js
-js/rpg_scenes.js
-js/rpg_sprites.js
-js/rpg_windows.js
+app/js/libs/
+app/js/main.js
+app/js/rpg_core.js
+app/js/rpg_managers.js
+app/js/rpg_objects.js
+app/js/rpg_scenes.js
+app/js/rpg_sprites.js
+app/js/rpg_windows.js
+
+# Ignore all saves
 *.rpgsave
 
 # Ignore QMovement for now
-js/plugins/QMovement/*
-js/plugins/QMovement-dev.js
-js/plugins/QMovement.js
-js/plugins/QuasiMovement.js
+app/js/plugins/QMovement/*
+app/js/plugins/QMovement-dev.js
+app/js/plugins/QMovement.js
+app/js/plugins/QuasiMovement.js
