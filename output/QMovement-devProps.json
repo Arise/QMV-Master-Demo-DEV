@@ -1,0 +1,53 @@
+{
+  "existing": {},
+  "new": {
+    "QMovement": [],
+    "Polygon_Collider": [
+      "prototype - initialize - points",
+      "prototype - isPolygon - undefined",
+      "prototype - isBox - undefined",
+      "prototype - isCircle - undefined",
+      "prototype - makeVertices - points",
+      "prototype - makeVectors - undefined",
+      "prototype - setBounds - undefined",
+      "prototype - refreshVertices - undefined",
+      "prototype - sectorEdge - undefined",
+      "prototype - gridEdge - undefined",
+      "prototype - edge - undefined",
+      "prototype - setPivot - x, y",
+      "prototype - centerPivot - undefined",
+      "prototype - setRadian - radian",
+      "prototype - rotate - radian",
+      "prototype - setScale - zX, zY",
+      "prototype - scale - zX, zY",
+      "prototype - moveTo - x, y",
+      "prototype - intersects - other",
+      "prototype - inside - other",
+      "prototype - containsPoint - x, y"
+    ],
+    "Box_Collider": [
+      "prototype - initialize - width, height, ox, oy",
+      "prototype - isPolygon - undefined",
+      "prototype - isBox - undefined",
+      "prototype - containsPoint - x, y"
+    ],
+    "Circle_Collider": [
+      "prototype - init - width, height, ox, oy",
+      "prototype - isPolygon - undefined",
+      "prototype - isCircle - undefined",
+      "prototype - scale - zX, zY",
+      "prototype - circlePosition - radian",
+      "prototype - intersects - other"
+    ],
+    "Sprite_Collider": [
+      "prototype - initialize - collider, options",
+      "prototype - _setupCollider - collider",
+      "prototype - setupCollider - collider",
+      "prototype - _drawCollider - undefined",
+      "prototype - drawCollider - undefined",
+      "prototype - update - undefined",
+      "prototype - checkChanges - undefined",
+      "prototype - updateDecay - undefined"
+    ]
+  }
+}
