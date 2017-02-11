@@ -1,27 +1,23 @@
 //=============================================================================
-// QName
+// QYScale
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QName = '1.0.0';
+Imported.QYScale = '1.0.0';
 
 if (!Imported.QPlus) {
-  var msg = 'Error: QName requires QPlus to work.';
+  var msg = 'Error: QYScale requires QPlus to work.';
   alert(msg);
   throw new Error(msg);
 }
 
 //=============================================================================
  /*:
- * @plugindesc <QName>
- * desc
+ * @plugindesc <QYScale>
+ * Change characters scale based off their Y value
  * @author Quxios  | Version 1.0.0
  *
- * @requires
- *
- * @param
- * @desc
- * @default
+ * @requires QPlus
  *
  * @video
  *
@@ -33,11 +29,11 @@ if (!Imported.QPlus) {
  * ============================================================================
  * ## How to use
  * ============================================================================
- *
+ * **Map Notetag**
  * ----------------------------------------------------------------------------
- * **Sub section**
- * ----------------------------------------------------------------------------
- *
+ * ~~~
+ *   <scale:min, max, factor, origin, default>
+ * ~~~
  * ============================================================================
  * ## Links
  * ============================================================================
@@ -54,7 +50,7 @@ if (!Imported.QPlus) {
 //=============================================================================
 
 //=============================================================================
-// QName
+// QYScale
 
 (function() {
   //-----------------------------------------------------------------------------
@@ -63,19 +59,27 @@ if (!Imported.QPlus) {
   var Alias_Game_Map_setup = Game_Map.prototype.setup;
   Game_Map.prototype.setup = function(mapId) {
     Alias_Game_Map_setup.call(this, mapId);
-    this._hasZoomDepth = null;
+    this._hasYScale = null;
   };
 
-  Game_Map.prototype.hasZoomDepth = function() {
-    if (this._hasZoomDepth === null) {
+  Game_Map.prototype.hasYScale = function() {
+    if (this._hasYScale === null) {
       var meta = $dataMap.meta.scale;
       if (meta) {
-        this._hasZoomDepth = meta.split(',').map(Number);
+        // min, max, multiplier, origin, default
+        var settings = meta.split(',').map(Number);
+        this._hasYScale = {
+          min: settings[0] || 1,
+          max: settings[1] || 1,
+          multi: settings[2] || 1,
+          origin: settings[3] || 0,
+          base: settings[4] || 1
+        }
       } else {
-        this._hasZoomDepth = false;
+        this._hasYScale = false;
       }
     }
-    return this._hasZoomDepth;
+    return this._hasYScale;
   };
 
   //-----------------------------------------------------------------------------
@@ -84,32 +88,45 @@ if (!Imported.QPlus) {
   var Alias_Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
     Alias_Game_CharacterBase_initMembers.call(this);
-    this._zoomDepth = 1;
+    this._yScale = null;
   }
 
   var Alias_Game_CharacterBase_update = Game_CharacterBase.prototype.update;
   Game_CharacterBase.prototype.update = function() {
     var oldY = this._realY;
     Alias_Game_CharacterBase_update.call(this);
-    if ($gameMap.hasZoomDepth() && this._realY !== oldY) {
-      this.updateZoomDepth();
+    if ($gameMap.hasYScale() && (this._realY !== oldY || this._yScale === null)) {
+      this.updateYScale();
+    } else if (!$gameMap.hasYScale()) {
+      this._yScale = 1;
     }
   };
 
-  Game_CharacterBase.prototype.updateZoomDepth = function() {
-    var scale = $gameMap.hasZoomDepth();
-    var scaleMin = scale[0];
-    var scaleMax = scale[1];
-    var ds = scaleMax - scaleMin;
+  Game_CharacterBase.prototype.updateYScale = function() {
+    var settings = $gameMap.hasYScale();
+    var min = settings.min;
+    var max = settings.max;
+    var multi = settings.multi;
+    var origin = settings.origin;
+    var base = settings.base;
     var yMax = $gameMap.height() - 1;
+    var ds = max - min;
     var dy = (yMax - this._realY) / yMax;
-    this._zoomDepth = scaleMax - dy * ds
+    this._yScale = max - dy * ds;
+    if (Imported.QMovement) {
+      var colliders = this._colliders;
+      for (var type in colliders) {
+        if (colliders.hasOwnProperty(type)) {
+          colliders[type].setScale(this._yScale, this._yScale);
+        }
+      }
+    }
   };
 
   var Alias_Game_CharacterBase_distancePerFrame = Game_CharacterBase.prototype.distancePerFrame;
   Game_CharacterBase.prototype.distancePerFrame = function() {
     var spd = Alias_Game_CharacterBase_distancePerFrame.call(this);
-    return spd * this._zoomDepth;
+    return spd * this._yScale;
   };
 
   //-----------------------------------------------------------------------------
@@ -118,16 +135,16 @@ if (!Imported.QPlus) {
   var Alias_Sprite_Character_update = Sprite_Character.prototype.update;
   Sprite_Character.prototype.update = function() {
     Alias_Sprite_Character_update.call(this);
-    if ($gameMap.hasZoomDepth()) {
-      this.updateZoomDepth();
+    if ($gameMap.hasYScale()) {
+      this.updateYScale();
     }
   };
 
-  Sprite_Character.prototype.updateZoomDepth = function() {
-    if (this._zoomDepth !== this._character._zoomDepth) {
-      this.scale.x = this._character._zoomDepth;
-      this.scale.y = this._character._zoomDepth;
-      this._zoomDepth = this._character._zoomDepth;
+  Sprite_Character.prototype.updateYScale = function() {
+    if (this._yScale !== this._character._yScale) {
+      this.scale.x = this._character._yScale;
+      this.scale.y = this._character._yScale;
+      this._yScale = this._character._yScale;
     };
   };
 })()

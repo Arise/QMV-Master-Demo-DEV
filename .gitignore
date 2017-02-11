@@ -31,8 +31,5 @@ app/js/rpg_windows.js
 # Ignore all saves
 *.rpgsave
 
-# Ignore QMovement for now
-app/js/plugins/QMovement/*
-app/js/plugins/QMovement-dev.js
-app/js/plugins/QMovement.js
-app/js/plugins/QuasiMovement.js
+# other
+.vscode
