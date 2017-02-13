@@ -4,48 +4,18 @@
 (function() {
   var Alias_Game_Character_processMoveCommand = Game_Character.prototype.processMoveCommand;
   Game_Character.prototype.processMoveCommand = function(command) {
+    this.subMVMoveCommands(command);
     if (this.subQMoveCommand(command)) {
-      //this._moveRouteIndex++;
+      command = this._moveRoute.list[this._moveRouteIndex];
     }
     this.processQMoveCommands(command);
     Alias_Game_Character_processMoveCommand.call(this, command);
   };
 
-  Game_Character.prototype.subQMoveCommand = function(command) {
-    var gc = Game_Character;
-    var code = command.code;
-    var params = command.parameters;
-    if (command.code === gc.ROUTE_SCRIPT) {
-      var mmove = /mmove\((.*)\)/i.exec(params[0]);
-      var qmove = /qmove\((.*)\)/i.exec(params[0]);
-      var arc   = /arc\((.*)\)/i.exec(params[0]);
-      if (mmove) return this.subMMove(mmove[1]);
-      if (qmove) return this.subQMove(qmove[1]);
-      if (arc)   return this.subArc(arc[1]);
-    }
-    return false;
-  };
-
-  Game_Character.prototype.processQMoveCommands = function(command) {
+  Game_Character.prototype.subMVMoveCommands = function(command) {
     var gc = Game_Character;
     var params = command.parameters;
     switch (command.code) {
-      case 'arc': {
-        this.arc(params[0], params[1], params[2], params[3]);
-        break;
-      }
-      case 'fixedMove': {
-        this.fixedMove(params[0], params[1]);
-        break;
-      }
-      case 'fixedMoveBackward': {
-        this.fixedMoveBackward(params[0]);
-        break;
-      }
-      case 'fixedMoveForward': {
-        this.fixedMove(this.direction(), params[0]);
-        break;
-      }
       case gc.ROUTE_MOVE_DOWN: {
         this.subQMove("2, 1," + QMovement.tileSize);
         //this._moveRouteIndex++;
@@ -113,39 +83,53 @@
     }
   };
 
+  Game_Character.prototype.subQMoveCommand = function(command) {
+    var gc = Game_Character;
+    var code = command.code;
+    var params = command.parameters;
+    if (command.code === gc.ROUTE_SCRIPT) {
+      var qmove = /^qmove\((.*)\)/i.exec(params[0]);
+      var arc   = /^arc\((.*)\)/i.exec(params[0]);
+      if (qmove) this.subQMove(qmove[1]);
+      if (arc)   this.subArc(arc[1]);
+      if (qmove || arc) return true;
+    }
+    return false;
+  };
+
+  Game_Character.prototype.processQMoveCommands = function(command) {
+    var params = command.parameters;
+    switch (command.code) {
+      case 'arc': {
+        this.arc(params[0], params[1], params[2], params[3]);
+        break;
+      }
+      case 'fixedMove': {
+        this.fixedMove(params[0], params[1]);
+        break;
+      }
+      case 'fixedMoveBackward': {
+        this.fixedMoveBackward(params[0]);
+        break;
+      }
+      case 'fixedMoveForward': {
+        this.fixedMove(this.direction(), params[0]);
+        break;
+      }
+    }
+  };
+
   Game_Character.prototype.subArc = function(settings) {
     var cmd = {};
     cmd.code = 'arc';
     cmd.parameters = QPlus.stringToAry(settings);
     this._moveRoute.list[this._moveRouteIndex] = cmd;
-    //this._moveRoute.list.splice(this._moveRouteIndex + 1, 0, cmd);
-    //this._moveRoute.list.splice(this._moveRouteIndex, 1);
-    //this._moveRouteIndex--;
-  };
-
-  Game_Character.prototype.subMMove = function(settings) {
-    settings = QPlus.stringToAry(settings);
-    var dir  = settings[0];
-    var amt  = settings[1];
-    var mult = settings[2] || 1;
-    var tot  = amt * mult;
-    for (var i = 0; i <= tot; i++) {
-      var cmd = {};
-      cmd.code = 'fixedMove';
-      cmd.parameters = [dir, this.moveTiles()];
-      if (dir === 0) {
-        cmd.code = 'fixedMoveBackward';
-        cmd.parameters = [this.moveTiles()];
-      }
-      this._moveRoute.list.splice(this._moveRouteIndex + 1, 0, cmd);
-    }
-    this._moveRoute.list.splice(this._moveRouteIndex, 1);
-    //this._moveRouteIndex--;
   };
 
   Game_Character.prototype.subQMove = function(settings) {
     settings  = QPlus.stringToAry(settings);
     var dir   = settings[0];
+    if (dir === 5) dir = this._direction;
     var amt   = settings[1];
     var multi = settings[2] || 1;
     var tot   = amt * multi;
@@ -173,7 +157,6 @@
       this._moveRoute.list.splice(this._moveRouteIndex + 1 + i, 0, cmd);
     }
     this._moveRoute.list.splice(this._moveRouteIndex, 1);
-    //this._moveRouteIndex--;
   };
 
   Game_Character.prototype.deltaPXFrom = function(x) {
