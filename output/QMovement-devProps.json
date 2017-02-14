@@ -82,10 +82,10 @@
     ],
     "Game_Character": [
       "alias - prototype - processMoveCommand - command",
+      "prototype - subMVMoveCommands - command",
       "prototype - subQMoveCommand - command",
       "prototype - processQMoveCommands - command",
       "prototype - subArc - settings",
-      "prototype - subMMove - settings",
       "prototype - subQMove - settings",
       "prototype - deltaPXFrom - x",
       "prototype - deltaPYFrom - y",

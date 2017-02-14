@@ -87,15 +87,93 @@ if (!Imported.QPlus) {
  * ============================================================================
  * ## About
  * ============================================================================
+ * This plugin completely rewrites the collision system to use colliders. Using
+ * colliders enabled more accurate collision checking with dealing with pixel
+ * movement. This plugin also lets you change how many pixels the characters
+ * move per step, letting you set up a 24x24 movement or a 1x1 (pixel movement)
  *
+ * --DEVELOPMENT VERSION
  * ============================================================================
  * ## How to use
  * ============================================================================
+ * TODO
+ * ============================================================================
+ * ## Colliders
+ * ============================================================================
+ * There are 3 types of colliders; Polygon, Box and Circle. Though you can only
+ * create box and circle colliders, unless you modify the code to accept
+ * polygons. This is intentional since polygon would be "harder" to setup.
  *
- * ----------------------------------------------------------------------------
- * **Sub section**
- * ----------------------------------------------------------------------------
+ * ![Colliders Image](https://quxios.github.io/imgs/qmovement/colliders.png)
  *
+ * - Boxes takes in width, height, offset x and offset y
+ * - Circles similar to boxes, takes in width, height, offset x and offset y
+ * ----------------------------------------------------------------------------
+ * **Setting up colliders**
+ * ----------------------------------------------------------------------------
+ * Colliders are setup inside the Players notebox or as a comment inside an
+ * Events page. Events colliders depends it's page, so you may need to make the
+ * collider on all pages.
+ *
+ * There are two ways to setup colliders. using `<collider:-,-,-,->` and using
+ * `<colliders>-</colliders>`. The first method sets the 'Default' collider for
+ * that character. The second one you create the colliders for every collider
+ * type.
+ * ----------------------------------------------------------------------------
+ * **Collider Types**
+ * ----------------------------------------------------------------------------
+ * There are 3 collider types. Default, Collision and Interaction.
+ * - Default: This is the collider to use if collider type that was called was
+ * not found
+ * - Collision: This collider is used for collision checking
+ * - Interaction: This collider is used for checking interaction.
+ * ============================================================================
+ * ## Collider Terms
+ * ============================================================================
+ * ![Colliders Terms Image](https://quxios.github.io/imgs/qmovement/colliderInfo.png)
+ * ----------------------------------------------------------------------------
+ * **Collider Notetag**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ * <collider: shape, width, height, ox, oy>
+ * ~~~
+ * This notetag sets all collider types to these values.
+ * - Shape: Set to box or circle
+ * - Width: The width of the collider
+ * - Height: The height of the collider
+ * - OX: The x offset value of the collider
+ * - OY: The y offset value of the collider
+ * ----------------------------------------------------------------------------
+ * **Colliders Notetag**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ * <colliders>
+ * type: shape, width, height, ox, oy
+ * </colliders>
+ * ~~~
+ * This notetag sets all collider types to these values.
+ * - Type: The type of collider, set to default, collision or interaction
+ * - Shape: Set to box or circle
+ * - Width: The width of the collider
+ * - Height: The height of the collider
+ * - OX: The x offset value of the collider
+ * - OY: The y offset value of the collider
+ *
+ * To add another type, just add `type: shape, width, height, ox, oy` on
+ * another line.
+ *
+ * Example:
+ * ~~~
+ * <colliders>
+ * default: box, 48, 48
+ * collision: circle, 24, 24, 12, 12
+ * interaction: box: 32, 32, 8, 8
+ * </colliders>
+ * ~~~
+ * ============================================================================
+ * ## Move Routes
+ * ============================================================================
+ * TODO
  * ============================================================================
  * ## Links
  * ============================================================================
@@ -1775,48 +1853,18 @@ function ColliderManager() {
 (function() {
   var Alias_Game_Character_processMoveCommand = Game_Character.prototype.processMoveCommand;
   Game_Character.prototype.processMoveCommand = function(command) {
+    this.subMVMoveCommands(command);
     if (this.subQMoveCommand(command)) {
-      //this._moveRouteIndex++;
+      command = this._moveRoute.list[this._moveRouteIndex];
     }
     this.processQMoveCommands(command);
     Alias_Game_Character_processMoveCommand.call(this, command);
   };
 
-  Game_Character.prototype.subQMoveCommand = function(command) {
-    var gc = Game_Character;
-    var code = command.code;
-    var params = command.parameters;
-    if (command.code === gc.ROUTE_SCRIPT) {
-      var mmove = /mmove\((.*)\)/i.exec(params[0]);
-      var qmove = /qmove\((.*)\)/i.exec(params[0]);
-      var arc   = /arc\((.*)\)/i.exec(params[0]);
-      if (mmove) return this.subMMove(mmove[1]);
-      if (qmove) return this.subQMove(qmove[1]);
-      if (arc)   return this.subArc(arc[1]);
-    }
-    return false;
-  };
-
-  Game_Character.prototype.processQMoveCommands = function(command) {
+  Game_Character.prototype.subMVMoveCommands = function(command) {
     var gc = Game_Character;
     var params = command.parameters;
     switch (command.code) {
-      case 'arc': {
-        this.arc(params[0], params[1], params[2], params[3]);
-        break;
-      }
-      case 'fixedMove': {
-        this.fixedMove(params[0], params[1]);
-        break;
-      }
-      case 'fixedMoveBackward': {
-        this.fixedMoveBackward(params[0]);
-        break;
-      }
-      case 'fixedMoveForward': {
-        this.fixedMove(this.direction(), params[0]);
-        break;
-      }
       case gc.ROUTE_MOVE_DOWN: {
         this.subQMove("2, 1," + QMovement.tileSize);
         //this._moveRouteIndex++;
@@ -1884,39 +1932,53 @@ function ColliderManager() {
     }
   };
 
+  Game_Character.prototype.subQMoveCommand = function(command) {
+    var gc = Game_Character;
+    var code = command.code;
+    var params = command.parameters;
+    if (command.code === gc.ROUTE_SCRIPT) {
+      var qmove = /^qmove\((.*)\)/i.exec(params[0]);
+      var arc   = /^arc\((.*)\)/i.exec(params[0]);
+      if (qmove) this.subQMove(qmove[1]);
+      if (arc)   this.subArc(arc[1]);
+      if (qmove || arc) return true;
+    }
+    return false;
+  };
+
+  Game_Character.prototype.processQMoveCommands = function(command) {
+    var params = command.parameters;
+    switch (command.code) {
+      case 'arc': {
+        this.arc(params[0], params[1], params[2], params[3]);
+        break;
+      }
+      case 'fixedMove': {
+        this.fixedMove(params[0], params[1]);
+        break;
+      }
+      case 'fixedMoveBackward': {
+        this.fixedMoveBackward(params[0]);
+        break;
+      }
+      case 'fixedMoveForward': {
+        this.fixedMove(this.direction(), params[0]);
+        break;
+      }
+    }
+  };
+
   Game_Character.prototype.subArc = function(settings) {
     var cmd = {};
     cmd.code = 'arc';
     cmd.parameters = QPlus.stringToAry(settings);
     this._moveRoute.list[this._moveRouteIndex] = cmd;
-    //this._moveRoute.list.splice(this._moveRouteIndex + 1, 0, cmd);
-    //this._moveRoute.list.splice(this._moveRouteIndex, 1);
-    //this._moveRouteIndex--;
-  };
-
-  Game_Character.prototype.subMMove = function(settings) {
-    settings = QPlus.stringToAry(settings);
-    var dir  = settings[0];
-    var amt  = settings[1];
-    var mult = settings[2] || 1;
-    var tot  = amt * mult;
-    for (var i = 0; i <= tot; i++) {
-      var cmd = {};
-      cmd.code = 'fixedMove';
-      cmd.parameters = [dir, this.moveTiles()];
-      if (dir === 0) {
-        cmd.code = 'fixedMoveBackward';
-        cmd.parameters = [this.moveTiles()];
-      }
-      this._moveRoute.list.splice(this._moveRouteIndex + 1, 0, cmd);
-    }
-    this._moveRoute.list.splice(this._moveRouteIndex, 1);
-    //this._moveRouteIndex--;
   };
 
   Game_Character.prototype.subQMove = function(settings) {
     settings  = QPlus.stringToAry(settings);
     var dir   = settings[0];
+    if (dir === 5) dir = this._direction;
     var amt   = settings[1];
     var multi = settings[2] || 1;
     var tot   = amt * multi;
@@ -1944,7 +2006,6 @@ function ColliderManager() {
       this._moveRoute.list.splice(this._moveRouteIndex + 1 + i, 0, cmd);
     }
     this._moveRoute.list.splice(this._moveRouteIndex, 1);
-    //this._moveRouteIndex--;
   };
 
   Game_Character.prototype.deltaPXFrom = function(x) {
