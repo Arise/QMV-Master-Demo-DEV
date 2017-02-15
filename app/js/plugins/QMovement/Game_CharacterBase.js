@@ -430,6 +430,34 @@
     }
   };
 
+  Game_CharacterBase.prototype.moveRadian = function(radian) {
+    var d = this.radianToDirection(radian, true);
+    var xAxis = Math.cos(radian);
+    var yAxis = -Math.sin(radian);
+    var horzSteps = Math.abs(xAxis) * this.moveTiles();
+    var vertSteps = Math.abs(yAxis) * this.moveTiles();
+    var horz = xAxis > 0 ? 6 : xAxis < 0 ? 4 : 0;
+    var vert = yAxis > 0 ? 2 : yAxis < 0 ? 8 : 0;
+    this.setMovementSuccess(this.canPixelPass(this.px, this.py, horz, horzSteps) &&
+      this.canPixelPass(this.px, this.py, vert, vertSteps));
+    //var originalSpeed = this._moveSpeed;
+    //if (this.smartMove() > 0) this.smartMoveSpeed([horz, vert], true);
+    if (this.isMovementSucceeded()) {
+      this._diagonal = false;
+      this._adjustFrameSpeed = false;
+      this.setDirection(d);
+      this._px = $gameMap.roundPXWithDirection(this._px, horz, horzSteps);
+      this._py = $gameMap.roundPYWithDirection(this._py, vert, vertSteps);
+      this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(horz), horzSteps);
+      this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(vert), vertSteps);
+      this._moveCount++;
+      this.increaseSteps();
+    } else {
+      this.setDirection(d);
+      this.checkEventTriggerTouchFront(d);
+    }
+  };
+
   Game_CharacterBase.prototype.fixedMove = function(dir, dist) {
     dir = dir === 5 ? this.direction() : dir;
     if ([1, 3, 7, 9].contains(dir)) {

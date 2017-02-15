@@ -22,12 +22,16 @@
         var y = $gameTemp.destinationPY();
         //if (!this._pathFind) direction = this.startPathFind(x, y);
       }
-      if ([4, 6].contains(direction)) {
-        this.moveInputHorizontal(direction);
-      } else if ([2, 8].contains(direction)) {
-        this.moveInputVertical(direction);
-      } else if ([1, 3, 7, 9].contains(direction) && QMovement.diagonal) {
-        this.moveInputDiagonal(direction);
+      if (Imported.QInput && Input.preferGamepad()) {
+        this.moveGamepad();
+      } else {
+        if ([4, 6].contains(direction)) {
+          this.moveInputHorizontal(direction);
+        } else if ([2, 8].contains(direction)) {
+          this.moveInputVertical(direction);
+        } else if ([1, 3, 7, 9].contains(direction) && QMovement.diagonal) {
+          this.moveInputDiagonal(direction);
+        }
       }
     }
   };
@@ -46,6 +50,15 @@
       7: [4, 8],   9: [6, 8]
     };
     this.moveDiagonally(diag[dir][0], diag[dir][1]);
+  };
+
+  Game_Player.prototype.moveGamepad = function() {
+    var horz = Input._dirAxesA.x;
+    var vert = -Input._dirAxesA.y;
+    if (horz === 0 && vert === 0) return;
+    var radian = Math.atan2(vert, horz);
+    radian += radian < 0 ? Math.PI * 2 : 0;
+    this.moveRadian(radian);
   };
 
   Game_Player.prototype.update = function(sceneActive) {

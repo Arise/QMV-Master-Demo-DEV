@@ -3,14 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.Quasi_Input = 2.00; // backwards compatibility
-Imported.QInput = '2.0.0';
+Imported.QInput = '2.1.0';
 
 //=============================================================================
  /*:
  * @plugindesc <QInput>
  * Adds additional keys to Input class, and allows remapping keys.
- * @author Quxios  | Version 2.0.0
+ * @author Quxios  | Version 2.1.0
  *
  * @param Ok
  * @desc Which buttons will trigger the ok input
@@ -235,8 +234,6 @@ QInput.stringToAry = function(string) {
   return ary;
 };
 
-var QuasiInput = QInput; // backwards compatibility
-
 //=============================================================================
 // QInput
 
@@ -244,6 +241,7 @@ var QuasiInput = QInput; // backwards compatibility
   var _params = $plugins.filter(function(p) {
     return p.description.contains('<QInput>') && p.status;
   })[0].parameters;
+
   QInput.remapped = {};
   QInput.remapped['ok']       = QInput.stringToAry(_params['Ok']);
   QInput.remapped['escape']   = QInput.stringToAry(_params['Escape / Cancel']);
@@ -433,25 +431,44 @@ var QuasiInput = QInput; // backwards compatibility
     return key;
   };
 
+  //Gamepad button index to input action
   Input.gamepadMapper = {
     0: '$ok',        // A
     1: '$cancel',    // B
     2: '$shift',     // X
     3: '$menu',      // Y
-    4: '$pageup',    // LB
-    5: '$pagedown',  // RB
+    4: '$pageup',    // L1
+    5: '$pagedown',  // R1
+    6: '', // L2
+    7: '', // R2
+    8: '', // Select
+    9: '', // Start
+    10: '', // L3
+    11: '', // R3
     12: '$up',       // D-pad up
     13: '$down',     // D-pad down
     14: '$left',     // D-pad left
     15: '$right',    // D-pad right
   };
 
+  // Gamepad button index to button name
+  Input.gamepadKeys = {
+    0: 'A', 1: 'B', 2: 'X', 3: 'Y',
+    4: 'L1', 5: 'R1', 6: 'L2', 7: 'R2', 10: 'L3', 11: 'R3',
+    8: 'select', 9: 'start',
+    12: 'UP', 13: 'DOWN', 14: 'LEFT', 15: 'RIGHT'
+  };
+
   var Alias_Input_clear = Input.clear;
   Input.clear = function() {
     Alias_Input_clear.call(this);
+    this._lastUsed = 'keyboard';
     this._ranPress = false;
     this._lastPressed = null;
     this._lastTriggered = null;
+    this._lastGamepadDown = null;
+    this._dirAxesA = new Point(0, 0);
+    this._dirAxesB = new Point(0, 0);
   };
 
   // Checks if any press is pressed with .onkeydown()
@@ -566,14 +583,14 @@ var QuasiInput = QInput; // backwards compatibility
   };
 
   // Added keypress listener to check for caps lock.
+  var Alias_Input__setupEventHandlers = Input._setupEventHandlers;
   Input._setupEventHandlers = function() {
     document.addEventListener('keypress', this._onKeyPress.bind(this));
-    document.addEventListener('keydown', this._onKeyDown.bind(this));
-    document.addEventListener('keyup', this._onKeyUp.bind(this));
-    window.addEventListener('blur', this._onLostFocus.bind(this));
+    Alias_Input__setupEventHandlers.call(this);
   };
 
   Input._onKeyDown = function(event) {
+    this._lastUsed = 'keyboard';
     if (this._shouldPreventDefault(event.keyCode)) {
       event.preventDefault();
     }
@@ -608,6 +625,7 @@ var QuasiInput = QInput; // backwards compatibility
   };
 
   Input._onKeyPress = function(event) {
+    this._lastUsed = 'keyboard';
     this._lastPressed = String.fromCharCode(event.charCode);
     this._ranPress = true;
     this._setCapsLock(event);
@@ -624,6 +642,87 @@ var QuasiInput = QInput; // backwards compatibility
       this.capsLock = false;
     }
   };
+
+  Input._updateGamepadState = function(gamepad) {
+    var lastState = this._gamepadStates[gamepad.index] || [];
+    var newState = [];
+    var buttons = gamepad.buttons;
+    var axes = gamepad.axes;
+    var threshold = 0.2;
+    this._usingGamepad = false;
+    this._lastGamepadDown = null;
+    this._dirAxesA.x = 0;
+    this._dirAxesA.y = 0;
+    this._dirAxesB.x = 0;
+    this._dirAxesB.y = 0;
+    newState[12] = false;
+    newState[13] = false;
+    newState[14] = false;
+    newState[15] = false;
+    for (var i = 0; i < buttons.length; i++) {
+      newState[i] = buttons[i].pressed;
+    }
+    // left stick
+    if (axes[0] < -threshold) {
+      this._dirAxesA.x = axes[0]
+      newState[14] = true;    // left
+      this._lastUsed = 'gamepad';
+    } else if (axes[0] > threshold) {
+      this._dirAxesA.x = axes[0]
+      newState[15] = true;    // right
+      this._lastUsed = 'gamepad';
+    }
+    if (axes[1] < -threshold) {
+      this._dirAxesA.y = axes[1];
+      newState[12] = true;    // up
+      this._lastUsed = 'gamepad';
+    } else if (axes[1] > threshold) {
+      this._dirAxesA.y = axes[1];
+      newState[13] = true;    // down
+      this._lastUsed = 'gamepad';
+    }
+    // right stick
+    if (Math.abs(axes[2]) > threshold) {
+      this._dirAxesB.x = axes[2]
+      this._lastUsed = 'gamepad';
+    }
+    if (Math.abs(axes[3]) > threshold) {
+      this._dirAxesB.y = axes[3]
+      this._lastUsed = 'gamepad';
+    }
+    for (var j = 0; j < newState.length; j++) {
+      if (newState[j] !== lastState[j]) {
+        var buttonName = this.gamepadMapper[j];
+        if (buttonName) {
+          this._lastUsed = 'gamepad';
+          this._lastGamepadDown = this.gamepadKeys[j];
+          this._currentState[buttonName] = newState[j];
+        }
+      }
+    }
+    this._gamepadStates[gamepad.index] = newState;
+  };
+
+  Input.anyGamepadTriggered = function() {
+    var states = this._gamepadStates;
+    for (var i = 0; i < states.length; i++) {
+      if (states[i]) {
+        return this.gamepadKeys[i];
+      }
+    }
+    return false;
+  };
+
+  Input.preferKeyboard = function() {
+    return this._lastUsed === 'keyboard';
+  };
+
+  Input.preferGamepad = function() {
+    return this._lastUsed === 'gamepad';
+  };
+
+  //-----------------------------------------------------------------------------
+  // Graphics
 
   Graphics._onKeyDown = function(event) {
     if (!event.ctrlKey && !event.altKey) {

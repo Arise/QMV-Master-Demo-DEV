@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QSpeed = '1.0.0';
+Imported.QSpeed = '1.1.0';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QSpeed requires QPlus to work.';
@@ -15,7 +15,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QSpeed>
  * Allows for custom Move speeds and an acceleration effect
- * @author Quxios  | Version 1.0.0
+ * @author Quxios  | Version 1.1.0
  *
  * @requires QPlus
  *
@@ -154,7 +154,7 @@ if (!Imported.QPlus) {
 
 (function() {
   var _params = QPlus.getParams('<QSpeed>');
-  var _defaultAccel = _params['Acceleration'] === 'true';
+  var _accel = _params['Acceleration'] === 'true';
   var _defaultDur = Number(_params['Duration']) || 1;
   if (_defaultDur < 1) _defaultDur = 1;
 
@@ -199,7 +199,7 @@ if (!Imported.QPlus) {
     this._realMoveSpeed = 4;
     this._moveSpeedDuration = _defaultDur;
     this._moveSpeedSpd  = 0;
-    this._useAccel   = true;
+    this._useAccel   = _accel;
     this._wasDashing = false;
   };
 
@@ -251,4 +251,21 @@ if (!Imported.QPlus) {
       this.setMoveSpeed(Number(match[1]) || 4);
     }
   };
+
+  //-----------------------------------------------------------------------------
+  // Game_Player
+
+  if (Imported.QInput) {
+    Game_Player.prototype.realMoveSpeed = function() {
+      var spd = Game_Character.prototype.realMoveSpeed.call(this);
+      if (Input.preferGamepad()) {
+        var horz = Input._dirAxesA.x;
+        var vert = Input._dirAxesA.y;
+        var multi = Math.sqrt(horz * horz + vert * vert) || 1;
+        spd *= Math.min(multi, 1);
+      }
+      return spd;
+    };
+  }
+
 })()
