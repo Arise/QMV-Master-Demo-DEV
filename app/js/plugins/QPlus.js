@@ -3,13 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QPlus = '1.0.5';
+Imported.QPlus = '1.1.0';
 
 //=============================================================================
  /*:
  * @plugindesc <QPlus> (Should go above all Q Plugins)
  * Some small changes to MV for easier plugin development.
- * @author Quxios  | Version 1.0.5
+ * @author Quxios  | Version 1.1.0
  *
  * @param Quick Test
  * @desc Enable quick testing.
@@ -141,9 +141,13 @@ QPlus.getParams = function(id) {
 QPlus.versionCheck = function(version, targetVersion) {
   version = version.split('.').map(Number);
   targetVersion = targetVersion.split('.').map(Number);
-  if (version[0] < targetVersion[0]) return false;
-  if (version[1] < targetVersion[1]) return false;
-  if (version[2] < targetVersion[2]) return false;
+  if (version[0] < targetVersion[0]) {
+    return false;
+  } else if (version[0] === targetVersion[0] && version[1] < targetVersion[1]) {
+    return false;
+  } else if (version[1] === targetVersion[1] && version[2] < targetVersion[2]) {
+    return false;
+  }
   return true;
 };
 
@@ -209,12 +213,44 @@ QPlus.getCharacter = function(string) {
 };
 
 /**
+ * @static QPlus.request
+ * @param  {String} filePath
+ *         path to the file to load
+ * @param  {Function} callback
+ *         callback on load, response value is passed as 1st argument
+ * @param  {Function} err
+ *         callback on error
+ */
+QPlus.request = function(filePath, callback, err) {
+  var xhr = new XMLHttpRequest();
+  var url = filePath;
+  xhr.open('GET', url, true);
+  var type = filePath.split('.').pop().toLowerCase();
+  if (type === 'txt') {
+    xhr.overrideMimeType('text/plain');
+  } else if (type === 'json') {
+    xhr.overrideMimeType('application/json');
+  }
+  xhr.onload = function() {
+    if (xhr.status < 400) {
+      var val = xhr.responseText;
+      if (type === 'json') val = JSON.parse(val);
+      callback(val);
+    }
+  }
+  xhr.onerror = err || function() {
+    console.error('Error:' + filePath + ' not found');
+  }
+  xhr.send();
+};
+
+/**
  * @static QPlus.stringToObj
- * @param  {string} string
+ * @param  {String} string
  *         string in the format:
  *         key: value
  *         key2: value2
- * @return {obj}
+ * @return {Object}
  */
 QPlus.stringToObj = function(string) {
   var lines = string.split('\n');
@@ -240,9 +276,9 @@ QPlus.stringToObj = function(string) {
 
 /**
  * @static QPlus.stringToAry
- * @param  {string} string
+ * @param  {String} string
  *         Separate values with a comma
- * @return {array}
+ * @return {Array}
  *         Values will be trimmed, and auto converted to
  *         Number, true, false or null
  */
@@ -260,10 +296,10 @@ QPlus.stringToAry = function(string) {
 /**
  * @static QPlus.pointToIndex
  * Converts a point to a 1D point (an index)
- * @param  {point} point
- * @param  {int} maxCols
- * @param  {int} maxRows
- * @return {int} index value
+ * @param  {Point} point
+ * @param  {Int} maxCols
+ * @param  {Int} maxRows
+ * @return {Int} index value
  */
 QPlus.pointToIndex = function(point, maxCols, maxRows) {
   if (point.x >= maxCols) return -1;
@@ -277,10 +313,10 @@ QPlus.pointToIndex = function(point, maxCols, maxRows) {
 /**
  * @static QPlus.indexToPoint
  * Converts a 1D point (an index) to a 2D or 3D point
- * @param  {int} index
- * @param  {int} maxCols
- * @param  {int} maxRows
- * @return {point}
+ * @param  {Int} index
+ * @param  {Int} maxCols
+ * @param  {Int} maxRows
+ * @return {Point}
  *         2D point if index is within maxCols * maxRows
  *         3D point if index is out of maxCols * maxRows
  */
@@ -298,7 +334,7 @@ QPlus.indexToPoint = function(index, maxCols, maxRows) {
 
 /**
  * @static QPlus.freeImgCache
- * @param  {string or array} files
+ * @param  {String or Array} files
  *         List of files to remove from cache
  *         If a string, separate with commas
  *         Is case sensative, but only checking if any file
