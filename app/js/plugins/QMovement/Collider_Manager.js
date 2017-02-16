@@ -112,9 +112,9 @@ function ColliderManager() {
     }
     for (x = currGrid.x1; x <= currGrid.x2; x++) {
       for (y = currGrid.y1; y <= currGrid.y2; y++) {
-        if (x < 0 || x >= this.maxWidth) {
+        if (x < 0 || x >= maxWidth) {
           continue;
-        } else if (y < 0 || y >= this.maxHeight) {
+        } else if (y < 0 || y >= maxHeight) {
           continue;
         }
         grid[x][y].push(collider);
@@ -149,8 +149,8 @@ function ColliderManager() {
     var x, y, i;
     for (x = grid.x1; x <= grid.x2; x++) {
       for (y = grid.y1; y <= grid.y2; y++) {
-        if (x < 0 || x > this.sectorCols()) continue;
-        if (y < 0 || y > this.sectorRows()) continue;
+        if (x < 0 || x >= this.sectorCols()) continue;
+        if (y < 0 || y >= this.sectorRows()) continue;
         var charas = this._characterGrid[x][y];
         for (i = 0; i < charas.length; i++) {
           if (only) {
@@ -180,8 +180,8 @@ function ColliderManager() {
     var x, y, i;
     for (x = grid.x1; x <= grid.x2; x++) {
       for (y = grid.y1; y <= grid.y2; y++) {
-        if (x < 0 || x > this.sectorCols()) continue;
-        if (y < 0 || y > this.sectorRows()) continue;
+        if (x < 0 || x >= this.sectorCols()) continue;
+        if (y < 0 || y >= this.sectorRows()) continue;
         var colliders = this._colliderGrid[x][y];
         for (i = 0; i < colliders.length; i++) {
           if (only) {

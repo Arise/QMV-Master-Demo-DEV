@@ -101,7 +101,7 @@
     var params = command.parameters;
     switch (command.code) {
       case 'arc': {
-        this.arc(params[0], params[1], params[2], params[3]);
+        this.arc(params[0], params[1], eval(params[2]), params[3], params[4]);
         break;
       }
       case 'fixedMove': {
