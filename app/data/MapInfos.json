@@ -1,6 +1,6 @@
 [
 null,
-{"id":1,"expanded":false,"name":"QIslands","order":1,"parentId":0,"scrollX":1219,"scrollY":997},
+{"id":1,"expanded":false,"name":"QIslands","order":1,"parentId":0,"scrollX":1219,"scrollY":997.5},
 {"id":2,"expanded":false,"name":"QMap","order":2,"parentId":0,"scrollX":667,"scrollY":499.5},
 {"id":3,"expanded":false,"name":"QScale","order":3,"parentId":0,"scrollX":667,"scrollY":503.5},
 {"id":4,"expanded":false,"name":"PerformanceTests","order":4,"parentId":0,"scrollX":1235,"scrollY":913},

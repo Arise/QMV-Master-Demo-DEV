@@ -20,5 +20,6 @@ var $plugins =
 {"name":"QCamera","status":true,"description":"<QCamera>\r\nBetter Camera control","parameters":{"Offset":"0.5","Shift Y":"0","Shift X":"0"}},
 {"name":"QYScale","status":true,"description":"<QYScale>\r\nChange characters scale based off their Y value","parameters":{}},
 {"name":"QMap","status":true,"description":"<QMap>\r\ndesc","parameters":{"":""}},
-{"name":"========================","status":false,"description":"","parameters":{}}
+{"name":"========================","status":false,"description":"","parameters":{}},
+{"name":"QImport","status":true,"description":"<QImport>\r\ndesc","parameters":{"":""}}
 ];

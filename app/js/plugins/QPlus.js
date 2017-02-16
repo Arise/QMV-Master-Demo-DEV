@@ -454,6 +454,16 @@ QPlus.freeImgCache = function(files) {
     }
   };
 
+  var Alias_DataManager_extractMetadata = DataManager.extractMetadata;
+  DataManager.extractMetadata = function(data) {
+    Alias_DataManager_extractMetadata.call(this, data);
+    this.extractQData(data);
+  };
+
+  DataManager.extractQData = function(data) {
+    // To be aliased by QPlugins
+  };
+
   //-----------------------------------------------------------------------------
   // Game_Interpreter
   //

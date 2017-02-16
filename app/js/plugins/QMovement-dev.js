@@ -21,7 +21,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '0.1.0';
+Imported.QMovement = '0.2.0';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QMovement requires QPlus to work.';
@@ -33,7 +33,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QMovement>
  * Development
- * @author Quxios  | Version 0.1.0
+ * @author Quxios  | Version 0.2.0
  *
  * @requires QPlus
  *
@@ -109,6 +109,9 @@ if (!Imported.QPlus) {
  * colliders enabled more accurate collision checking with dealing with pixel
  * movement. This plugin also lets you change how many pixels the characters
  * move per step, letting you set up a 24x24 movement or a 1x1 (pixel movement)
+ *
+ * Note there are a few mv features disabled/broken; mouse movement, followers,
+ * and vehicles.
  *
  * --DEVELOPMENT VERSION
  * ============================================================================
@@ -191,7 +194,50 @@ if (!Imported.QPlus) {
  * ============================================================================
  * ## Move Routes
  * ============================================================================
- * TODO
+ * By default, event move commands (moveup, movedown, ect) will convert to a
+ * qmove that moves the character based off your tilesize. So if your tilesize
+ * is 48 and your gridsize is 1. Then a moveup command will move the character
+ * up 48 pixels not 1. But if you want to move the character by a fixed amount
+ * of pixels, then you will use the QMove commands.
+ * ----------------------------------------------------------------------------
+ * **QMove**
+ * ----------------------------------------------------------------------------
+ * ![QMove Script Call](https://quxios.github.io/imgs/qmovement/arc.png)
+ * To do a QMove, add a script in the move route in the format:
+ * ~~~
+ *  qmove(DIR, AMOUNT, MULTIPLER)
+ * ~~~
+ * - DIR: Set to a number representing the direction to move,
+ *  2: left, 4: right, 8: up 2: down,
+ *  1: lower left, 3: lower right, 7: upper left, 9: upper right,
+ *  5: current direction, 0: reverse direction
+ * - AMOUNT: The amount to move in that direction, in pixels
+ * - MULTIPLIER: multiplies against amount to make larger values easier [OPTIONAL]
+ *
+ * Example:
+ * ~~~
+ *  qmove(4, 24)
+ * ~~~
+ * Will move that character 24 pixels to the left.
+ * ----------------------------------------------------------------------------
+ * **Arc**
+ * ----------------------------------------------------------------------------
+ * Arcing is used to make a character orbit around a position. Note that collisions
+ * are ignored when arcing, but interactions still work. To add a arc add a script
+ * in the move route in the format:
+ * ~~~
+ *  arc(PIVOTX, PIVOTY, RADIAN, CCWISE?, FRAMES)
+ * ~~~
+ * - PIVOTX: The x position to orbit around, in pixels
+ * - PIVOTY: The y position to orbit around, in pixels
+ * - RADIAN: The degrees to move, in radians
+ * - CCWISE?: set to true or false; if true it will arc countclock wise
+ * - FRAMES: The amount of frames to complete the arc
+ *
+ * Example:
+ * ~~~
+ *  arc(480,480,Math.PI*2,false,60)
+ * ~~~
  * ============================================================================
  * ## Links
  * ============================================================================
@@ -203,6 +249,6 @@ if (!Imported.QPlus) {
  *
  *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
- * @tags
+ * @tags movement, pixel
  */
 //=============================================================================
