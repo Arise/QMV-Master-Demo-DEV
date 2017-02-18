@@ -14,9 +14,11 @@ function QMovement() {
   QMovement.smartMove = Number(_params['Smart Move']);
   QMovement.midPass = _params['Mid Pass'] === 'true';
   QMovement.diagonal = _params['Diagonal'] === 'true';
-  QMovement.collision = '#FF0000';
-  QMovement.water1 = '#00FF00';
-  QMovement.water2 = '#0000FF';
+  QMovement.collision = '#FF0000'; // will be changable in a separate addon
+  QMovement.water1 = '#00FF00'; // will be changable in a separate addon
+  QMovement.water2 = '#0000FF'; // will be changable in a separate addon
+  QMovement.water1Tag = 1; // will be changable in a separate addon
+  QMovement.water2Tag = 2; // will be changable in a separate addon
   QMovement.playerCollider = _params['Player Collider'];
   QMovement.eventCollider = _params['Player Collider'];
   QMovement.showColliders = _params['Show Colliders'] === 'true';
@@ -48,5 +50,5 @@ function QMovement() {
     3599: [48, 48],  // Impassable A2, A3, A4
     3727: [48, 48]
   };
-  QMovement.regionBoxes = {};
+  QMovement.regionBoxes = {}; // will be changable in a separate addon
 })();

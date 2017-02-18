@@ -67,6 +67,7 @@
   };
 
   Game_Map.prototype.setupMapColliders = function() {
+    this._tileCounter = 0;
     for (var x = 0; x < this.width(); x++) {
       for (var y = 0; y < this.height(); y++) {
         var flags = this.tilesetFlags();
@@ -145,10 +146,7 @@
     newBox.isBush    = (flag & 0x40)  || /<bush>/i.test(newBox.note);
     newBox.isCounter = (flag & 0x80)  || /<counter>/i.test(newBox.note);
     newBox.isDamage  = (flag & 0x100) || /<damage>/i.test(newBox.note);
-    //var vx = x * this.height() * this.width();
-    //var vy = y * this.height();
-    //var vz = index || (QMovement._mapColliders[x][y] ? QMovement._mapColliders[x][y].length : 0);
-    //newBox.location  = vx + vy + vz;
+    newBox.id = this._tileCounter++;
     if (newBox.isWater2) {
       newBox.color = QMovement.water2.toLowerCase();
     } else if (newBox.isWater1) {

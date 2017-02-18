@@ -170,4 +170,8 @@
   Game_Character.prototype.pixelDistanceFrom = function(x, y) {
     return $gameMap.distance(this.cx(), this.cy(), x, y);
   };
+
+  Game_Character.prototype.startPathFind = function(x, y) {
+    // override in QPathfind
+  };
 })();

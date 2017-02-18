@@ -20,10 +20,10 @@
         }
         var x = $gameTemp.destinationPX();
         var y = $gameTemp.destinationPY();
-        //if (!this._pathFind) direction = this.startPathFind(x, y);
+        if (!this._pathFind) return this.startPathFind(x, y);
       }
-      if (Imported.QInput && Input.preferGamepad()) {
-        this.moveGamepad();
+      if (Imported.QInput && Input.preferGamepad() && QMovement.offGrid) {
+        this.moveWithAnalog();
       } else {
         if ([4, 6].contains(direction)) {
           this.moveInputHorizontal(direction);
@@ -52,7 +52,7 @@
     this.moveDiagonally(diag[dir][0], diag[dir][1]);
   };
 
-  Game_Player.prototype.moveGamepad = function() {
+  Game_Player.prototype.moveWithAnalog = function() {
     var horz = Input._dirAxesA.x;
     var vert = -Input._dirAxesA.y;
     if (horz === 0 && vert === 0) return;
