@@ -104,6 +104,10 @@
         this.arc(params[0], params[1], eval(params[2]), params[3], params[4]);
         break;
       }
+      case 'moveRadian': {
+        this.moveRadian(params[0], params[1]);
+        break;
+      }
       case 'fixedMove': {
         this.fixedMove(params[0], params[1]);
         break;

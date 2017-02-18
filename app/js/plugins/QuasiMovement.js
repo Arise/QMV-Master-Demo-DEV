@@ -1493,7 +1493,6 @@ var QuasiMovement = {};
               charas.push(QuasiMovement._characterGrid[x][y][i]);
             }
           }
-
         }
       }
     }

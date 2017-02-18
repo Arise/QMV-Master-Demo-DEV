@@ -112,15 +112,18 @@
     return this.canPixelPass(x * QMovement.tileSize, y * QMovement.tileSize, dir);
   };
 
-  Game_CharacterBase.prototype.canPixelPass = function(x, y, dir, dist) {
-    var dist = dist || this.moveTiles();
+  Game_CharacterBase.prototype.canPixelPass = function(x, y, dir, dist, type) {
+    dist = dist || this.moveTiles();
+    type = type || 'collision';
     var x1 = $gameMap.roundPXWithDirection(x, dir, dist);
     var y1 = $gameMap.roundPYWithDirection(y, dir, dist);
-    if (!this.collisionCheck(x1, y1, dir, dist)) {
-      this.collider('collision').moveTo(this._px, this._py);
+    if (!this.collisionCheck(x1, y1, dir, dist, type)) {
+      this.collider(type).moveTo(this._px, this._py);
       return false;
     }
-    this.moveColliders(x1, y1);
+    if (type[0] !== '_') {
+      this.moveColliders(x1, y1);
+    }
     return true;
   };
 
@@ -128,39 +131,39 @@
     return this.canPixelPassDiagonally(x * QMovement.tileSize, y * QMovement.tileSize, horz, vert);
   };
 
-  Game_CharacterBase.prototype.canPixelPassDiagonally = function(x, y, horz, vert, dist) {
+  Game_CharacterBase.prototype.canPixelPassDiagonally = function(x, y, horz, vert, dist, type) {
     var dist = dist || this.moveTiles();
     var x1 = $gameMap.roundPXWithDirection(x, horz, dist);
     var y1 = $gameMap.roundPYWithDirection(y, vert, dist);
-    return (this.canPixelPass(x, y, vert, dist) && this.canPixelPass(x, y1, horz, dist)) ||
-           (this.canPixelPass(x, y, horz, dist) && this.canPixelPass(x1, y, vert, dist));
+    return (this.canPixelPass(x, y, vert, dist, type) && this.canPixelPass(x, y1, horz, dist, type)) ||
+           (this.canPixelPass(x, y, horz, dist, type) && this.canPixelPass(x1, y, vert, dist, type));
   };
 
-  Game_CharacterBase.prototype.collisionCheck = function(x, y, dir, dist) {
-    this.collider('collision').moveTo(x, y);
-    if (!this.valid()) return false;
+  Game_CharacterBase.prototype.collisionCheck = function(x, y, dir, dist, type) {
+    this.collider(type).moveTo(x, y);
+    if (!this.valid(type)) return false;
     if (this.isThrough() || this.isDebugThrough()) return true;
     if (QMovement.midPass) {
-      if (!this.middlePass(x, y, dir, dist)) return false;
+      if (!this.middlePass(x, y, dir, dist, type)) return false;
     }
-    if (this.collideWithTile()) return false;
-    if (this.collideWithCharacter()) return false;
+    if (this.collideWithTile(type)) return false;
+    if (this.collideWithCharacter(type)) return false;
     return true;
   };
 
-  Game_CharacterBase.prototype.middlePass = function(x, y, dir, dist) {
+  Game_CharacterBase.prototype.middlePass = function(x, y, dir, dist, type) {
     var dist = dist / 2 || this.moveTiles() / 2;
     var x2 = $gameMap.roundPXWithDirection(x, this.reverseDir(dir), dist);
     var y2 = $gameMap.roundPYWithDirection(y, this.reverseDir(dir), dist);
-    this.collider('collision').moveTo(x2, y2);
-    if (this.collideWithTile()) return false;
-    if (this.collideWithCharacter()) return false;
-    this.collider('collision').moveTo(x, y);
+    this.collider(type).moveTo(x2, y2);
+    if (this.collideWithTile(type)) return false;
+    if (this.collideWithCharacter(type)) return false;
+    this.collider(type).moveTo(x, y);
     return true;
   };
 
-  Game_CharacterBase.prototype.collideWithTile = function() {
-    var collider = this.collider('collision');
+  Game_CharacterBase.prototype.collideWithTile = function(type) {
+    var collider = this.collider(type);
     var collided = false;
     ColliderManager.getCollidersNear(collider, (function(tile) {
       if (!tile.isTile) return false;
@@ -173,8 +176,8 @@
     return collided;
   };
 
-  Game_CharacterBase.prototype.collideWithCharacter = function() {
-    var collider = this.collider('collision');
+  Game_CharacterBase.prototype.collideWithCharacter = function(type) {
+    var collider = this.collider(type);
     var collided = false;
     ColliderManager.getCharactersNear(collider, (function(chara) {
       if (chara.isThrough() || chara === this || !chara.isNormalPriority()) {
@@ -186,8 +189,8 @@
     return collided;
   };
 
-  Game_CharacterBase.prototype.valid = function() {
-    var edge = this.collider('collision').gridEdge();
+  Game_CharacterBase.prototype.valid = function(type) {
+    var edge = this.collider(type).gridEdge();
     var maxW = $gameMap.width();
     var maxH = $gameMap.height();
     if (!$gameMap.isLoopHorizontal()) {
@@ -328,7 +331,7 @@
     Alias_Game_CharacterBase_updateJump.call(this);
     this._px = this._realPX = this._x * QMovement.tileSize;
     this._py = this._realPY = this._y * QMovement.tileSize;
-    this.moveAllBoxes(this._px, this._py);
+    this.moveColliders(this._px, this._py);
   };
 
   Game_CharacterBase.prototype.updateColliders = function() {
@@ -347,7 +350,6 @@
   };
 
   Game_CharacterBase.prototype.onPositionChange = function() {
-
     this.refreshBushDepth();
   };
 
@@ -383,18 +385,19 @@
     this.setDirectionFix(lastDirectionFix);
   };
 
-  Game_CharacterBase.prototype.moveStraight = function(d) {
-    this.setMovementSuccess(this.canPixelPass(this.px, this.py, d));
+  Game_CharacterBase.prototype.moveStraight = function(d, dist) {
+    dist = dist || this.moveTiles();
+    this.setMovementSuccess(this.canPixelPass(this.px, this.py, d, dist));
     var originalSpeed = this._moveSpeed;
     if (this.smartMove() > 0) this.smartMoveSpeed(d);
     if (this.isMovementSucceeded()) {
       this._diagonal = false;
       this._adjustFrameSpeed = false;
       this.setDirection(d);
-      this._px = $gameMap.roundPXWithDirection(this._px, d, this.moveTiles());
-      this._py = $gameMap.roundPYWithDirection(this._py, d, this.moveTiles());
-      this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(d), this.moveTiles());
-      this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(d), this.moveTiles());
+      this._px = $gameMap.roundPXWithDirection(this._px, d, dist);
+      this._py = $gameMap.roundPYWithDirection(this._py, d, dist);
+      this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(d), dist);
+      this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(d), dist);
       this._moveCount++;
       this.increaseSteps();
     } else {
@@ -439,13 +442,14 @@
     }
   };
 
-  Game_CharacterBase.prototype.moveRadian = function(radian) {
+  Game_CharacterBase.prototype.moveRadian = function(radian, dist) {
+    dist = dist || this.moveTiles();
     var realDir = this.radianToDirection(radian, true);
     var dir = this.radianToDirection(radian);
     var xAxis = Math.cos(radian);
     var yAxis = -Math.sin(radian);
-    var horzSteps = Math.abs(xAxis) * this.moveTiles();
-    var vertSteps = Math.abs(yAxis) * this.moveTiles();
+    var horzSteps = Math.abs(xAxis) * dist;
+    var vertSteps = Math.abs(yAxis) * dist;
     var horz = xAxis > 0 ? 6 : xAxis < 0 ? 4 : 0;
     var vert = yAxis > 0 ? 2 : yAxis < 0 ? 8 : 0;
     var x2 = $gameMap.roundPXWithDirection(this._px, horz, horzSteps);
@@ -459,8 +463,9 @@
       if ([1, 3, 7, 9].contains(realDir)) {
         this._diagonal = realDir;
       }
-      this._adjustFrameSpeed = false;
+      this._adjustFrameSpeed = true;
       this.setDirection(dir);
+      this._radian = radian;
       this._px = x2;
       this._py = y2;
       this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(horz), horzSteps);
@@ -473,10 +478,10 @@
     }
     if (!this.isMovementSucceeded() && this.smartMove() > 1) {
       if ([1, 3, 7, 9].contains(realDir)) {
-        if (this.canPixelPass(this.px, this.py, horz)) {
-          this.moveStraight(horz);
-        } else if (this.canPixelPass(this.px, this.py, vert)) {
-          this.moveStraight(vert);
+        if (this.canPixelPass(this.px, this.py, horz, horzSteps)) {
+          this.moveStraight(horz, horzSteps);
+        } else if (this.canPixelPass(this.px, this.py, vert, vertSteps)) {
+          this.moveStraight(vert, vertSteps);
         }
       } else {
         this.smartMoveDir8(dir);
@@ -539,16 +544,6 @@
     this.setDirectionFix(true);
     this.fixedMove(this.reverseDir(this.direction()), dist);
     this.setDirectionFix(lastDirectionFix);
-  };
-
-  Game_CharacterBase.prototype.slideTo = function(x, y) {
-    this._radian = Math.atan2(this._py - y, this._px - x);
-    this._radian = this._radian < 0 ? rad + 2 * Math.PI : this._radian;
-    this._adjustFrameSpeed = true;
-    this._px = x;
-    this._py = y;
-    this._moveCount++;
-    this.increaseSteps();
   };
 
   Game_CharacterBase.prototype.arc = function(pivotX, pivotY, radians, cc, frames) {
@@ -678,14 +673,18 @@
     }
     for (var collider in configs) {
       if (!configs.hasOwnProperty(collider)) continue;
-      configs[collider][4] = configs[collider][4] || 0;
-      configs[collider][4] -= this.shiftY();
-      this._colliders[collider] = ColliderManager.convertToCollider(configs[collider]);
-      this._colliders[collider]._charaId = String(this.charaId());
-      ColliderManager.addCollider(this._colliders[collider], -1, true);
+      this.makeCollider(collider, configs[collider]);
     }
     this.makeBounds();
     this.moveColliders();
+  };
+
+  Game_CharacterBase.prototype.makeCollider = function(name, settings) {
+    settings[4] = settings[4] || 0;
+    settings[4] -= this.shiftY();
+    this._colliders[name] = ColliderManager.convertToCollider(settings);
+    this._colliders[name]._charaId = this.charaId();
+    ColliderManager.addCollider(this._colliders[name], -1, true);
   };
 
   Game_CharacterBase.prototype.makeBounds = function() {

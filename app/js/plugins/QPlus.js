@@ -196,7 +196,7 @@ QPlus.getArg = function(args, regex) {
 };
 
 QPlus.getCharacter = function(string) {
-  string = string.toLowerCase();
+  string = String(string).toLowerCase();
   if (/^[0-9]+$/.test(string)) {
     var id = Number(string);
     return id === 0 ? $gamePlayer : $gameMap.event(id);

@@ -185,4 +185,12 @@
     }
     return false;
   };
+
+  Game_Player.prototype.moveStraight = function(d, dist) {
+    Game_Character.prototype.moveStraight.call(this, d, dist);
+  };
+
+  Game_Player.prototype.moveDiagonally = function(horz, vert) {
+    Game_Character.prototype.moveDiagonally.call(this, horz, vert);
+  };
 })();

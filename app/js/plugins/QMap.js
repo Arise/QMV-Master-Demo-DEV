@@ -253,8 +253,8 @@ var $dataQMap = null;
 
   if (Imported.QMovement) {
     var Alias_Game_CharacterBase_collideWithCharacter = Game_CharacterBase.prototype.collideWithCharacter;
-    Game_CharacterBase.prototype.collideWithCharacter = function() {
-      if (Alias_Game_CharacterBase_collideWithCharacter.call(this)) return true;
+    Game_CharacterBase.prototype.collideWithCharacter = function(type) {
+      if (Alias_Game_CharacterBase_collideWithCharacter.call(this, type)) return true;
       return this.collideWithMapObj();
     };
 
