@@ -64,6 +64,11 @@ function QPathfind() {
 (function() {
   var _diagonals = !true;
   var _halfOpt = true;
+  var _defaultOptions = {
+    smart: 0,
+    chase: null,
+    breakable: false
+  }
 
   QPathfind.prototype.initialize = function(charaId, endPoint, options) {
     this.initMembers(charaId, endPoint, options);
@@ -72,6 +77,17 @@ function QPathfind() {
 
   QPathfind.prototype.initMembers = function(charaId, endPoint, options) {
     this.options = options;
+    this.options.smart = this.options.smart === undefined ? _defaultOptions.smart : this.options.smart;
+    this.options.chase = this.options.chase === undefined ? _defaultOptions.chase : this.options.chase;
+    this.options.breakable = this.options.breakable === undefined ? _defaultOptions.breakable : this.options.breakable;
+    if (options.chase !== null) {
+      var chasing = QPlus.getCharacter(options.chase);
+      if (Imported.QMovement) {
+        endPoint = new Point(chasing.px, chasing.py);
+      } else {
+        endPoint = new Point(chasing.x, chasing.y);
+      }
+    }
     this._charaId = charaId;
     var startPoint;
     if (Imported.QMovement) {
@@ -92,17 +108,31 @@ function QPathfind() {
     this._completed = false;
     this._tick = 0;
     this._steps = 0;
+    if (this.options.smart > 1) {
+      this._smartTime = 90 + Math.randomIntBetween(0, 30);
+    }
   };
 
   QPathfind.prototype.beforeStart = function() {
     // test if end point is valid, if not send fail
-    console.time('Pathfind');
+    //console.time('Pathfind');
   };
 
   QPathfind.prototype.update = function() {
-    if (this._completed && this.options.smart) {
+    if (this._completed && this.options.smart > 1) {
       this._tick++;
-      if (this._tick % 90 === 0) {
+      var ot = 0;
+      if (this.options.chase) {
+        var chasing = QPlus.getCharacter(this.options.chase);
+        var p1 = new Point(chasing.x, chasing.y);
+        var p2 = new Point(this.character().x, this.character().y);
+        var dist = this.heuristic(p1, p2);
+        var range = 5;
+        if (dist > range) {
+          ot = 600;
+        }
+      }
+      if (this._tick > this._smartTime + ot) {
         return this.character().restartPathfind();
       }
     } else if (!this._completed) {
@@ -139,9 +169,10 @@ function QPathfind() {
 
   QPathfind.prototype.aStar = function() {
     var currI = 0;
-    var i;
+    var i, j;
     this._current = this._openNodes[0];
-    for (i = 0; i < this._openNodes.length; i++) {
+    j = this._openNodes.length;
+    for (i = 0; i < j; i++) {
       if (this._openNodes[i].f < this._current.f) {
         this._current = this._openNodes[i];
         currI = i;
@@ -153,8 +184,9 @@ function QPathfind() {
     this._openNodes.splice(currI, 1);
     this._closed[this._current.value] = true;
     var neighbors = this.findNeighbors(this._current);
-    for (var i = 0; i < neighbors.length; i++) {
-      if (this._closed[neighbors[i]]) continue;
+    j = neighbors.length;
+    for (i = 0; i < j; i++) {
+      if (this._closed[neighbors[i].value]) continue;
       var gScore = this._current.g + this.heuristic(this._current, neighbors[i]);
       if (!neighbors[i].visited) {
         neighbors[i].visited = true;
@@ -169,13 +201,13 @@ function QPathfind() {
   };
 
   QPathfind.prototype.onComplete = function() {
-    console.timeEnd('Pathfind');
+    //console.timeEnd('Pathfind');
     this._completed = true;
     this.character().startPathfind(this.createFinalPath());
   };
 
   QPathfind.prototype.onFail = function() {
-    console.timeEnd('Pathfind');
+    //console.timeEnd('Pathfind');
     this._completed = true;
     this.character().clearPathfind();
   };
@@ -218,7 +250,7 @@ function QPathfind() {
         passed = chara.canPass(x, y, dir);
       }
       var val = x2 + (y2 * this._mapWidth);
-      if (passed || onEnd) {
+      if (passed || val === this._endNode.value) {
         var node;
         if (Imported.QMovement) {
           if (Math.abs(x2 - xf) < tiles && Math.abs(y2 - yf) < tiles) {
@@ -408,12 +440,34 @@ function QPathfind() {
     }
   };
 
+  if (Imported.QMovement) {
+    var Alias_Game_CharacterBase_ignoreCharacters = Game_CharacterBase.prototype.ignoreCharacters;
+    Game_CharacterBase.prototype.ignoreCharacters = function(type) {
+      var ignores = Alias_Game_CharacterBase_ignoreCharacters.call(this, type);
+      if (this._isChasing) {
+        if (!ignores['_pathfind']) ignores['_pathfind'] = [];
+        ignores['_pathfind'].push(this._isChasing.charaId());
+      }
+      return ignores[type] || ignores || [];
+    };
+  }
+
+  // if using QMovement, x and y are pixel values
   Game_Character.prototype.initPathfind = function(x, y, options) {
     if (this._isPathfinding) {
       this.clearPathfind();
     }
     options = options || {};
     this._pathfind = new QPathfind(this.charaId(), new Point(x, y), options);
+  };
+
+  Game_Character.prototype.initChase = function(chara) {
+    if (!chara || this === chara) return;
+    this.initPathfind(0, 0, {
+      smart: 2,
+      chase: chara.charaId()
+    })
+    this._isChasing = chara;
   };
 
   Game_Character.prototype.restartPathfind = function() {
@@ -429,6 +483,10 @@ function QPathfind() {
   };
 
   Game_Character.prototype.onPathfindComplete = function() {
+    if (this._isChasing) {
+      this._pathfind._smartTime /= 2;
+      return;
+    }
     this._isPathfinding = false;
     this._pathfind = null;
   };
@@ -460,7 +518,7 @@ function QPathfind() {
   Game_Character.prototype.advanceMoveRouteIndex = function() {
     if (this._isPathfinding) {
       var moveRoute = this._moveRoute;
-      if (moveRoute && (!this.isMovementSucceeded() && this._pathfind.options.smart)) {
+      if (moveRoute && (!this.isMovementSucceeded() && this._pathfind.options.smart > 0)) {
         return this.restartPathfind();
       }
     }

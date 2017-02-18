@@ -40,4 +40,27 @@
       }
     }
   };
+
+  Game_Event.prototype.checkEventTriggerTouch = function(x, y) {
+    if (!$gameMap.isEventRunning()) {
+      if (this._trigger === 2 && !this.isJumping() && this.isNormalPriority()) {
+        var collider = this.collider('collision');
+        var prevX = collider.x;
+        var prevY = collider.y;
+        collider.moveTo(x, y);
+        var collided = false;
+        ColliderManager.getCharactersNear(collider, (function(chara) {
+          if (chara.constructor !== Game_Player) return false;
+          collided = chara.collider('collision').intersects(collider);
+          return 'break';
+        }).bind(this));
+        collider.moveTo(prevX, prevY);
+        if (collided) {
+          this._stopCount = 0;
+          this._freqCount = this.freqThreshold();
+          this.start();
+        }
+      }
+    }
+  };
 })();

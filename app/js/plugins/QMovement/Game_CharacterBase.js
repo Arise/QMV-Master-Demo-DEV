@@ -183,10 +183,20 @@
       if (chara.isThrough() || chara === this || !chara.isNormalPriority()) {
         return false;
       }
+      if (this.ignoreCharacters(type).contains(chara.charaId())) {
+        return false;
+      }
       collided = chara.collider('collision').intersects(collider);
       if (collided) return 'break';
     }).bind(this));
     return collided;
+  };
+
+  Game_CharacterBase.prototype.ignoreCharacters = function(type) {
+    var ignore = {
+      default: []
+    }
+    return ignore[type] || ignore.default;
   };
 
   Game_CharacterBase.prototype.valid = function(type) {
