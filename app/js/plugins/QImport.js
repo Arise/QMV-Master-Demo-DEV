@@ -9,8 +9,8 @@ if (!Imported.QPlus) {
   var msg = 'Error: QImport requires QPlus to work.';
   alert(msg);
   throw new Error(msg);
-} else if (!QPlus.versionCheck(Imported.QPlus, '1.1.0')) {
-  var msg = 'Error: QImport requires QPlus 1.1.0 or newer to work.';
+} else if (!QPlus.versionCheck(Imported.QPlus, '1.1.1')) {
+  var msg = 'Error: QImport requires QPlus 1.1.1 or newer to work.';
   alert(msg);
   throw new Error(msg);
 }
@@ -66,26 +66,35 @@ function QImport() {
 
 (function() {
   QImport._queue = [];
+  QImport._scanQueue = [];
   QImport._cache = {};
   QImport._wait = false;
 
   QImport.empty = function() {
-    return this._queue.length === 0;
+    return this._queue.length === 0 && this._scanQueue.length === 0;
   };
 
-  QImport.run = function() {
-    var q = this._queue;
+  QImport.update = function() {
     this._wait = false;
-    //console.log('Import started');
+    this.updateQueue();
+    this.updateScan();
+    if (this.empty()) {
+      QImport._cache = {};
+    }
+  };
+
+  QImport.updateQueue = function() {
+    var q = this._queue;
     for (var i = q.length - 1; i >= 0; i--) {
+      if (this._wait) break;
       var data = q.pop();
       var regex = /<import:(.*)?>/ig;
       var notes = data.note;
       for (;;) {
         var match = regex.exec(notes);
         if (match) {
-          this.import(data, match);
-          if (QImport._wait) {
+          this.import(data, 'note', match);
+          if (this._wait) {
             q.push(data);
             break;
           }
@@ -93,50 +102,76 @@ function QImport() {
           break;
         }
       }
-      if (QImport._wait) break;
-      DataManager.extractMetadata(data);
-    }
-    if (this.empty()) {
-      QImport._cache = {};
+      if (!this._wait) {
+        DataManager.extractMetadata(data);
+      }
     }
   };
 
-  QImport.import = function(data, match) {
+  QImport.updateScan = function() {
+    var q = this._scanQueue;
+    for (var i = q.length - 1; i >= 0; i--) {
+      if (this._wait) break;
+      var data = q.pop();
+      if (this.isEvent(data)) {
+        for (var j = 0; i < data.pages.length; i++) {
+          this.scan(data.pages[i]);
+          if (this._wait) {
+            q.push(data);
+            break;
+          }
+        }
+      }
+    }
+  };
+
+  QImport.scan = function(page) {
+    for (var i = 0; i < page.list.length; i++) {
+      if (this._wait) break;
+      var cmd = page.list[i];
+      var regex = /<import:(.*)?>/ig;
+      for (;;) {
+        var match = regex.exec(cmd.parameters[0]);
+        if (match) {
+          this.import(cmd.parameters, 0, match);
+          if (this._wait) break;
+          break;
+        } else {
+          break;
+        }
+      }
+      console.log(cmd.parameters);
+    }
+  };
+
+  QImport.import = function(data, prop, match) {
     var args = match[1].split(',').map(function(s) {
       return s.trim().toLowerCase();
     })
     var type = args.shift();
     switch (type) {
       case 'note': {
-        this.importNote(data, match[0], args);
+        this.importNote(data, prop, match[0], args);
+        break;
+      }
+      case 'text':{
+        this.importText(data, prop, match[0], args);
         break;
       }
       case 'event': {
-        this.importEvent(data, match[0], args);
+        if (this.isEvent(data)) {
+          this.importEvent(data, prop, match[0], args);
+        } else {
+          data[prop] = data[prop].replace(match, '');
+        }
         break;
       }
     }
   };
 
-  QImport.importNote = function(data, match, args) {
+  QImport.importNote = function(data, prop, match, args) {
     var type = args.shift();
-    //console.log('Importing notes from ' + type);
     switch (type) {
-      case 'text': {
-        if (this._cache[args[0]]) {
-          val = this._cache[args[0]];
-        } else {
-          this._wait = true;
-          QPlus.request(args[0], function(response) {
-            QImport._cache[args[0]] = response;
-            data.note = data.note.replace(match, response);
-            QImport.run();
-            data = null;
-          });
-          return;
-        }
-        break;
-      }
       case 'actor': {
         obj = $dataActors[Number(args[0])];
         break;
@@ -173,16 +208,35 @@ function QImport() {
     if (obj) {
       val = obj.note || '';
     }
-    data.note = data.note.replace(match, val);
+    data[prop] = data[prop].replace(match, val);
   };
 
-  QImport.importEvent = function(data, match, args) {
+  QImport.importText = function(data, prop, match, args) {
+    if (this._cache[args[0]]) {
+      val = this._cache[args[0]];
+    } else {
+      this._wait = true;
+      QPlus.request(args[0], function(response) {
+        QImport._cache[args[0]] = response;
+        data[prop] = data[prop].replace(match, response);
+        QImport.update();
+        data = null;
+      });
+      return;
+    }
+  };
+
+  QImport.importEvent = function(data, prop, match, args) {
     var mapId = Number(args[0]);
-    var eventId = Number(args[1])
-    console.log('Importing event ' + eventId + ' from map ' + mapId);
+    var eventId = Number(args[1]);
     var key = 'map' + mapId ;
     if (this._cache[key]) {
-      data = this._cache[key];
+      for (var props in data) {
+        if (props === 'x' || props === 'y') {
+          continue;
+        }
+        data[props] = this._cache[key].events[eventId][props];
+      }
     } else {
       this._wait = true;
       var mapPath = 'data/Map%1.json'.format(mapId.padZero(3));
@@ -190,49 +244,30 @@ function QImport() {
         QImport._wait = false;
         if (response.events && response.events[eventId]) {
           QImport._cache[key] = response;
-          for (var prop in data) {
-            if (prop === 'x' || prop === 'y') {
+          for (var props in data) {
+            if (props === 'x' || props === 'y') {
               continue;
             }
-            data[prop] = response.events[eventId][prop];
+            data[props] = response.events[eventId][props];
           }
         }
-        QImport.run();
+        QImport.update();
         data = null;
       });
       return;
     }
-    data.note = data.note.replace(match, '');
+    data[prop] = data[prop].replace(match, '');
+  };
+
+  QImport.isEvent = function(data) {
+    if (!data) return false;
+    if (!data.x || !data.y) return false;
+    if (data.pages && data.pages.constructor === Array) return true;
+    return false;
   };
 })();
 
 (function() {
-  //-----------------------------------------------------------------------------
-  // Game_Map
-
-  var Alias_Game_Map_setupEvents = Game_Map.prototype.setupEvents;
-  Game_Map.prototype.setupEvents = function() {
-    Alias_Game_Map_setupEvents.call(this);
-  };
-
-  //-----------------------------------------------------------------------------
-  // Game_Interpreter
-
-  var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-  Game_Interpreter.prototype.pluginCommand = function(command, args) {
-    if (command.toLowerCase() === 'qimport') {
-      this.qImportCommand(args);
-      return;
-    }
-    Alias_Game_Interpreter_pluginCommand.call(this, command, args);
-  };
-
-  Game_Interpreter.prototype.qImportCommand = function(args) {
-    //var args2 = args.slice(2);
-    //QPlus.getCharacter(args[0]);
-    //QPlus.getArg(args2, /lock/i)
-  };
-
   //-----------------------------------------------------------------------------
   // DataManager
 
@@ -241,6 +276,8 @@ function QImport() {
     Alias_DataManager_extractQData.call(this, data);
     if (data.meta.import) {
       QImport._queue.push(data);
+    } else if (data.meta.importing) {
+      QImport._scanQueue.push(data);
     }
   };
 
@@ -248,7 +285,7 @@ function QImport() {
   DataManager.isDatabaseLoaded = function() {
     var loaded = Alias_DataManager_isDatabaseLoaded.call(this);
     if (loaded) {
-      QImport.run();
+      QImport.update();
     }
     return loaded && QImport.empty();
   };
@@ -257,7 +294,7 @@ function QImport() {
   DataManager.isMapLoaded = function() {
     var loaded = Alias_DataManager_isMapLoaded.call(this);
     if (loaded) {
-      QImport.run();
+      QImport.update();
     }
     return loaded && QImport.empty();
   };

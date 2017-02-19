@@ -21,6 +21,6 @@ var $plugins =
 {"name":"QYScale","status":false,"description":"<QYScale>\r\nChange characters scale based off their Y value","parameters":{}},
 {"name":"QMap","status":false,"description":"<QMap>\r\ndesc","parameters":{"":""}},
 {"name":"========================","status":false,"description":"","parameters":{}},
-{"name":"QImport","status":false,"description":"<QImport>\r\ndesc","parameters":{"":""}},
+{"name":"QImport","status":true,"description":"<QImport>\r\ndesc","parameters":{"":""}},
 {"name":"QPathfind","status":true,"description":"<QPathfind>\r\ndesc","parameters":{"":""}}
 ];
