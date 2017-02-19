@@ -23,17 +23,50 @@ if (!Imported.QPlus) {
  *
  * @requires QPlus
  *
- * @param
- * @desc
- * @default
- *
- * @video
- *
  * @help
  * ============================================================================
  * ## About
  * ============================================================================
+ * TODO
+ * - Add more features
+ * - Create help
  *
+ * ----------------------------------------------------------------------------
+ * Notetags for database items
+ * ----------------------------------------------------------------------------
+ * <import: type, from, from2>
+ *  type: set to text or note
+ *  from: if type is text, set this to the path of the text file
+ *        if type is note, set to the database to read;
+ *        actor, class, skill, item, weapon, armor, enemy, or state
+ *  from2: if type is text ignore this
+ *         if type is note, set this to the id from that database
+ *
+ * example:
+ *   <import:text,text/file.txt>
+ * Will import the text from the file located in text/file.txt
+ *   <import:note,actor,2>
+ * Will import the notes from actor 2
+ * ----------------------------------------------------------------------------
+ * Notetags for events
+ * ----------------------------------------------------------------------------\
+ * <import: type, from, from2>
+ *  type: set to text, note or event
+ *  from: if type is text, set this to the path of the text file
+ *        if type is note, set to the database to read;
+ *        actor, class, skill, item, weapon, armor, enemy, or state
+ *        if type is event, set to the mapId the event is located
+ *  from2: if type is text ignore this
+ *         if type is note, set this to the id from that database
+ *         if type is event, set to the event id
+ *
+ * example:
+ *   <import:event,1,2>
+ * Will replace that event with the event 2 from map 1
+ *
+ * <importing>
+ * Will search that events show text, comments and script for <import:> tags
+ * W.I.P.
  * ============================================================================
  * ## How to use
  * ============================================================================
@@ -67,15 +100,16 @@ function QImport() {
 (function() {
   QImport._queue = [];
   QImport._scanQueue = [];
+  QImport._request = [];
   QImport._cache = {};
   QImport._wait = false;
 
   QImport.empty = function() {
-    return this._queue.length === 0 && this._scanQueue.length === 0;
+    return this._queue.length === 0 && this._scanQueue.length === 0 && this._request.length === 0;
   };
 
   QImport.update = function() {
-    this._wait = false;
+    if (this._wait) return;
     this.updateQueue();
     this.updateScan();
     if (this.empty()) {
@@ -102,9 +136,7 @@ function QImport() {
           break;
         }
       }
-      if (!this._wait) {
-        DataManager.extractMetadata(data);
-      }
+      DataManager.extractMetadata(data);
     }
   };
 
@@ -133,14 +165,14 @@ function QImport() {
       for (;;) {
         var match = regex.exec(cmd.parameters[0]);
         if (match) {
+          match[1] = 'text,' + match[1];
           this.import(cmd.parameters, 0, match);
           if (this._wait) break;
-          break;
         } else {
           break;
         }
       }
-      console.log(cmd.parameters);
+      //console.log(cmd);
     }
   };
 
@@ -212,18 +244,29 @@ function QImport() {
   };
 
   QImport.importText = function(data, prop, match, args) {
+    var val = '<REQUESTING' + args[0] + '>';
+    console.log('import text');
     if (this._cache[args[0]]) {
+      console.log('loading cache');
       val = this._cache[args[0]];
     } else {
       this._wait = true;
+      this._request.push(data);
+      console.log('requesting');
       QPlus.request(args[0], function(response) {
+        QImport._wait = false;
         QImport._cache[args[0]] = response;
-        data[prop] = data[prop].replace(match, response);
-        QImport.update();
+        data[prop] = data[prop].replace(val, response);
+        DataManager.extractMetadata(data);
+        var i = QImport._request.indexOf(data);
+        QImport._request.splice(i, 1);
         data = null;
+        args = null;
+        match = null;
+        console.log('request finished');
       });
-      return;
     }
+    data[prop] = data[prop].replace(match, val);
   };
 
   QImport.importEvent = function(data, prop, match, args) {
@@ -238,10 +281,10 @@ function QImport() {
         data[props] = this._cache[key].events[eventId][props];
       }
     } else {
-      this._wait = true;
       var mapPath = 'data/Map%1.json'.format(mapId.padZero(3));
+      this._wait = true;
+      this._request.push(data);
       QPlus.request(mapPath, function(response) {
-        QImport._wait = false;
         if (response.events && response.events[eventId]) {
           QImport._cache[key] = response;
           for (var props in data) {
@@ -250,13 +293,18 @@ function QImport() {
             }
             data[props] = response.events[eventId][props];
           }
+          DataManager.extractMetadata(data);
         }
-        QImport.update();
+        QImport._wait = false;
+        var i = QImport._request.indexOf(data);
+        QImport._request.splice(i, 1);
         data = null;
+        args = null;
+        match = null;
       });
-      return;
+      var val = '<REQUESTING' + key + '>';
+      data[prop] = data[prop].replace(match, val);
     }
-    data[prop] = data[prop].replace(match, '');
   };
 
   QImport.isEvent = function(data) {

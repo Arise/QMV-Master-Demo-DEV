@@ -1,6 +1,11 @@
 //-----------------------------------------------------------------------------
 // Game_CharacterBase
 
+// TODO
+// few collision bugs;
+//  smartmove speed lets you get close to a collider, once as close as can be
+//  can only move back, cant move adjacently
+
 (function() {
   Object.defineProperties(Game_CharacterBase.prototype, {
       px: { get: function() { return this._px; }, configurable: true },
