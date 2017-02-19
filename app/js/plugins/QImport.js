@@ -146,8 +146,8 @@ function QImport() {
       if (this._wait) break;
       var data = q.pop();
       if (this.isEvent(data)) {
-        for (var j = 0; i < data.pages.length; i++) {
-          this.scan(data.pages[i]);
+        for (var j = 0; j < data.pages.length; j++) {
+          this.scan(data.pages[j]);
           if (this._wait) {
             q.push(data);
             break;
@@ -158,13 +158,37 @@ function QImport() {
   };
 
   QImport.scan = function(page) {
+    var codes = [
+      401, // show text
+      108, // comment line 1
+      408, // comment line 2
+      355, // script line 1
+      655  // script line 2
+    ]
     for (var i = 0; i < page.list.length; i++) {
       if (this._wait) break;
       var cmd = page.list[i];
+      if (!codes.contains(cmd.code)) continue;
       var regex = /<import:(.*)?>/ig;
       for (;;) {
         var match = regex.exec(cmd.parameters[0]);
         if (match) {
+          if (cmd.code === 108 || cmd.code === 408) {
+            if (/^event\,/i.test(match[1])) {
+              var args = match[1].split(',');
+              var newEvent = {
+                id: $dataMap.events.length,
+                name: 'IMPORTED_EVENT',
+                note: '',
+                pages: [],
+                x: Number(args[2]) || 0,
+                y: Number(args[3]) || 0
+              }
+              $dataMap.events.push(newEvent);
+              this.import(newEvent, 'note', match);
+              continue;
+            }
+          }
           match[1] = 'text,' + match[1];
           this.import(cmd.parameters, 0, match);
           if (this._wait) break;
@@ -172,7 +196,6 @@ function QImport() {
           break;
         }
       }
-      //console.log(cmd);
     }
   };
 
@@ -245,14 +268,11 @@ function QImport() {
 
   QImport.importText = function(data, prop, match, args) {
     var val = '<REQUESTING' + args[0] + '>';
-    console.log('import text');
     if (this._cache[args[0]]) {
-      console.log('loading cache');
       val = this._cache[args[0]];
     } else {
       this._wait = true;
       this._request.push(data);
-      console.log('requesting');
       QPlus.request(args[0], function(response) {
         QImport._wait = false;
         QImport._cache[args[0]] = response;
@@ -263,7 +283,6 @@ function QImport() {
         data = null;
         args = null;
         match = null;
-        console.log('request finished');
       });
     }
     data[prop] = data[prop].replace(match, val);
@@ -280,6 +299,7 @@ function QImport() {
         }
         data[props] = this._cache[key].events[eventId][props];
       }
+      DataManager.extractMetadata(data);
     } else {
       var mapPath = 'data/Map%1.json'.format(mapId.padZero(3));
       this._wait = true;
@@ -309,9 +329,9 @@ function QImport() {
 
   QImport.isEvent = function(data) {
     if (!data) return false;
-    if (!data.x || !data.y) return false;
-    if (data.pages && data.pages.constructor === Array) return true;
-    return false;
+    if (data.x === undefined && data.y === undefined) return false;
+    if (!data.pages || data.pages.constructor !== Array) return false;
+    return true;
   };
 })();
 

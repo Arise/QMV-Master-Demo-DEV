@@ -5,6 +5,7 @@
 // few collision bugs;
 //  smartmove speed lets you get close to a collider, once as close as can be
 //  can only move back, cant move adjacently
+// need to change how to check the smart move value
 
 (function() {
   Object.defineProperties(Game_CharacterBase.prototype, {
