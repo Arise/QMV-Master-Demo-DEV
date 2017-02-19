@@ -29,7 +29,33 @@ if (!Imported.QPlus) {
  * ============================================================================
  * ## About
  * ============================================================================
+ * TODO
+ * - plugin commands
+ * - pathfind on mouse click (qmovement only)
+ * - clear pathfind and chase on page change / erase
+ * - make sample map
+ * - add plugin parameters
+ * - help info
  *
+ * script calls:
+ * $gamePlayer.initPathfind(x, y, options);
+ * x/y - grid x/y, or pixel x/y if using qMovement
+ * options - optional object with the following props:
+ *   smart - set to an int; 0, 1 or 2
+ *   breakable - for player only, if player tries to move will break pathfind if
+ *               this is true
+ *
+ * examples:
+ * $gamePlayer.initPathfind(1, 1)
+ *
+ * $gamePlayer.initPathfind(1, 1, { smart: 2, breakable: true })
+ *
+ * to case:
+ * $gamePlayer.initChase(character)
+ * set character to who it should chase
+ *
+ * examples:
+ * $gameMap.event(1).initChase($gamePlayer)
  * ============================================================================
  * ## How to use
  * ============================================================================
