@@ -3,13 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QPlus = '1.2.0';
+Imported.QPlus = '1.1.2';
 
 //=============================================================================
  /*:
  * @plugindesc <QPlus> (Should go above all Q Plugins)
  * Some small changes to MV for easier plugin development.
- * @author Quxios  | Version 1.2.0
+ * @author Quxios  | Version 1.1.2
  *
  * @param Quick Test
  * @desc Enable quick testing.

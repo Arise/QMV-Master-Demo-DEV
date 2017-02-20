@@ -265,7 +265,7 @@ if (!Imported.QPlus) {
   //-----------------------------------------------------------------------------
   // Game_Player
 
-  if (Imported.QInput) {
+  if (Imported.QInput && QPlus.versionCheck(Imported.QInput, '2.1.0')) {
     Game_Player.prototype.realMoveSpeed = function() {
       var spd = Game_Character.prototype.realMoveSpeed.call(this);
       if (Input.preferGamepad()) {
@@ -277,5 +277,4 @@ if (!Imported.QPlus) {
       return spd;
     };
   }
-
-})()
+})();
