@@ -29,6 +29,15 @@ if (!Imported.QPlus) {
  * a character to reach new speeds.   Default: 30
  * @default 30
  *
+ * @param ===========
+ * @desc spacer
+ * @default
+ *
+ * @param Dash Inc
+ * @desc Set this to value thats added to the characters speed when dashing
+ * Default: 1          (can be a decimal)
+ * @default 1
+ *
  * @help
  * ============================================================================
  * ## About
@@ -157,6 +166,7 @@ if (!Imported.QPlus) {
   var _accel = _params['Acceleration'] === 'true';
   var _defaultDur = Number(_params['Duration']) || 1;
   if (_defaultDur < 1) _defaultDur = 1;
+  var _dash = Number(_params['Dash Inc']) || 1;
 
   //-----------------------------------------------------------------------------
   // Game_Interpreter
@@ -232,10 +242,10 @@ if (!Imported.QPlus) {
     }
     var isDashing = this.isDashing();
     if (!this._wasDashing && isDashing) {
-      this.setMoveSpeed(this._moveSpeed + 1);
+      this.setMoveSpeed(this._moveSpeed + _dash);
     }
     if (this._wasDashing && !isDashing) {
-      this.setMoveSpeed(this._moveSpeed - 1);
+      this.setMoveSpeed(this._moveSpeed - _dash);
     }
     this._wasDashing = isDashing;
   };

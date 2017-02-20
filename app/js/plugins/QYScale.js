@@ -32,7 +32,7 @@ if (!Imported.QPlus) {
  * **Map Notetag**
  * ----------------------------------------------------------------------------
  * ~~~
- *   <scale:min, max, factor, origin, default>
+ *   <scale:min, max>
  * ~~~
  * ============================================================================
  * ## Links
@@ -66,14 +66,10 @@ if (!Imported.QPlus) {
     if (this._hasYScale === null) {
       var meta = $dataMap.meta.scale;
       if (meta) {
-        // min, max, multiplier, origin, default
         var settings = meta.split(',').map(Number);
         this._hasYScale = {
           min: settings[0] || 1,
-          max: settings[1] || 1,
-          multi: settings[2] || 1,
-          origin: settings[3] || 0,
-          base: settings[4] || 1
+          max: settings[1] || 1
         }
       } else {
         this._hasYScale = false;
@@ -106,13 +102,10 @@ if (!Imported.QPlus) {
     var settings = $gameMap.hasYScale();
     var min = settings.min;
     var max = settings.max;
-    var multi = settings.multi;
-    var origin = settings.origin;
-    var base = settings.base;
     var yMax = $gameMap.height() - 1;
     var ds = max - min;
-    var dy = (yMax - this._realY) / yMax;
-    this._yScale = max - dy * ds;
+    var ry = (yMax - this._realY) / yMax;
+    this._yScale = max - ry * ds;
     if (Imported.QMovement) {
       var colliders = this._colliders;
       for (var type in colliders) {
