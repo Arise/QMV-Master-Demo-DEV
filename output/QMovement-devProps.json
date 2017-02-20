@@ -39,13 +39,15 @@
       "prototype - angularSpeed - undefined",
       "prototype - canMove - undefined",
       "prototype - canPass - x, y, dir",
-      "prototype - canPixelPass - x, y, dir, dist",
+      "prototype - canPixelPass - x, y, dir, dist, type",
       "override - prototype - canPassDiagonally - x, y, horz, vert",
-      "prototype - canPixelPassDiagonally - x, y, horz, vert, dist",
-      "prototype - collisionCheck - x, y, dir, dist",
-      "prototype - collideWithTile - undefined",
-      "prototype - collideWithCharacter - undefined",
-      "prototype - valid - undefined",
+      "prototype - canPixelPassDiagonally - x, y, horz, vert, dist, type",
+      "prototype - collisionCheck - x, y, dir, dist, type",
+      "prototype - middlePass - x, y, dir, dist, type",
+      "prototype - collideWithTile - type",
+      "prototype - collideWithCharacter - type",
+      "prototype - ignoreCharacters - type",
+      "prototype - valid - type",
       "prototype - passableColors - undefined",
       "override - prototype - checkEventTriggerTouchFront - d",
       "override - prototype - isOnLadder - undefined",
@@ -62,12 +64,12 @@
       "prototype - pixelJumpForward - dist, dir",
       "prototype - pixelJumpBackward - dist",
       "prototype - pixelJumpFixed - dir, dist",
-      "override - prototype - moveStraight - d",
+      "prototype - moveStraight - d, dist",
       "override - prototype - moveDiagonally - horz, vert",
+      "prototype - moveRadian - radian, dist",
       "prototype - fixedMove - dir, dist",
       "prototype - fixedDiagMove - horz, vert, dist",
       "prototype - fixedMoveBackward - dist",
-      "prototype - slideTo - x, y",
       "prototype - arc - pivotX, pivotY, radians, cc, frames",
       "prototype - smartMove - undefined",
       "prototype - smartMoveDir8 - dir",
@@ -75,6 +77,7 @@
       "prototype - reloadColliders - undefined",
       "prototype - collider - type",
       "prototype - setupColliders - undefined",
+      "prototype - makeCollider - name, settings",
       "prototype - makeBounds - undefined",
       "prototype - moveColliders - x, y",
       "prototype - cx - undefined",
@@ -89,7 +92,8 @@
       "prototype - subQMove - settings",
       "prototype - deltaPXFrom - x",
       "prototype - deltaPYFrom - y",
-      "prototype - pixelDistanceFrom - x, y"
+      "prototype - pixelDistanceFrom - x, y",
+      "prototype - startPathFind - x, y"
     ],
     "Game_Player": [
       "prototype - smartMove - undefined",
@@ -97,17 +101,21 @@
       "prototype - moveInputHorizontal - dir",
       "prototype - moveInputVertical - dir",
       "prototype - moveInputDiagonal - dir",
+      "prototype - moveWithAnalog - undefined",
       "override - prototype - update - sceneActive",
       "override - prototype - updateNonmoving - wasMoving",
       "override - prototype - startMapEvent - x, y, triggers, normal",
       "override - prototype - checkEventTriggerHere - triggers",
       "prototype - checkEventTriggerThere - triggers, x2, y2",
-      "prototype - checkCounter - triggers, x2, y2"
+      "prototype - checkCounter - triggers, x2, y2",
+      "prototype - moveStraight - d, dist",
+      "override - prototype - moveDiagonally - horz, vert"
     ],
     "Game_Event": [
       "alias - prototype - setupPageSettings - undefined",
       "override - prototype - updateStop - undefined",
-      "override - prototype - updateSelfMovement - undefined"
+      "override - prototype - updateSelfMovement - undefined",
+      "override - prototype - checkEventTriggerTouch - x, y"
     ],
     "Scene_Map": [
       "alias - prototype - updateMain - undefined"
