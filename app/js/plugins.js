@@ -22,5 +22,5 @@ var $plugins =
 {"name":"QMap","status":true,"description":"<QMap>\r\ndesc","parameters":{"":""}},
 {"name":"========================","status":false,"description":"","parameters":{}},
 {"name":"QImport","status":true,"description":"<QImport>\r\ndesc","parameters":{"":""}},
-{"name":"QPathfind","status":true,"description":"<QPathfind>\r\ndesc","parameters":{"":""}}
+{"name":"QPathfind","status":true,"description":"<QPathfind>\r\nA* Pathfinding algorithm","parameters":{"Diagonals":"false","Intervals":"100","Smart Wait":"60","=============":"","Half Opt":"true"}}
 ];
