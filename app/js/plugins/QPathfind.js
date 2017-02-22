@@ -164,6 +164,16 @@ function QPathfind() {
 
   //-----------------------------------------------------------------------------
   // QPathfind
+  // Life Cycle:
+  // Game_Character.initPathfind >
+  // QPathfind.initialize > QPathfind.initMembers > Qpathfind.beforeStart
+  // QPathfind.update > QPathfind.aStar
+  // if path found:
+  //   QPathfind.onComplete > Game_Character.startPathfind
+  //   when character completes route:
+  //     Game_Character.onPathfindComplete
+  // if path wasn't found
+  //   QPathfind.onFail > Game_Character.clearPathfind
 
   QPathfind.prototype.initialize = function(charaId, endPoint, options) {
     this.initMembers(charaId, endPoint, options);
@@ -658,7 +668,7 @@ function QPathfind() {
     }
     options = options || {};
     this._pathfind = new QPathfind(this.charaId(), new Point(x, y), options);
-    this._isChasing = options.chase !== undefined ? options.chase : false;
+    this._isChasing = options.chase !== null ? options.chase : false;
   };
 
   Game_Character.prototype.initChase = function(charaId) {
