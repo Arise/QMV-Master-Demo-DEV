@@ -161,11 +161,11 @@
   };
 
   Game_Map.prototype.adjustPX = function(x) {
-    return this.adjustX(x / QuasiMovement.tileSize) * QMovement.tileSize;
+    return this.adjustX(x / QMovement.tileSize) * QMovement.tileSize;
   };
 
   Game_Map.prototype.adjustPY = function(y) {
-    return this.adjustY(y / QuasiMovement.tileSize) * QMovement.tileSize;
+    return this.adjustY(y / QMovement.tileSize) * QMovement.tileSize;
   };
 
   Game_Map.prototype.roundPX = function(x) {

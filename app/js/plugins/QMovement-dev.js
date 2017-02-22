@@ -2,18 +2,16 @@
   QMovement/Header.js
   QMovement/Colliders.js
   QMovement/Collider_Manager.js
-  QMovement/Game_Interpreter.js
+  QMovement/Game_Temp.js
   QMovement/Game_Map.js
   QMovement/Game_CharacterBase.js
   QMovement/Game_Character.js
   QMovement/Game_Player.js
   QMovement/Game_Event.js
-  QMovement/Game_Follower.js
   QMovement/Scene_Map.js
   QMovement/Sprite_Collider.js
-  QMovement/Sprite_Character.js
+  Qmovement/Sprite_Destination.js
   QMovement/Spriteset_Map.js
-  QMovement/Bitmap.js
   > QMovement.js
 */
 //=============================================================================
@@ -65,6 +63,11 @@ if (!Imported.QPlus) {
  * @desc An extra collision check for the midpoint of the Movement.
  * Set to true to enable, false to disable
  * @default false
+ *
+ * @param Move on click
+ * @desc Set if player moves with mouse click
+ * * Requires QPathfind to work
+ * @default true
  *
  * @param Diagonal
  * @desc Allow for diagonal movement?

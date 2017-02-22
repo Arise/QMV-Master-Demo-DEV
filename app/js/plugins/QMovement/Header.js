@@ -13,6 +13,7 @@ function QMovement() {
   QMovement.offGrid = _params['Off Grid'] === 'true';
   QMovement.smartMove = Number(_params['Smart Move']);
   QMovement.midPass = _params['Mid Pass'] === 'true';
+  QMovement.moveOnClick = _params['Move on click'] === 'true';
   QMovement.diagonal = _params['Diagonal'] === 'true';
   QMovement.collision = '#FF0000'; // will be changable in a separate addon
   QMovement.water1 = '#00FF00'; // will be changable in a separate addon

@@ -2,8 +2,32 @@
 // Game_Player
 
 (function() {
+  var Alias_Game_Player_initMembers = Game_Player.prototype.initMembers;
+  Game_Player.prototype.initMembers = function() {
+    Alias_Game_Player_initMembers.call(this);
+    this._requestMouseMove = false;
+    this._movingWithMouse = false;
+  };
+
   Game_Player.prototype.smartMove = function() {
     return QMovement.smartMove;
+  };
+
+  Game_Player.prototype.requestMouseMove = function() {
+    this._requestMouseMove = true;
+  };
+
+  Game_Player.prototype.moveByMouse = function(x, y) {
+    $gameTemp.setPixelDestination(x, y);
+    this._requestMouseMove = false;
+    this._movingWithMouse = true;
+    // alias with pathfinding addon
+  };
+
+  Game_Player.prototype.clearMouseMove = function() {
+    this._requestMouseMove = false;
+    this._movingWithMouse = false;
+    $gameTemp.clearDestination();
   };
 
   Game_Player.prototype.moveByInput = function() {
@@ -11,16 +35,15 @@
       if (this.triggerAction()) return;
       var direction = QMovement.diagonal ? Input.dir8 : Input.dir4;
       if (direction > 0) {
-        $gameTemp.clearDestination();
-        this._pathFind = null;
-      } else if ($gameTemp.isDestinationValid()) {
+        this.clearMouseMove();
+      } else if ($gameTemp.isDestinationValid() && this._requestMouseMove) {
         if (!QMovement.moveOnClick) {
           $gameTemp.clearDestination();
           return;
         }
         var x = $gameTemp.destinationPX();
         var y = $gameTemp.destinationPY();
-        if (!this._pathFind) return this.startPathFind(x, y);
+        return this.moveByMouse(x, y);
       }
       if (Imported.QInput && Input.preferGamepad() && QMovement.offGrid) {
         this.moveWithAnalog();
@@ -91,7 +114,7 @@
           this.updateEncounterCount();
           this._freqCount = 0;
         }
-      } else if (!this.isMoving()) {
+      } else if (!this.isMoving() && !this._movingWithMouse) {
         $gameTemp.clearDestination();
       }
     }

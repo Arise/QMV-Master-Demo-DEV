@@ -138,7 +138,8 @@
   };
 
   Game_CharacterBase.prototype.canPixelPassDiagonally = function(x, y, horz, vert, dist, type) {
-    var dist = dist || this.moveTiles();
+    dist = dist || this.moveTiles();
+    type = type || 'collision';
     var x1 = $gameMap.roundPXWithDirection(x, horz, dist);
     var y1 = $gameMap.roundPYWithDirection(y, vert, dist);
     return (this.canPixelPass(x, y, vert, dist, type) && this.canPixelPass(x, y1, horz, dist, type)) ||
@@ -302,8 +303,8 @@
     var xSpeed = 1;
     var ySpeed = 1;
     if (this._adjustFrameSpeed) {
-      xSpeed = Math.round(Math.cos(this._radian) * 10000) / 10000;
-      ySpeed = Math.round(Math.sin(this._radian) * 10000) / 10000;
+      xSpeed = Math.cos(this._radian);
+      ySpeed = Math.sin(this._radian);
     }
     if (this._px < this._realPX) {
       this._realPX = Math.max(this._realPX - this.frameSpeed(xSpeed), this._px);
@@ -405,7 +406,7 @@
     dist = dist || this.moveTiles();
     this.setMovementSuccess(this.canPixelPass(this.px, this.py, d, dist));
     var originalSpeed = this._moveSpeed;
-    if (this.smartMove() > 0) this.smartMoveSpeed(d);
+    if (this.smartMove() === 1 || this.smartMove() > 2) this.smartMoveSpeed(d, dist);
     if (this.isMovementSucceeded()) {
       this._diagonal = false;
       this._adjustFrameSpeed = false;
@@ -426,10 +427,11 @@
     }
   };
 
-  Game_CharacterBase.prototype.moveDiagonally = function(horz, vert) {
-    this.setMovementSuccess(this.canPixelPassDiagonally(this.px, this.py, horz, vert));
+  Game_CharacterBase.prototype.moveDiagonally = function(horz, vert, dist) {
+    dist = dist || this.moveTiles();
+    this.setMovementSuccess(this.canPixelPassDiagonally(this.px, this.py, horz, vert, dist));
     var originalSpeed = this._moveSpeed;
-    if (this.smartMove() > 0) this.smartMoveSpeed([horz, vert], true);
+    if (this.smartMove() === 1 || this.smartMove() > 2) this.smartMoveSpeed([horz, vert], dist);
     if (this.isMovementSucceeded()) {
       this._diagonal = this.direction8(horz, vert);
       this._adjustFrameSpeed = false;
@@ -644,13 +646,16 @@
     }
   };
 
-  Game_CharacterBase.prototype.smartMoveSpeed = function(dir, diag) {
+  Game_CharacterBase.prototype.smartMoveSpeed = function(dir, dist) {
+    var diag = dir.constructor === Array;
     while (!this.isMovementSucceeded()) {
+      // should improve by figuring out what 1 pixel is in terms of movespeed
+      // and subtract by that value instead
       this._moveSpeed--;
       if (diag) {
-        this.setMovementSuccess(this.canPixelPassDiagonally(this.px, this.py, dir[0], dir[1]));
+        this.setMovementSuccess(this.canPixelPassDiagonally(this.px, this.py, dir[0], dir[1], dist));
       } else {
-        this.setMovementSuccess(this.canPixelPass(this.px, this.py, dir));
+        this.setMovementSuccess(this.canPixelPass(this.px, this.py, dir, dist));
       }
       if (this._moveSpeed < 1) break;
     }

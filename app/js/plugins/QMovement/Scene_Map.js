@@ -13,4 +13,24 @@
     }
     ColliderManager.update();
   };
+
+  Scene_Map.prototype.processMapTouch = function() {
+    if ((TouchInput.isTriggered() || TouchInput.isPressed()) && $gamePlayer.canClick()) {
+      if (this._touchCount % 10 === 0) {
+        var x = $gameMap.canvasToMapPX(TouchInput.x);
+        var y = $gameMap.canvasToMapPY(TouchInput.y);
+        if (!QMovement.offGrid) {
+          var ox  = x % QMovement.tileSize;
+          var oy  = y % QMovement.tileSize;
+          x += QMovement.tileSize / 2 - ox;
+          y += QMovement.tileSize / 2 - oy;
+        }
+        $gameTemp.setPixelDestination(x, y);
+        $gamePlayer.requestMouseMove();
+      }
+      this._touchCount++;
+    } else {
+      this._touchCount = 0;
+    }
+  };
 })();
