@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QPathfind = '0.1.0';
+Imported.QPathfind = '1.0.0';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QPathfind requires QPlus to work.';
@@ -14,8 +14,8 @@ if (!Imported.QPlus) {
 //=============================================================================
  /*:
  * @plugindesc <QPathfind>
- * desc
- * @author Quxios  | Version 0.1.0
+ * A* Pathfinding algorithm
+ * @author Quxios  | Version 1.0.0
  *
  * @requires QPlus
  *
@@ -29,41 +29,69 @@ if (!Imported.QPlus) {
  * ============================================================================
  * ## About
  * ============================================================================
- * TODO
- * - plugin commands
- * - pathfind on mouse click (qmovement only)
- * - clear pathfind and chase on page change / erase
- * - make sample map
- * - add plugin parameters
- * - help info
- *
- * script calls:
- * $gamePlayer.initPathfind(x, y, options);
- * x/y - grid x/y, or pixel x/y if using qMovement
- * options - optional object with the following props:
- *   smart - set to an int; 0, 1 or 2
- *   breakable - for player only, if player tries to move will break pathfind if
- *               this is true
- *
- * examples:
- * $gamePlayer.initPathfind(1, 1)
- *
- * $gamePlayer.initPathfind(1, 1, { smart: 2, breakable: true })
- *
- * to case:
- * $gamePlayer.initChase(character)
- * set character to who it should chase
- *
- * examples:
- * $gameMap.event(1).initChase($gamePlayer)
+ * This plugin will calculate a path for a character to take to reach a target
+ * position. You can also use this plugin to make a character chase a target.
  * ============================================================================
  * ## How to use
  * ============================================================================
+ * **Pathfind**
+ * ----------------------------------------------------------------------------
+ * To start a pathfind, you need to use a plugin command:
+ * ~~~
+ *  qPathfind [CHARAID] [list of options]
+ * ~~~
+ * CHARAID - The character identifier.
+ *
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID or eventEVENTID (replace EVENTID with a number)
+ *
+ * Possible options:
+ *  - xX     - where X is the x position in grid terms
+ *  - yY     - where Y is the y position in grid terms
+ *  - pxX    - where X is the x position in pixel terms (QMovement only)
+ *  - pyY    - where Y is the y position in pixel terms (QMovement only)
+ *  - smartX - where X is 1 or 2.
+ *   When 1, pathfind will recalculate when its path is blocked
+ *   When 2, pathfind will also recalucate at a set interval
+ *  - wait   - the event that called this will wait until the pathfind is complete
  *
  * ----------------------------------------------------------------------------
- * **Sub section**
+ * **Chase**
  * ----------------------------------------------------------------------------
+ * To start a chase, use the plugin command:
+ * ~~~
+ *  qPathfind [CHARAID] chase [TARGETCHARAID]
+ * ~~~
+ * CHARAID - The character identifier.
  *
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID or eventEVENTID (replace EVENTID with a number)
+ *
+ * TARGETCHARAID - The CharaID of who you want the CHARAID to chase
+ * ----------------------------------------------------------------------------
+ * **Examples**
+ * ----------------------------------------------------------------------------
+ * Make the player pathfind to 5, 1. With no smart
+ * ~~~
+ *  qPathfind 0 x5 y1
+ *  qPathfind p x5 y1
+ *  qPathfind player x5 y1
+ * ~~~
+ * (Note: All 3 are the same, just using a different character id method)
+ *
+ * Make the player pathfind to 2, 4. With smart 1
+ * ~~~
+ *  qPathfind 0 x2 y4 smart1
+ *  qPathfind p x2 y4 smart1
+ *  qPathfind player x2 y4 smart1
+ * ~~~
+ *
+ * Make the event 1 chase player
+ * ~~~
+ *  qPathfind 1 chase 0
+ *  qPathfind e1 chase p
+ *  qPathfind event1 chase player1
+ * ~~~
  * ============================================================================
  * ## Links
  * ============================================================================
@@ -75,7 +103,7 @@ if (!Imported.QPlus) {
  *
  *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
- * @tags
+ * @tags pathfind, chase, character, map
  */
 //=============================================================================
 
@@ -90,6 +118,7 @@ function QPathfind() {
 (function() {
   var _diagonals = !true;
   var _halfOpt = true;
+  var _intervals = 1000;
   var _defaultOptions = {
     smart: 0,
     chase: null,
@@ -137,33 +166,19 @@ function QPathfind() {
     if (this.options.smart > 1) {
       this._smartTime = 90 + Math.randomIntBetween(0, 30);
     }
+    this._intervals = _intervals;
   };
 
   QPathfind.prototype.beforeStart = function() {
-    // test if end point is valid, if not send fail
+    // TODO test if end point is valid, if not send fail
     //console.time('Pathfind');
   };
 
   QPathfind.prototype.update = function() {
     if (this._completed && this.options.smart > 1) {
-      this._tick++;
-      var ot = 0;
-      if (this.options.chase) {
-        var chasing = QPlus.getCharacter(this.options.chase);
-        var p1 = new Point(chasing.x, chasing.y);
-        var p2 = new Point(this.character().x, this.character().y);
-        var dist = this.heuristic(p1, p2);
-        var range = 5;
-        if (dist > range) {
-          ot = 600;
-        }
-      }
-      if (this._tick > this._smartTime + ot) {
-        return this.character().restartPathfind();
-      }
+      this.updateSmart();
     } else if (!this._completed) {
-      var intervals = 1000;
-      for (var i = 0; i < intervals; i++) {
+      for (var i = 0; i < this._intervals; i++) {
         this.aStar();
         this._steps++;
         if (this._completed) {
@@ -173,6 +188,34 @@ function QPathfind() {
           break;
         }
       }
+    }
+  };
+
+  QPathfind.prototype.updateSmart = function() {
+    this._tick++;
+    var ot = 0;
+    if (this.options.chase !== null) {
+      var chasing = QPlus.getCharacter(this.options.chase);
+      var p1 = new Point(chasing.x, chasing.y);
+      var p2 = new Point(this.character().x, this.character().y);
+      var dist = this.heuristic(p1, p2);
+      var range = 5;
+      if (dist > range) {
+        ot = 600;
+      }
+      // If endpoint hasn't changed, no need to recalc
+      if (Imported.QMovement) {
+        if (this._endNode.x === chasing.px && this._endNode.y === chasing.py) {
+          return;
+        }
+      } else {
+        if (this._endNode.x === chasing.x && this._endNode.y === chasing.y) {
+          return;
+        }
+      }
+    }
+    if (this._tick > this._smartTime + ot) {
+      return this.character().restartPathfind();
     }
   };
 
@@ -389,7 +432,7 @@ function QPathfind() {
       }
       var command = {};
       if (Imported.QMovement) {
-        // TODO route isn't correct
+        // TODO not sure if route is correct
         /*
         var radian = Math.atan2(sy, -sx);
         radian += radian < 0 ? 2 * Math.PI : 0;
@@ -412,10 +455,69 @@ function QPathfind() {
     return route;
   };
 
-  if (Imported.QMovement) {
-    //-----------------------------------------------------------------------------
-    // Game_CharacterBase
+  //-----------------------------------------------------------------------------
+  // Game_Interpreter
 
+  var Alias_Game_Interpreter_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
+  Game_Interpreter.prototype.updateWaitMode = function() {
+    var waiting = false
+    if (this._waitMode === 'pathfind') {
+      waiting = this._character._pathfind || this._character._isPathfinding;
+      if (!waiting) {
+        this._waitMode = '';
+      }
+    }
+    return waiting || Alias_Game_Interpreter_updateWaitMode.call(this);
+  };
+
+  var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+  Game_Interpreter.prototype.pluginCommand = function(command, args) {
+    if (command.toLowerCase() === 'qpathfind') {
+      this.qPathfindCommand(args);
+      return;
+    }
+    Alias_Game_Interpreter_pluginCommand.call(this, command, args);
+  };
+
+  Game_Interpreter.prototype.qPathfindCommand = function(args) {
+    // qPathfind CHARAID X Y
+    // qPathfind CHARAID chase CHARAID2
+    var chara = QPlus.getCharacter(args[0]);
+    if (!chara) return;
+    var args2 = args.slice(1);
+    if (args2[0].toLowerCase() === 'chase') {
+      chara.initChase(args2[1])
+      return;
+    }
+    var x = QPlus.getArg(args2, /^x(\d+)/i);
+    var y = QPlus.getArg(args2, /^y(\d+)/i);
+    if (Imported.QMovement) {
+      if (x === null) {
+        x = QPlus.getArg(args2, /^px(\d+)/i);
+      } else {
+        x = Number(x) * QMovement.tileSize;
+      }
+      if (y === null) {
+        y = QPlus.getArg(args2, /^py(\d+)/i);
+      } else {
+        y = Number(y) * QMovement.tileSize;
+      }
+    }
+    if (x === null && y === null) return;
+    chara.initPathfind(Number(x), Number(y), {
+      smart: Number(QPlus.getArg(args2, /^smart(\d+)/i))
+    })
+    var wait = QPlus.getArg(args2, /^wait$/i);
+    if (wait) {
+      this._character = chara;
+      this.setWaitMode('pathfind');
+    }
+  };
+
+  //-----------------------------------------------------------------------------
+  // Game_CharacterBase
+
+  if (Imported.QMovement) {
     Game_CharacterBase.prototype.optTiles = function() {
       if (!QMovement.offGrid) {
         return this.moveTiles();
@@ -474,7 +576,7 @@ function QPathfind() {
         if (!ignores['_pathfind']) ignores['_pathfind'] = [];
         ignores['_pathfind'].push(this._isChasing.charaId());
       }
-      return ignores[type] || ignores || [];
+      return ignores[type] || [];
     };
   }
 
@@ -487,11 +589,11 @@ function QPathfind() {
     this._pathfind = new QPathfind(this.charaId(), new Point(x, y), options);
   };
 
-  Game_Character.prototype.initChase = function(chara) {
-    if (!chara || this === chara) return;
+  Game_Character.prototype.initChase = function(charaId) {
+    if (this.charaId() === charaId) return;
     this.initPathfind(0, 0, {
       smart: 2,
-      chase: chara.charaId()
+      chase: chara
     })
     this._isChasing = chara;
   };
@@ -500,7 +602,6 @@ function QPathfind() {
     var x = this._pathfind._endNode.x;
     var y = this._pathfind._endNode.y;
     this.initPathfind(x, y, this._pathfind.options);
-    //this._pathfind = new QPathfind(this.charaId(), new Point(x, y), this._pathfind.options);
   };
 
   Game_Character.prototype.startPathfind = function(path) {
@@ -509,7 +610,7 @@ function QPathfind() {
   };
 
   Game_Character.prototype.onPathfindComplete = function() {
-    if (this._isChasing) {
+    if (this._isChasing !== false) {
       this._pathfind._smartTime /= 2;
       return;
     }
@@ -518,10 +619,11 @@ function QPathfind() {
   };
 
   Game_Character.prototype.clearPathfind = function() {
+    this._pathfind = null;
+    this._isChasing = false;
     if (this._isPathfinding) {
       this.processRouteEnd();
     }
-    this._pathfind = null;
   };
 
   var Alias_Game_Character_processRouteEnd = Game_Character.prototype.processRouteEnd;
@@ -554,23 +656,56 @@ function QPathfind() {
   //-----------------------------------------------------------------------------
   // Game_Player
 
+  if (Imported.QMovement) {
+    var Alias_Game_Player_requestMouseMove = Game_Player.prototype.requestMouseMove;
+    Game_Player.prototype.requestMouseMove = function() {
+      Alias_Game_Player_requestMouseMove.call(this);
+      if (this._isPathfinding) {
+        this._isPathfinding = false;
+        this.processRouteEnd();
+      }
+      this._pathfind = null;
+    };
 
+    var Alias_Game_Player_moveByMouse = Game_Player.prototype.moveByMouse;
+    Game_Player.prototype.moveByMouse = function(x, y) {
+      var half = QMovement.tileSize / 2;
+      this.initPathfind(x - half, y - half, {
+        smart: 2,
+        breakable: true
+      })
+      Alias_Game_Player_moveByMouse.call(this, x, y);
+    };
+
+    var Alias_Game_Player_clearMouseMove = Game_Player.prototype.clearMouseMove;
+    Game_Player.prototype.clearMouseMove = function() {
+      Alias_Game_Player_clearMouseMove.call(this);
+      this.clearPathfind();
+    };
+
+    Game_Player.prototype._clearPathfind = function() {
+      Game_Character.prototype.clearPathfind.call(this);
+      if (this._movingWithMouse) {
+        this.clearMouseMove();
+      }
+    };
+
+    Game_Player.prototype.onPathfindComplete = function() {
+      Game_Character.prototype.onPathfindComplete.call(this);
+      if (this._movingWithMouse) {
+        this.clearMouseMove();
+      }
+    };
+  }
 
   //-----------------------------------------------------------------------------
-  // Game_Interpreter
+  // Game_Event
 
-  var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-  Game_Interpreter.prototype.pluginCommand = function(command, args) {
-    if (command.toLowerCase() === 'qplugin') {
-      this.qPluginCommand(args);
-      return;
+  var Alias_Game_Event_setupPage = Game_Event.prototype.setupPage;
+  Game_Event.prototype.setupPage = function() {
+    if (this._isChasing) {
+      this.clearPathfind();
     }
-    Alias_Game_Interpreter_pluginCommand.call(this, command, args);
-  };
-
-  Game_Interpreter.prototype.qPluginCommand = function(args) {
-    //var args2 = args.slice(2);
-    //QPlus.getCharacter(args[0]);
-    //QPlus.getArg(args2, /lock/i)
+    Alias_Game_Event_setupPage.call(this);
   };
 })()
