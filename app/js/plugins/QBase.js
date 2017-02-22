@@ -79,6 +79,8 @@ function NewClass() {
 // QName
 
 (function() {
+  var _params = QPlus.getParams('<QName>');
+
   //-----------------------------------------------------------------------------
   // Game_Interpreter
 

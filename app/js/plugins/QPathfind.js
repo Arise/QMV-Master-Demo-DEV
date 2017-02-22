@@ -9,6 +9,10 @@ if (!Imported.QPlus) {
   var msg = 'Error: QPathfind requires QPlus to work.';
   alert(msg);
   throw new Error(msg);
+} else if (!QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
+  var msg = 'Error: QName requires QPlus 1.1.3 or newer to work.';
+  alert(msg);
+  throw new Error(msg);
 }
 
 //=============================================================================
@@ -19,9 +23,29 @@ if (!Imported.QPlus) {
  *
  * @requires QPlus
  *
- * @param
- * @desc
+ * @param Diagonals
+ * @desc Set to true to enable diagonals in the route
+ * Set to false to disable diagonals
+ * @default false
+ *
+ * @param Intervals
+ * @desc Set to the number of calculations per frame
+ * Higher value will calculate faster but can lower frames
+ * @default 100
+ *
+ * @param Smart Wait
+ * @desc How long should the pathfind smart 2 wait until it tries again.
+ * Default: 60
+ * @default 60
+ *
+ * @param =============
+ * @desc Spacer
  * @default
+ *
+ * @param Half Opt
+ * @desc (Only for QMovement) Uses half the value from Optimize Move Tiles.
+ * Slightly increases pathfinding accuracy.
+ * @default true
  *
  * @video
  *
@@ -86,6 +110,13 @@ if (!Imported.QPlus) {
  *  qPathfind player x2 y4 smart1
  * ~~~
  *
+ * Make the event 1 pathfind to 2, 4. With a wait
+ * ~~~
+ *  qPathfind 1 x2 y4 wait
+ *  qPathfind e1 x2 y4 wait
+ *  qPathfind event1 x2 y4 wait
+ * ~~~
+ *
  * Make the event 1 chase player
  * ~~~
  *  qPathfind 1 chase 0
@@ -116,14 +147,23 @@ function QPathfind() {
 }
 
 (function() {
-  var _diagonals = !true;
-  var _halfOpt = true;
-  var _intervals = 1000;
+  var _params = QPlus.getParams('<QPathfind>');
+
+  var _diagonals = _params['Diagonals'] === 'true';
+  var _intervals = Number(_params['Intervals']);
+  var _smartWait = Number(_params['Smart Wait']);
+  var _halfOpt = _params['Half Opt'] === 'true';
   var _defaultOptions = {
     smart: 0,
     chase: null,
     breakable: false
   }
+  // value to use to offset smart ticker when target is far away
+  // when target is far away no need to calc as often, so we slow it down with offset
+  var _smartOT = 300;
+
+  //-----------------------------------------------------------------------------
+  // QPathfind
 
   QPathfind.prototype.initialize = function(charaId, endPoint, options) {
     this.initMembers(charaId, endPoint, options);
@@ -164,14 +204,28 @@ function QPathfind() {
     this._tick = 0;
     this._steps = 0;
     if (this.options.smart > 1) {
-      this._smartTime = 90 + Math.randomIntBetween(0, 30);
+      // TODO smart wait should probably be calculated
+      // based on how many pathfinders there are
+      // The random is to try to have pathfinders run at different frames
+      // inorder to stretch the performance on multiple frames instead of on the same frames
+      this._smartTime = _smartWait + Math.randomIntBetween(0, 10);
     }
     this._intervals = _intervals;
   };
 
   QPathfind.prototype.beforeStart = function() {
-    // TODO test if end point is valid, if not send fail
     //console.time('Pathfind');
+    var x = this._endNode.x;
+    var y = this._endNode.y;
+    var canPass = true;
+    if (Imported.QMovement) {
+      canPass = this.character().canPixelPass(x, y, 5, null, '_pathfind');
+    } else {
+      canPass = this.character().canPass(x, y, 5);
+    }
+    if (!canPass && !this.options.chase) {
+      this.onFail();
+    }
   };
 
   QPathfind.prototype.update = function() {
@@ -179,7 +233,15 @@ function QPathfind() {
       this.updateSmart();
     } else if (!this._completed) {
       for (var i = 0; i < this._intervals; i++) {
+        if (this.options.chase) {
+          var chasing = QPlus.getCharacter(this.options.chase);
+          var oldThrough = chasing._through;
+          chasing.setThrough(true);
+        }
         this.aStar();
+        if (this.options.chase) {
+          chasing.setThrough(oldThrough);
+        }
         this._steps++;
         if (this._completed) {
           break;
@@ -192,6 +254,7 @@ function QPathfind() {
   };
 
   QPathfind.prototype.updateSmart = function() {
+    // TODO try to make this even "smarter"
     this._tick++;
     var ot = 0;
     if (this.options.chase !== null) {
@@ -201,7 +264,7 @@ function QPathfind() {
       var dist = this.heuristic(p1, p2);
       var range = 5;
       if (dist > range) {
-        ot = 600;
+        ot = _smartOT;
       }
       // If endpoint hasn't changed, no need to recalc
       if (Imported.QMovement) {
@@ -278,6 +341,9 @@ function QPathfind() {
   QPathfind.prototype.onFail = function() {
     //console.timeEnd('Pathfind');
     this._completed = true;
+    if (this.options.chase !== null) {
+      return;
+    }
     this.character().clearPathfind();
   };
 
@@ -489,6 +555,10 @@ function QPathfind() {
       chara.initChase(args2[1])
       return;
     }
+    if (args2[0].toLowerCase() === 'clear') {
+      chara.clearPathfind();
+      return;
+    }
     var x = QPlus.getArg(args2, /^x(\d+)/i);
     var y = QPlus.getArg(args2, /^y(\d+)/i);
     if (Imported.QMovement) {
@@ -569,12 +639,13 @@ function QPathfind() {
   };
 
   if (Imported.QMovement) {
+    // TODO might not be needed
     var Alias_Game_CharacterBase_ignoreCharacters = Game_CharacterBase.prototype.ignoreCharacters;
     Game_CharacterBase.prototype.ignoreCharacters = function(type) {
       var ignores = Alias_Game_CharacterBase_ignoreCharacters.call(this, type);
-      if (this._isChasing) {
+      if (this._isChasing !== false) {
         if (!ignores['_pathfind']) ignores['_pathfind'] = [];
-        ignores['_pathfind'].push(this._isChasing.charaId());
+        ignores['_pathfind'].push(this._isChasing);
       }
       return ignores[type] || [];
     };
@@ -587,15 +658,17 @@ function QPathfind() {
     }
     options = options || {};
     this._pathfind = new QPathfind(this.charaId(), new Point(x, y), options);
+    this._isChasing = options.chase !== undefined ? options.chase : false;
   };
 
   Game_Character.prototype.initChase = function(charaId) {
     if (this.charaId() === charaId) return;
+    if (!QPlus.getCharacter(charaId)) return;
     this.initPathfind(0, 0, {
       smart: 2,
-      chase: chara
+      chase: charaId
     })
-    this._isChasing = chara;
+    this._isChasing = charaId;
   };
 
   Game_Character.prototype.restartPathfind = function() {
@@ -611,7 +684,7 @@ function QPathfind() {
 
   Game_Character.prototype.onPathfindComplete = function() {
     if (this._isChasing !== false) {
-      this._pathfind._smartTime /= 2;
+      this._pathfind._smartTime -= _smartOT;
       return;
     }
     this._isPathfinding = false;
@@ -703,7 +776,7 @@ function QPathfind() {
 
   var Alias_Game_Event_setupPage = Game_Event.prototype.setupPage;
   Game_Event.prototype.setupPage = function() {
-    if (this._isChasing) {
+    if (this._isChasing !== false) {
       this.clearPathfind();
     }
     Alias_Game_Event_setupPage.call(this);
