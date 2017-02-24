@@ -6,6 +6,7 @@
   Game_Event.prototype.setupPageSettings = function() {
     Alias_Game_Event_setupPageSettings.call(this);
     this.reloadColliders();
+    this._randomDir = null;
   };
 
   Game_Event.prototype.updateStop = function() {
@@ -39,6 +40,16 @@
         }
       }
     }
+  };
+
+  Game_Event.prototype.moveTypeRandom = function() {
+    if (this._freqCount === 0 || !this._randomDir) {
+      this._randomDir = 2 * (Math.randomInt(4) + 1);
+    }
+    if (!this.canPixelPass(this.px, this.py, this._randomDir)) {
+      this._randomDir = 2 * (Math.randomInt(4) + 1);
+    }
+    this.moveStraight(this._randomDir);
   };
 
   Game_Event.prototype.checkEventTriggerTouch = function(x, y) {

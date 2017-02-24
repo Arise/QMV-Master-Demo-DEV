@@ -163,6 +163,13 @@
     this._moveRoute.list.splice(this._moveRouteIndex, 1);
   };
 
+  Game_Character.prototype.moveRandom = function() {
+    var d = 2 + Math.randomInt(4) * 2;
+    if (this.canPixelPass(this.px, this.py, d)) {
+      this.moveStraight(d);
+    }
+  };
+
   Game_Character.prototype.deltaPXFrom = function(x) {
     return $gameMap.deltaPX(this.cx(), x);
   };
