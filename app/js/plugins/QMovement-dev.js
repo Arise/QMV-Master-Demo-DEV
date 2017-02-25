@@ -1,5 +1,5 @@
 /**:merge
-  QMovement/Header.js
+  QMovement/Header2.js
   QMovement/Colliders.js
   QMovement/Collider_Manager.js
   QMovement/Game_Temp.js
@@ -19,10 +19,14 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '0.2.0';
+Imported.QMovement = '1.0.0';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QMovement requires QPlus to work.';
+  alert(msg);
+  throw new Error(msg);
+} else if (!QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
+  var msg = 'Error: QName requires QPlus 1.1.3 or newer to work.';
   alert(msg);
   throw new Error(msg);
 }
@@ -30,8 +34,8 @@ if (!Imported.QPlus) {
 //=============================================================================
  /*:
  * @plugindesc <QMovement>
- * Development
- * @author Quxios  | Version 0.2.0
+ * More control over character movement
+ * @author Quxios  | Version 1.0.0
  *
  * @requires QPlus
  *
@@ -115,8 +119,6 @@ if (!Imported.QPlus) {
  *
  * Note there are a few mv features disabled/broken; mouse movement, followers,
  * and vehicles.
- *
- * --DEVELOPMENT VERSION
  * ============================================================================
  * ## How to use
  * ============================================================================
@@ -252,6 +254,6 @@ if (!Imported.QPlus) {
  *
  *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
- * @tags movement, pixel
+ * @tags movement, pixel, character
  */
 //=============================================================================
