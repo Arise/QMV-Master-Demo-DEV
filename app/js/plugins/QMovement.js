@@ -3,10 +3,14 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '0.2.0';
+Imported.QMovement = '1.0.0';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QMovement requires QPlus to work.';
+  alert(msg);
+  throw new Error(msg);
+} else if (!QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
+  var msg = 'Error: QName requires QPlus 1.1.3 or newer to work.';
   alert(msg);
   throw new Error(msg);
 }
@@ -14,8 +18,8 @@ if (!Imported.QPlus) {
 //=============================================================================
  /*:
  * @plugindesc <QMovement>
- * Development
- * @author Quxios  | Version 0.2.0
+ * More control over character movement
+ * @author Quxios  | Version 1.0.0
  *
  * @requires QPlus
  *
@@ -47,6 +51,11 @@ if (!Imported.QPlus) {
  * @desc An extra collision check for the midpoint of the Movement.
  * Set to true to enable, false to disable
  * @default false
+ *
+ * @param Move on click
+ * @desc Set if player moves with mouse click
+ * * Requires QPathfind to work
+ * @default true
  *
  * @param Diagonal
  * @desc Allow for diagonal movement?
@@ -94,8 +103,6 @@ if (!Imported.QPlus) {
  *
  * Note there are a few mv features disabled/broken; mouse movement, followers,
  * and vehicles.
- *
- * --DEVELOPMENT VERSION
  * ============================================================================
  * ## How to use
  * ============================================================================
@@ -231,9 +238,10 @@ if (!Imported.QPlus) {
  *
  *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
- * @tags movement, pixel
+ * @tags movement, pixel, character
  */
 //=============================================================================
+
 //=============================================================================
 // QMovement Static Class
 
@@ -249,6 +257,7 @@ function QMovement() {
   QMovement.offGrid = _params['Off Grid'] === 'true';
   QMovement.smartMove = Number(_params['Smart Move']);
   QMovement.midPass = _params['Mid Pass'] === 'true';
+  QMovement.moveOnClick = _params['Move on click'] === 'true';
   QMovement.diagonal = _params['Diagonal'] === 'true';
   QMovement.collision = '#FF0000'; // will be changable in a separate addon
   QMovement.water1 = '#00FF00'; // will be changable in a separate addon
@@ -981,6 +990,43 @@ function ColliderManager() {
   };
 })();
 
+//-----------------------------------------------------------------------------
+// Game_Temp
+//
+// The game object class for temporary data that is not included in save data.
+
+(function() {
+  var Alias_Game_Temp_initialize = Game_Temp.prototype.initialize;
+  Game_Temp.prototype.initialize = function() {
+    Alias_Game_Temp_initialize.call(this);
+    this._destinationPX = null;
+    this._destinationPY = null;
+  };
+
+  Game_Temp.prototype.setPixelDestination = function(x, y) {
+    this._destinationPX = x;
+    this._destinationPY = y;
+    var x1 = $gameMap.roundX(Math.floor(x / $gameMap.tileWidth()));
+    var y1 = $gameMap.roundY(Math.floor(y / $gameMap.tileHeight()));
+    this.setDestination(x1, y1);
+  };
+
+  var Alias_Game_Temp_clearDestination = Game_Temp.prototype.clearDestination;
+  Game_Temp.prototype.clearDestination = function() {
+    if ($gamePlayer._movingWithMouse) return;
+    Alias_Game_Temp_clearDestination.call(this);
+    this._destinationPX = null;
+    this._destinationPY = null;
+  };
+
+  Game_Temp.prototype.destinationPX = function() {
+    return this._destinationPX;
+  };
+
+  Game_Temp.prototype.destinationPY = function() {
+    return this._destinationPY;
+  };
+})();
 
 //-----------------------------------------------------------------------------
 // Game_Map
@@ -1145,11 +1191,11 @@ function ColliderManager() {
   };
 
   Game_Map.prototype.adjustPX = function(x) {
-    return this.adjustX(x / QuasiMovement.tileSize) * QMovement.tileSize;
+    return this.adjustX(x / QMovement.tileSize) * QMovement.tileSize;
   };
 
   Game_Map.prototype.adjustPY = function(y) {
-    return this.adjustY(y / QuasiMovement.tileSize) * QMovement.tileSize;
+    return this.adjustY(y / QMovement.tileSize) * QMovement.tileSize;
   };
 
   Game_Map.prototype.roundPX = function(x) {
@@ -1353,7 +1399,8 @@ function ColliderManager() {
   };
 
   Game_CharacterBase.prototype.canPixelPassDiagonally = function(x, y, horz, vert, dist, type) {
-    var dist = dist || this.moveTiles();
+    dist = dist || this.moveTiles();
+    type = type || 'collision';
     var x1 = $gameMap.roundPXWithDirection(x, horz, dist);
     var y1 = $gameMap.roundPYWithDirection(y, vert, dist);
     return (this.canPixelPass(x, y, vert, dist, type) && this.canPixelPass(x, y1, horz, dist, type)) ||
@@ -1517,8 +1564,8 @@ function ColliderManager() {
     var xSpeed = 1;
     var ySpeed = 1;
     if (this._adjustFrameSpeed) {
-      xSpeed = Math.round(Math.cos(this._radian) * 10000) / 10000;
-      ySpeed = Math.round(Math.sin(this._radian) * 10000) / 10000;
+      xSpeed = Math.cos(this._radian);
+      ySpeed = Math.sin(this._radian);
     }
     if (this._px < this._realPX) {
       this._realPX = Math.max(this._realPX - this.frameSpeed(xSpeed), this._px);
@@ -1620,7 +1667,7 @@ function ColliderManager() {
     dist = dist || this.moveTiles();
     this.setMovementSuccess(this.canPixelPass(this.px, this.py, d, dist));
     var originalSpeed = this._moveSpeed;
-    if (this.smartMove() > 0) this.smartMoveSpeed(d);
+    if (this.smartMove() === 1 || this.smartMove() > 2) this.smartMoveSpeed(d, dist);
     if (this.isMovementSucceeded()) {
       this._diagonal = false;
       this._adjustFrameSpeed = false;
@@ -1641,10 +1688,11 @@ function ColliderManager() {
     }
   };
 
-  Game_CharacterBase.prototype.moveDiagonally = function(horz, vert) {
-    this.setMovementSuccess(this.canPixelPassDiagonally(this.px, this.py, horz, vert));
+  Game_CharacterBase.prototype.moveDiagonally = function(horz, vert, dist) {
+    dist = dist || this.moveTiles();
+    this.setMovementSuccess(this.canPixelPassDiagonally(this.px, this.py, horz, vert, dist));
     var originalSpeed = this._moveSpeed;
-    if (this.smartMove() > 0) this.smartMoveSpeed([horz, vert], true);
+    if (this.smartMove() === 1 || this.smartMove() > 2) this.smartMoveSpeed([horz, vert], dist);
     if (this.isMovementSucceeded()) {
       this._diagonal = this.direction8(horz, vert);
       this._adjustFrameSpeed = false;
@@ -1859,13 +1907,16 @@ function ColliderManager() {
     }
   };
 
-  Game_CharacterBase.prototype.smartMoveSpeed = function(dir, diag) {
+  Game_CharacterBase.prototype.smartMoveSpeed = function(dir, dist) {
+    var diag = dir.constructor === Array;
     while (!this.isMovementSucceeded()) {
+      // should improve by figuring out what 1 pixel is in terms of movespeed
+      // and subtract by that value instead
       this._moveSpeed--;
       if (diag) {
-        this.setMovementSuccess(this.canPixelPassDiagonally(this.px, this.py, dir[0], dir[1]));
+        this.setMovementSuccess(this.canPixelPassDiagonally(this.px, this.py, dir[0], dir[1], dist));
       } else {
-        this.setMovementSuccess(this.canPixelPass(this.px, this.py, dir));
+        this.setMovementSuccess(this.canPixelPass(this.px, this.py, dir, dist));
       }
       if (this._moveSpeed < 1) break;
     }
@@ -2134,6 +2185,13 @@ function ColliderManager() {
     this._moveRoute.list.splice(this._moveRouteIndex, 1);
   };
 
+  Game_Character.prototype.moveRandom = function() {
+    var d = 2 + Math.randomInt(4) * 2;
+    if (this.canPixelPass(this.px, this.py, d)) {
+      this.moveStraight(d);
+    }
+  };
+
   Game_Character.prototype.deltaPXFrom = function(x) {
     return $gameMap.deltaPX(this.cx(), x);
   };
@@ -2145,18 +2203,38 @@ function ColliderManager() {
   Game_Character.prototype.pixelDistanceFrom = function(x, y) {
     return $gameMap.distance(this.cx(), this.cy(), x, y);
   };
-
-  Game_Character.prototype.startPathFind = function(x, y) {
-    // override in QPathfind
-  };
 })();
 
 //-----------------------------------------------------------------------------
 // Game_Player
 
 (function() {
+  var Alias_Game_Player_initMembers = Game_Player.prototype.initMembers;
+  Game_Player.prototype.initMembers = function() {
+    Alias_Game_Player_initMembers.call(this);
+    this._requestMouseMove = false;
+    this._movingWithMouse = false;
+  };
+
   Game_Player.prototype.smartMove = function() {
     return QMovement.smartMove;
+  };
+
+  Game_Player.prototype.requestMouseMove = function() {
+    this._requestMouseMove = true;
+  };
+
+  Game_Player.prototype.moveByMouse = function(x, y) {
+    $gameTemp.setPixelDestination(x, y);
+    this._requestMouseMove = false;
+    this._movingWithMouse = true;
+    // alias with pathfinding addon
+  };
+
+  Game_Player.prototype.clearMouseMove = function() {
+    this._requestMouseMove = false;
+    this._movingWithMouse = false;
+    $gameTemp.clearDestination();
   };
 
   Game_Player.prototype.moveByInput = function() {
@@ -2164,16 +2242,15 @@ function ColliderManager() {
       if (this.triggerAction()) return;
       var direction = QMovement.diagonal ? Input.dir8 : Input.dir4;
       if (direction > 0) {
-        $gameTemp.clearDestination();
-        this._pathFind = null;
-      } else if ($gameTemp.isDestinationValid()) {
+        this.clearMouseMove();
+      } else if ($gameTemp.isDestinationValid() && this._requestMouseMove) {
         if (!QMovement.moveOnClick) {
           $gameTemp.clearDestination();
           return;
         }
         var x = $gameTemp.destinationPX();
         var y = $gameTemp.destinationPY();
-        if (!this._pathFind) return this.startPathFind(x, y);
+        return this.moveByMouse(x, y);
       }
       if (Imported.QInput && Input.preferGamepad() && QMovement.offGrid) {
         this.moveWithAnalog();
@@ -2244,7 +2321,7 @@ function ColliderManager() {
           this.updateEncounterCount();
           this._freqCount = 0;
         }
-      } else if (!this.isMoving()) {
+      } else if (!this.isMoving() && !this._movingWithMouse) {
         $gameTemp.clearDestination();
       }
     }
@@ -2356,6 +2433,7 @@ function ColliderManager() {
   Game_Event.prototype.setupPageSettings = function() {
     Alias_Game_Event_setupPageSettings.call(this);
     this.reloadColliders();
+    this._randomDir = null;
   };
 
   Game_Event.prototype.updateStop = function() {
@@ -2391,6 +2469,16 @@ function ColliderManager() {
     }
   };
 
+  Game_Event.prototype.moveTypeRandom = function() {
+    if (this._freqCount === 0 || !this._randomDir) {
+      this._randomDir = 2 * (Math.randomInt(4) + 1);
+    }
+    if (!this.canPixelPass(this.px, this.py, this._randomDir)) {
+      this._randomDir = 2 * (Math.randomInt(4) + 1);
+    }
+    this.moveStraight(this._randomDir);
+  };
+
   Game_Event.prototype.checkEventTriggerTouch = function(x, y) {
     if (!$gameMap.isEventRunning()) {
       if (this._trigger === 2 && !this.isJumping() && this.isNormalPriority()) {
@@ -2415,7 +2503,6 @@ function ColliderManager() {
   };
 })();
 
-
 //-----------------------------------------------------------------------------
 // Scene_Map
 
@@ -2430,6 +2517,26 @@ function ColliderManager() {
       ColliderManager.toggle();
     }
     ColliderManager.update();
+  };
+
+  Scene_Map.prototype.processMapTouch = function() {
+    if ((TouchInput.isTriggered() || TouchInput.isPressed()) && $gamePlayer.canClick()) {
+      if (this._touchCount % 10 === 0) {
+        var x = $gameMap.canvasToMapPX(TouchInput.x);
+        var y = $gameMap.canvasToMapPY(TouchInput.y);
+        if (!QMovement.offGrid) {
+          var ox  = x % QMovement.tileSize;
+          var oy  = y % QMovement.tileSize;
+          x += QMovement.tileSize / 2 - ox;
+          y += QMovement.tileSize / 2 - oy;
+        }
+        $gameTemp.setPixelDestination(x, y);
+        $gamePlayer.requestMouseMove();
+      }
+      this._touchCount++;
+    } else {
+      this._touchCount = 0;
+    }
   };
 })();
 
@@ -2537,6 +2644,21 @@ function Sprite_Collider() {
   };
 })();
 
+//-----------------------------------------------------------------------------
+// Sprite_Destination
+//
+// The sprite for displaying the destination place of the touch input.
+
+(function() {
+  Sprite_Destination.prototype.updatePosition = function() {
+    var tileWidth = $gameMap.tileWidth();
+    var tileHeight = $gameMap.tileHeight();
+    var x = $gameTemp.destinationPX();
+    var y = $gameTemp.destinationPY();
+    this.x = $gameMap.adjustPX(x);
+    this.y = $gameMap.adjustPY(y);
+  };
+})();
 
 //-----------------------------------------------------------------------------
 // Spriteset_Map
@@ -2555,5 +2677,3 @@ function Sprite_Collider() {
     // also get collision map here
   };
 })();
-
-
