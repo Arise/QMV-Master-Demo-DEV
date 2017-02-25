@@ -33,3 +33,5 @@ app/js/rpg_windows.js
 
 # other
 .vscode
+app/data/System.json
+app/js/plugins.js
