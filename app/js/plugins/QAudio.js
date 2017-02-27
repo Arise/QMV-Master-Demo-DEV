@@ -218,11 +218,6 @@ if (!Imported.QPlus) {
         fadeIn: Number(fadein) || 0
       })
     }
-    if (cmd === 'fadeout') {
-      var id = args[1];
-      var duration = Number(args[2]) || 0;
-      AudioManager.fadeOutQAudio(id, duration);
-    }
     if (cmd === 'stop') {
       var id = args[1];
       var fadeOut = Number(QPlus.getArg(args, /^fadeout(\d+)/i));
