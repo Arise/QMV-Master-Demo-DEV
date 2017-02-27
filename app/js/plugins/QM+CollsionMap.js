@@ -9,8 +9,8 @@ if (!Imported.QMovement) {
   var msg = 'Error: QM+CollisionMap requires QMovement to work.';
   alert(msg);
   throw new Error(msg);
-} else if (!QPlus.versionCheck(Imported.QPlus, '1.0.0')) {
-  var msg = 'Error: QM+CollisionMap requires QMovement 1.0.0 or newer to work.';
+} else if (!QPlus.versionCheck(Imported.QMovement, '1.0.2')) {
+  var msg = 'Error: QM+CollisionMap requires QMovement 1.0.2 or newer to work.';
   alert(msg);
   throw new Error(msg);
 }
@@ -18,34 +18,44 @@ if (!Imported.QMovement) {
 //=============================================================================
  /*:
  * @plugindesc <QMCollisionMap>
- * desc
+ * QMovement Addon: Adds image collision map feature
  * @author Quxios  | Version 1.0.0
  *
- * @requires
- *
- * @param
- * @desc
- * @default
- *
- * @param ===========
- * @desc spacer
- * @default
+ * @requires QMovement
  *
  * @video
+ *
+ * @param Scan Size
+ * @desc How accurate to scan Collision Map, 1 is most Accurate
+ * Default: 4
+ * @default 4
+ *
+ * @param Folder
+ * @desc Which folder are collision maps located.
+ * Default: img/parallaxes/
+ * @default img/parallaxes/
  *
  * @help
  * ============================================================================
  * ## About
  * ============================================================================
- *
+ * This is an addon to QMovement plugin. This addon adds a feature that lets
+ * you use images as a collision map.
  * ============================================================================
  * ## How to use
  * ============================================================================
- *
+ * Install this plugin somewhere below QMovement. Make your collision map,
+ * White and transparent are passable areas, other colors will be impassable.
  * ----------------------------------------------------------------------------
- * **Sub section**
+ * **Note tag**
  * ----------------------------------------------------------------------------
- *
+ * To add a collision map to a map, open the map properties and add a notetag
+ * with the following format:
+ * ~~~
+ *  <cm:FILENAME>
+ * ~~~
+ * Where FILENAME is the name of the image you want to use thats located in the
+ * folder you set in the plugin parameters.
  * ============================================================================
  * ## Links
  * ============================================================================
@@ -58,21 +68,17 @@ if (!Imported.QMovement) {
  * Like my plugins? Support me on Patreon!
  *  https://www.patreon.com/quxios
  *
- * @tags
+ * @tags QM-Addon, collision
  */
 //=============================================================================
 
 //=============================================================================
 // QM CollisionMap
 
-function test() {
-
-};
-
 (function() {
   var _params = QPlus.getParams('<QMCollisionMap>');
-  var _cmFolder = 'img/parallaxes/';//_params[''];
-  var _scanSize = 4;
+  var _cmFolder = _params['Folder'];
+  var _scanSize = Number(_params['Scan Size']);
 
   //-----------------------------------------------------------------------------
   // ColliderManager
@@ -117,7 +123,8 @@ function test() {
 
   Game_Map.prototype.setupCollisionMap = function() {
     var cm = /<cm[=|:](.*?)>/i.exec($dataMap.note);
-    var rm = /<rm[=|:](.*?)>/i.exec($dataMap.note);
+    // regionmaps are disabled
+    //var rm = /<rm[=|:](.*?)>/i.exec($dataMap.note);
     this.loadCollisionmap(cm ? cm[1] : null);
   };
 
@@ -129,7 +136,6 @@ function test() {
       ColliderManager.clearCollisionMap();
       this._hasCM = false;
     }
-    // currentCM needed?
   };
 
   Game_Map.prototype.collisionMapPass = function(collider, dir, passableColors) {
@@ -333,11 +339,12 @@ function test() {
           !$gameMap.collisionMapPass(collider, 'bottom', passableColors) ||
           !$gameMap.collisionMapPass(collider, 'left', passableColors) ||
           !$gameMap.collisionMapPass(collider, 'right', passableColors) ) {
-        return false;
+        return true;
       }
     } else {
       return !$gameMap.collisionMapPass(collider, edge[dir], passableColors);
     }
+    return false;
   };
 
   //-----------------------------------------------------------------------------
@@ -363,6 +370,9 @@ function test() {
     }
     var i = (x * 4) + (y * 4 * this.width);
     var result = '#';
+    if (this._pixelData[i + 3] === 0) {
+      return '#00000000';
+    }
     for (var c = 0; c < 3; c++) {
       result += this._pixelData[i + c].toString(16).padZero(2);
     }
