@@ -120,6 +120,15 @@
     }
   };
 
+  Game_Player.prototype.updateDashing = function() {
+    if (this.startedMoving()) return;
+    if (this.canMove() && !this.isInVehicle() && !$gameMap.isDashDisabled()) {
+      this._dashing = this.isDashButtonPressed() || $gameTemp.isDestinationValid();
+    } else {
+      this._dashing = false;
+    }
+  };
+
   Game_Player.prototype.startMapEvent = function(x, y, triggers, normal) {
     if (!$gameMap.isEventRunning()) {
       var collider = this.collider('interaction');

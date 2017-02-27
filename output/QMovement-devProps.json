@@ -1,5 +1,12 @@
 {
   "existing": {
+    "Game_Temp": [
+      "alias - prototype - initialize - undefined",
+      "prototype - setPixelDestination - x, y",
+      "alias - prototype - clearDestination - undefined",
+      "prototype - destinationPX - undefined",
+      "prototype - destinationPY - undefined"
+    ],
     "Game_Map": [
       "alias - prototype - setup - mapId",
       "override - prototype - tileWidth - undefined",
@@ -65,7 +72,7 @@
       "prototype - pixelJumpBackward - dist",
       "prototype - pixelJumpFixed - dir, dist",
       "prototype - moveStraight - d, dist",
-      "override - prototype - moveDiagonally - horz, vert",
+      "prototype - moveDiagonally - horz, vert, dist",
       "prototype - moveRadian - radian, dist",
       "prototype - fixedMove - dir, dist",
       "prototype - fixedDiagMove - horz, vert, dist",
@@ -73,7 +80,7 @@
       "prototype - arc - pivotX, pivotY, radians, cc, frames",
       "prototype - smartMove - undefined",
       "prototype - smartMoveDir8 - dir",
-      "prototype - smartMoveSpeed - dir, diag",
+      "prototype - smartMoveSpeed - dir",
       "prototype - reloadColliders - undefined",
       "prototype - collider - type",
       "prototype - setupColliders - undefined",
@@ -90,13 +97,17 @@
       "prototype - processQMoveCommands - command",
       "prototype - subArc - settings",
       "prototype - subQMove - settings",
+      "override - prototype - moveRandom - undefined",
       "prototype - deltaPXFrom - x",
       "prototype - deltaPYFrom - y",
-      "prototype - pixelDistanceFrom - x, y",
-      "prototype - startPathFind - x, y"
+      "prototype - pixelDistanceFrom - x, y"
     ],
     "Game_Player": [
+      "alias - prototype - initMembers - undefined",
       "prototype - smartMove - undefined",
+      "prototype - requestMouseMove - undefined",
+      "prototype - moveByMouse - x, y",
+      "prototype - clearMouseMove - undefined",
       "override - prototype - moveByInput - undefined",
       "prototype - moveInputHorizontal - dir",
       "prototype - moveInputVertical - dir",
@@ -104,6 +115,7 @@
       "prototype - moveWithAnalog - undefined",
       "override - prototype - update - sceneActive",
       "override - prototype - updateNonmoving - wasMoving",
+      "override - prototype - updateDashing - undefined",
       "override - prototype - startMapEvent - x, y, triggers, normal",
       "override - prototype - checkEventTriggerHere - triggers",
       "prototype - checkEventTriggerThere - triggers, x2, y2",
@@ -115,10 +127,15 @@
       "alias - prototype - setupPageSettings - undefined",
       "override - prototype - updateStop - undefined",
       "override - prototype - updateSelfMovement - undefined",
+      "override - prototype - moveTypeRandom - undefined",
       "override - prototype - checkEventTriggerTouch - x, y"
     ],
     "Scene_Map": [
-      "alias - prototype - updateMain - undefined"
+      "alias - prototype - updateMain - undefined",
+      "override - prototype - processMapTouch - undefined"
+    ],
+    "Sprite_Destination": [
+      "override - prototype - updatePosition - undefined"
     ],
     "Spriteset_Map": [
       "alias - prototype - createLowerLayer - undefined",

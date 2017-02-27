@@ -1,7 +1,7 @@
 /**:merge
   QMovement/Header2.js
   QMovement/Colliders.js
-  QMovement/Collider_Manager.js
+  QMovement/ColliderManager.js
   QMovement/Game_Temp.js
   QMovement/Game_Map.js
   QMovement/Game_CharacterBase.js
@@ -19,7 +19,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.0.0';
+Imported.QMovement = '1.0.1';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QMovement requires QPlus to work.';
@@ -35,7 +35,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.0.0
+ * @author Quxios  | Version 1.0.1
  *
  * @requires QPlus
  *
@@ -247,12 +247,13 @@ if (!Imported.QPlus) {
  * ## Links
  * ============================================================================
  * RPGMakerWebs:
- *
- *   http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
+ *  http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
  *
  * Terms of use:
+ *  https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
- *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ * Like my plugins? Support me on Patreon!
+ *  https://www.patreon.com/quxios
  *
  * @tags movement, pixel, character
  */
