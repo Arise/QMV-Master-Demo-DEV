@@ -1,19 +1,3 @@
-/**:merge
-  QMovement/Header2.js
-  QMovement/Colliders.js
-  QMovement/ColliderManager.js
-  QMovement/Game_Temp.js
-  QMovement/Game_Map.js
-  QMovement/Game_CharacterBase.js
-  QMovement/Game_Character.js
-  QMovement/Game_Player.js
-  QMovement/Game_Event.js
-  QMovement/Scene_Map.js
-  QMovement/Sprite_Collider.js
-  Qmovement/Sprite_Destination.js
-  QMovement/Spriteset_Map.js
-  > QMovement.js
-*/
 //=============================================================================
 // QMovement
 //=============================================================================

@@ -131,7 +131,8 @@
     return this.canPixelPassDiagonally(x * QMovement.tileSize, y * QMovement.tileSize, horz, vert);
   };
 
-  Game_CharacterBase.prototype.canPixelPassDiagonally = function(x, y, horz, vert, dist, type) {
+  // old version, keeping incase issues appear with new one
+  Game_CharacterBase.prototype._canPixelPassDiagonally = function(x, y, horz, vert, dist, type) {
     dist = dist || this.moveTiles();
     type = type || 'collision';
     var x1 = $gameMap.roundPXWithDirection(x, horz, dist);
@@ -140,11 +141,26 @@
            (this.canPixelPass(x, y, horz, dist, type) && this.canPixelPass(x1, y, vert, dist, type));
   };
 
+  // new version, less checks should perform better
+  Game_CharacterBase.prototype.canPixelPassDiagonally = function(x, y, horz, vert, dist, type) {
+    dist = dist || this.moveTiles();
+    type = type || 'collision';
+    var x1 = $gameMap.roundPXWithDirection(x, horz, dist);
+    var y1 = $gameMap.roundPYWithDirection(y, vert, dist);
+    if (!this.canPixelPass(x1, y1, 5, null, type)) return false;
+    if (QMovement.midPass) {
+      var x2 = $gameMap.roundPXWithDirection(x, horz, dist / 2);
+      var y2 = $gameMap.roundPYWithDirection(y, vert, dist / 2);
+      if (!this.canPixelPass(x2, y2, 5, null, type)) return false;
+    }
+    return true;
+  };
+
   Game_CharacterBase.prototype.collisionCheck = function(x, y, dir, dist, type) {
     this.collider(type).moveTo(x, y);
     if (!this.valid(type)) return false;
     if (this.isThrough() || this.isDebugThrough()) return true;
-    if (QMovement.midPass) {
+    if (QMovement.midPass && dir !== 5) {
       if (!this.middlePass(x, y, dir, dist, type)) return false;
     }
     if (this.collideWithTile(type)) return false;
@@ -214,7 +230,8 @@
   };
 
   Game_CharacterBase.prototype.passableColors = function() {
-    var colors = ['#ffffff'];
+    // #00000000 is a transparent return value in collisionmap addon
+    var colors = ['#ffffff', '#00000000'];
     switch (this._passabilityLevel) {
       case 1:
       case 3: {
@@ -366,7 +383,7 @@
     this.refreshBushDepth();
   };
 
-  Game_CharacterBase.prototype._refreshBushDepth = function() {
+  Game_CharacterBase.prototype.refreshBushDepth = function() {
     if (this.isNormalPriority() && !this.isObjectCharacter() &&
         this.isOnBush() && !this.isJumping()) {
       if (!this.startedMoving()) this._bushDepth = 12;

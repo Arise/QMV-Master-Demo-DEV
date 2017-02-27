@@ -42,6 +42,7 @@
     }
   };
 
+  // TODO stop random dir from reseting every frame if event can't move
   Game_Event.prototype.moveTypeRandom = function() {
     if (this._freqCount === 0 || !this._randomDir) {
       this._randomDir = 2 * (Math.randomInt(4) + 1);
