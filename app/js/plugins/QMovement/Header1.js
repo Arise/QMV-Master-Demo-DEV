@@ -19,7 +19,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.0.1
+ * @author Quxios  | Version 1.0.2
  *
  * @requires QPlus
  *
