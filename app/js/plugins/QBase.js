@@ -23,6 +23,8 @@ if (!Imported.QPlus) {
  *
  * @requires
  *
+ * @video
+ *
  * @param
  * @desc
  * @default
@@ -30,8 +32,6 @@ if (!Imported.QPlus) {
  * @param ===========
  * @desc spacer
  * @default
- *
- * @video
  *
  * @help
  * ============================================================================
