@@ -17,6 +17,7 @@ app/movies/
 !app/img/characters/%test-Actor1.png
 !app/icon/cursor-default.png
 !app/icon/cursor-pointer.png
+!app/img/parallaxes/!CollisionMap.png
 
 # Ignore default js
 app/js/libs/
@@ -33,5 +34,3 @@ app/js/rpg_windows.js
 
 # other
 .vscode
-app/data/System.json
-app/js/plugins.js
