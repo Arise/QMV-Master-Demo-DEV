@@ -32,6 +32,8 @@ Imported.QInput = '2.1.1';
  *
  * @param Menu
  * @desc Which buttons will trigger the menu input
+ * MV Default: #esc, $Y
+ * @default #esc, $Y
  *
  * @param Shift
  * @desc Which buttons will trigger the shift input
