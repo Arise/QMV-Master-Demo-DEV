@@ -1,9 +1,9 @@
 [
 null,
-{"id":1,"expanded":false,"name":"QIslands","order":1,"parentId":0,"scrollX":926,"scrollY":1210},
-{"id":2,"expanded":false,"name":"QMap","order":2,"parentId":0,"scrollX":667,"scrollY":599.5},
-{"id":3,"expanded":false,"name":"QScale","order":3,"parentId":0,"scrollX":667,"scrollY":503.5},
-null,
+{"id":1,"expanded":false,"name":"QIslands","order":1,"parentId":0,"scrollX":904.6666666666666,"scrollY":946},
+{"id":2,"expanded":false,"name":"QMap","order":2,"parentId":0,"scrollX":899.3333333333334,"scrollY":611.3333333333334},
+{"id":3,"expanded":false,"name":"QScale","order":3,"parentId":0,"scrollX":899.3333333333334,"scrollY":611.3333333333334},
+{"id":4,"expanded":true,"name":"QMovement","order":5,"parentId":0,"scrollX":832,"scrollY":640},
 null,
 null,
 null,
