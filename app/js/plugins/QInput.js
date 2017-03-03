@@ -32,8 +32,6 @@ Imported.QInput = '2.1.1';
  *
  * @param Menu
  * @desc Which buttons will trigger the menu input
- * MV Default: $Y
- * @default $Y
  *
  * @param Shift
  * @desc Which buttons will trigger the shift input
@@ -504,18 +502,12 @@ QInput.stringToAry = function(string) {
       var i, pressed;
       for (i = 0; i < newKey.length; i++) {
         var key = newKey[i];
-        if (/^\$/.test(newKey[i])) {
-          //key = QInput.keyAt(this.gamepadKeys, key);
-        }
         if (alias.call(this, key)) {
           pressed = true;
           break;
         }
       }
       return pressed;
-    }
-    if (/^\$/.test(newKey)) {
-      //newKey = QInput.keyAt(this.gamepadKeys, newKey);
     }
     return alias.call(this, newKey);
   };
