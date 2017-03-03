@@ -37,21 +37,6 @@ function Sprite_Collider() {
     }
   };
 
-  Sprite_Collider.prototype._drawCollider = function() {
-    var collider = this._collider;
-    this.bitmap.clear();
-    var color = this._color.replace('#', '');
-    color = parseInt(color, 16);
-    if (collider.isCircle()) {
-      var radiusX = collider._radiusX;
-      var radiusY = collider._radiusY;
-      this.bitmap.drawEllipse(0, 0, radiusX, radiusY, color);
-      this.bitmap.rotation = collider.radian;
-    } else {
-      this.bitmap.drawPolygon(collider._baseVertices, color);
-    }
-  };
-
   Sprite_Collider.prototype.drawCollider = function() {
     var collider = this._collider;
     this._colliderSprite.clear();
@@ -59,10 +44,10 @@ function Sprite_Collider() {
     color = parseInt(color, 16);
     this._colliderSprite.beginFill(color);
     if (collider.isCircle()) {
-      var radiusX = collider._radiusX;
-      var radiusY = collider._radiusY;
+      var radiusX = collider.radiusX;
+      var radiusY = collider.radiusY;
       this._colliderSprite.drawEllipse(0, 0, radiusX, radiusY);
-      this._colliderSprite.rotation = collider.radian;
+      this._colliderSprite.rotation = collider._radian;
     } else {
       this._colliderSprite.drawPolygon(collider._baseVertices);
     }

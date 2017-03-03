@@ -9,6 +9,10 @@
     this._randomDir = null;
   };
 
+  Game_Event.prototype.defaultColliderConfig = function() {
+    return QMovement.eventCollider;
+  };
+
   Game_Event.prototype.updateStop = function() {
     if (this._locked) {
       this._freqCount = this.freqThreshold();

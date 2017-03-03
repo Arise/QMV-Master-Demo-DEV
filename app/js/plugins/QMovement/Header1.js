@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.0.2';
+Imported.QMovement = '1.0.3';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QMovement requires QPlus to work.';
@@ -19,9 +19,13 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.0.2
+ * @author Quxios  | Version 1.0.3
+ *
+ * @repo https://github.com/quxios/QMovement
  *
  * @requires QPlus
+ *
+ * @video
  *
  * @param Grid
  * @desc The amount of pixels you want to move per Movement.
@@ -90,8 +94,6 @@ if (!Imported.QPlus) {
  * Set to true or false      -Toggle on/off with F10 during play test
  * @default true
  *
- * @video
- *
  * @help
  * ============================================================================
  * ## About
@@ -106,7 +108,26 @@ if (!Imported.QPlus) {
  * ============================================================================
  * ## How to use
  * ============================================================================
- * TODO
+ * To setup a pixel based movement, you'll need to change the plugin parameters
+ * to something like:
+ *
+ * - Grid = 1
+ * - Off Grid = true
+ * - Mid Pass = false
+ *
+ * Other parameters can be set to your preference.
+ *
+ * For a grid based movement, set it something like:
+ *
+ * - Grid = GRIDSIZE YOU WANT
+ * - Off Grid = false
+ * - Mid Pass = true
+ *
+ * When in grid based movement, you want your colliders to fill up most of the
+ * grid size but with a padding of 4 pixels on all sides (this is because some
+ * tile colliders are 4 tiles wide or tall). So if your grid size was 48, your
+ * colliders shouldn't be 48x48, instead they should be 40x40, with an ox and oy
+ * of 4. So your collider setting would look like: box, 40, 40, 4, 4
  * ============================================================================
  * ## Colliders
  * ============================================================================
@@ -191,7 +212,8 @@ if (!Imported.QPlus) {
  * ----------------------------------------------------------------------------
  * **QMove**
  * ----------------------------------------------------------------------------
- * ![QMove Script Call](https://quxios.github.io/imgs/qmovement/arc.png)
+ * ![QMove Script Call](https://quxios.github.io/imgs/qmovement/qmove.png)
+ *
  * To do a QMove, add a script in the move route in the format:
  * ~~~
  *  qmove(DIR, AMOUNT, MULTIPLER)
@@ -227,6 +249,45 @@ if (!Imported.QPlus) {
  * ~~~
  *  arc(480,480,Math.PI*2,false,60)
  * ~~~
+ * Will make the character do a full 360 arc clockwise around the point 480, 480
+ * and it'll take 60 frames.
+ * ============================================================================
+ * ## Addons
+ * ============================================================================
+ * **Pathfind**
+ * ----------------------------------------------------------------------------
+ * https://quxios.github.io/#/plugins/QPathfind
+ *
+ * QPathfind is an A* pathfinding algorithm. This algorithm can be pretty heavy
+ * if you are doing pixel based movements. So to help preform better it will
+ * still try to calculate the path based on a grid, but this can lead to
+ * some paths not being found even though it should since the character started
+ * in a middle of a tile. To fix this issue, you'll need to enable Half Opt.
+ * It will increase the pathfinding accuracy but will also increase performance
+ * since it makes the "grid" smaller, which means paths are now larger.
+ *
+ * For the interval settings, you want to set this to a value where the path
+ * can be found in 1-3 frames. You can think of intervals as the number of
+ * moves to try per frame. The default setting 100, is good for grid based
+ * since that will take you 100 grid spaces away. But for a pixel based, 100
+ * steps isn't as far. If most of your pathfinds will be short (paths less then
+ * 10 tiles away), then you should set this to a value between 100-300. For medium
+ * paths (10-20 tiles away) try a value between 300-700. For large or complicated
+ * paths (20+ tiles away or lots of obsticles) try something between 1000-2000.
+ * I would avoid going over 2000. My opinion is to keep it below 1000, and simplify
+ * any of your larger paths by either splitting it into multiple pathfinds or
+ * just making the path less complex.
+ *
+ * ----------------------------------------------------------------------------
+ * **Collision Map**
+ * ----------------------------------------------------------------------------
+ * TODO add link
+ *
+ * Collision Map is an addon for this plugin that lets you use images for
+ * collisions. Note that collision map checks are a lot heavier then normal
+ * collision checks. So this plugin can make your game laggier if used with
+ * other heavy plugins.
+ *
  * ============================================================================
  * ## Links
  * ============================================================================

@@ -9,6 +9,10 @@
     this._movingWithMouse = false;
   };
 
+  Game_Player.prototype.defaultColliderConfig = function() {
+    return QMovement.playerCollider;
+  };
+
   Game_Player.prototype.smartMove = function() {
     return QMovement.smartMove;
   };
@@ -140,7 +144,7 @@
           return chara.collider('interaction').intersects(collider);
         }
         return false;
-      }).bind(this));
+      }).bind(this))
       collider.moveTo(x1, y1);
       if (events.length === 0) {
         events = null;
@@ -150,16 +154,16 @@
       var cy = this.cy();
       events.sort(function(a, b) {
         return a.pixelDistanceFrom(cx, cy) - b.pixelDistanceFrom(cx, cy);
-      });
+      })
       var event = events.shift();
-      if (event.isTriggerIn(triggers) && event.isNormalPriority() === normal) {
-        while (true) {
+      while (true) {
+        if (event.isTriggerIn(triggers) && event.isNormalPriority() === normal) {
           event.start();
-          if (events.length === 0 || $gameMap.isAnyEventStarting()) {
-            break;
-          }
-          event = events.shift();
         }
+        if (events.length === 0 || $gameMap.isAnyEventStarting()) {
+          break;
+        }
+        event = events.shift();
       }
       events = null;
     }
@@ -201,7 +205,7 @@
         return 'break';
       }
       return false;
-    });
+    })
     collider.moveTo(x1, y1);
     if (counter) {
       if ([4, 6].contains(direction)) {
@@ -218,6 +222,7 @@
     return false;
   };
 
+  // TODO create follower support addon
   Game_Player.prototype.moveStraight = function(d, dist) {
     Game_Character.prototype.moveStraight.call(this, d, dist);
   };

@@ -21,7 +21,7 @@ function QMovement() {
   QMovement.water1Tag = 1; // will be changable in a separate addon
   QMovement.water2Tag = 2; // will be changable in a separate addon
   QMovement.playerCollider = _params['Player Collider'];
-  QMovement.eventCollider = _params['Player Collider'];
+  QMovement.eventCollider = _params['Event Collider'];
   QMovement.showColliders = _params['Show Colliders'] === 'true';
   QMovement.tileBoxes = {
     1537: [48, 6, 0, 42],

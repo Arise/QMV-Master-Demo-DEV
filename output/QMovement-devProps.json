@@ -84,6 +84,7 @@
       "prototype - smartMoveSpeed - dir",
       "prototype - reloadColliders - undefined",
       "prototype - collider - type",
+      "prototype - defaultColliderConfig - undefined",
       "prototype - setupColliders - undefined",
       "prototype - makeCollider - name, settings",
       "prototype - makeBounds - undefined",
@@ -105,6 +106,7 @@
     ],
     "Game_Player": [
       "alias - prototype - initMembers - undefined",
+      "prototype - defaultColliderConfig - undefined",
       "prototype - smartMove - undefined",
       "prototype - requestMouseMove - undefined",
       "prototype - moveByMouse - x, y",
@@ -126,6 +128,7 @@
     ],
     "Game_Event": [
       "alias - prototype - setupPageSettings - undefined",
+      "prototype - defaultColliderConfig - undefined",
       "override - prototype - updateStop - undefined",
       "override - prototype - updateSelfMovement - undefined",
       "override - prototype - moveTypeRandom - undefined",
@@ -174,7 +177,7 @@
       "prototype - containsPoint - x, y"
     ],
     "Circle_Collider": [
-      "prototype - init - width, height, ox, oy",
+      "prototype - initialize - width, height, ox, oy",
       "prototype - isPolygon - undefined",
       "prototype - isCircle - undefined",
       "prototype - scale - zX, zY",
@@ -205,7 +208,6 @@
       "prototype - initialize - collider, options",
       "prototype - _setupCollider - collider",
       "prototype - setupCollider - collider",
-      "prototype - _drawCollider - undefined",
       "prototype - drawCollider - undefined",
       "prototype - update - undefined",
       "prototype - checkChanges - undefined",

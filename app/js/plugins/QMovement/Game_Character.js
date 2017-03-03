@@ -37,22 +37,22 @@
         break;
       }
       case gc.ROUTE_MOVE_LOWER_L: {
-        this.subQMove("1, 1," + QMovement.diagDist);
+        this.subQMove("1, 1," + QMovement.tileSize);
         //this._moveRouteIndex++;
         break;
       }
       case gc.ROUTE_MOVE_LOWER_R: {
-        this.subQMove("3, 1," + QMovement.diagDist);
+        this.subQMove("3, 1," + QMovement.tileSize);
         //this._moveRouteIndex++;
         break;
       }
       case gc.ROUTE_MOVE_UPPER_L: {
-        this.subQMove("7, 1," + QMovement.diagDist);
+        this.subQMove("7, 1," + QMovement.tileSize);
         //this._moveRouteIndex++;
         break;
       }
       case gc.ROUTE_MOVE_UPPER_R: {
-        this.subQMove("9, 1," + QMovement.diagDist);
+        this.subQMove("9, 1," + QMovement.tileSize);
         //this._moveRouteIndex++;
         break;
       }

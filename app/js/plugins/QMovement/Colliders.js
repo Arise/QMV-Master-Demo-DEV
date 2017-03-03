@@ -308,7 +308,7 @@ function Box_Collider() {
     this._radian = 0;
     this.id = Polygon_Collider._counter++;
     this.makeVertices(points);
-    this.rotate(0);
+    this.rotate(0); // readjusts the pivot
   };
 
   Box_Collider.prototype.isPolygon = function() {
@@ -345,15 +345,15 @@ function Circle_Collider() {
   Circle_Collider.prototype = Object.create(Polygon_Collider.prototype);
   Circle_Collider.prototype.constructor = Circle_Collider;
 
-  Circle_Collider.prototype.init = function(width, height, ox, oy) {
+  Circle_Collider.prototype.initialize = function(width, height, ox, oy) {
     ox = ox !== undefined ? ox : 0;
     oy = oy !== undefined ? oy : 0;
     this._radius = new Point((width - 1) / 2, (height - 1) / 2);
     var points = [];
     for (var i = 7; i >= 0; i--) {
       var rad = Math.PI / 4 * i + Math.PI;
-      var x = this.radius.x + this.radius.x * Math.cos(rad);
-      var y = this.radius.y + this.radius.y * -Math.sin(rad);
+      var x = this._radius.x + this._radius.x * Math.cos(rad);
+      var y = this._radius.y + this._radius.y * -Math.sin(rad);
       points.push(new Point(x, y));
     }
     this._position = new Point(0, 0);
@@ -363,6 +363,7 @@ function Circle_Collider() {
     this._radian = 0;
     this.id = Polygon_Collider._counter++;
     this.makeVertices(points);
+    this.rotate(0); // readjusts the pivot
   };
 
   Object.defineProperty(Circle_Collider.prototype, 'radiusX', {

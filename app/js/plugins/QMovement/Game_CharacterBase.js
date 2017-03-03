@@ -16,7 +16,6 @@
     this._realPY = 0;
     this._radian = 0;
     this._adjustFrameSpeed = false;
-    this._moveCount = 0;
     this._freqCount = 0;
     this._diagonal = false;
     this._currentRad = 0;
@@ -27,6 +26,7 @@
     this._radisuH = 0;
     this._angularSpeed;
     this._passabilityLevel = 0; // todo
+    this._isMoving = false;
   };
 
   Game_CharacterBase.prototype.direction8 = function(horz, vert) {
@@ -38,7 +38,7 @@
   };
 
   Game_CharacterBase.prototype.isMoving = function() {
-    return this._moveCount > 0;
+    return this._isMoving;
   };
 
   Game_CharacterBase.prototype.startedMoving = function() {
@@ -292,22 +292,24 @@
   Game_CharacterBase.prototype.update = function() {
     var prevX = this._realPX;
     var prevY = this._realPY;
-    if (this.isStopping()) {
+    if (this.startedMoving()) {
+      this._isMoving = true;
+    } else {
       this.updateStop();
     }
     if (this.isArcing()) {
       this.updateArc();
     } else if (this.isJumping()) {
       this.updateJump();
-    } else if (this.startedMoving()) {
+    } else if (this.isMoving()) {
       this.updateMove();
     }
     this.updateAnimation();
     this.updateColliders();
-    if ((prevX !== this._realPX || prevY !== this._realPY) || this.startedMoving()) {
+    if (prevX !== this._realPX || prevY !== this._realPY) {
       this.onPositionChange();
     } else {
-      this._moveCount = 0;
+      this._isMoving = false;
     }
   };
 
@@ -331,8 +333,8 @@
     if (this._py > this._realPY) {
       this._realPY = Math.min(this._realPY + this.frameSpeed(ySpeed), this._py);
     }
-    this._x = this._px / QMovement.tileSize;
-    this._y = this._py / QMovement.tileSize;
+    this._x = Math.floor(this._px / QMovement.tileSize);
+    this._y = Math.floor(this._py / QMovement.tileSize);
     this._realX = this._realPX / QMovement.tileSize;
     this._realY = this._realPY / QMovement.tileSize;
     this._freqCount += this.frameSpeed();
@@ -350,8 +352,10 @@
     this._currentRad = newRad;
     this._px = this._realPX = x1;
     this._py = this._realPY = y1;
-    this._x = this._realX = this._px / QMovement.tileSize;
-    this._y = this._realY = this._py / QMovement.tileSize;
+    this._x = Math.floor(this._px / QMovement.tileSize);
+    this._y = Math.floor(this._py / QMovement.tileSize);
+    this._realX = this._realPX / QMovement.tileSize;
+    this._realY = this._realPY / QMovement.tileSize;
     this.moveColliders(x1, y1);
     this.checkEventTriggerTouchFront(this._direction);
   };
@@ -431,7 +435,6 @@
       this._py = $gameMap.roundPYWithDirection(this._py, d, dist);
       this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(d), dist);
       this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(d), dist);
-      this._moveCount++;
       this.increaseSteps();
     } else {
       this.setDirection(d);
@@ -455,7 +458,6 @@
       this._py = $gameMap.roundPYWithDirection(this._py, vert, this.moveTiles());
       this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(horz), this.moveTiles());
       this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(vert), this.moveTiles());
-      this._moveCount++;
       this.increaseSteps();
     } else {
       this._diagonal = false;
@@ -504,7 +506,6 @@
       this._py = y2;
       this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(horz), horzSteps);
       this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(vert), vertSteps);
-      this._moveCount++;
       this.increaseSteps();
     } else {
       this.setDirection(dir);
@@ -543,7 +544,6 @@
       this._py = $gameMap.roundPYWithDirection(this._py, dir, dist);
       this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(dir), dist);
       this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(dir), dist);
-      this._moveCount++;
       this.increaseSteps();
     } else {
       this.setDirection(dir);
@@ -560,7 +560,6 @@
       this._py = $gameMap.roundPYWithDirection(this._py, vert, dist);
       this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(horz), dist);
       this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(vert), dist);
-      this._moveCount++;
       this.increaseSteps();
     } else {
       this._diagonal = false;
@@ -657,7 +656,6 @@
       this._radian = Math.atan2(y1 - y2, x2 - x1);
       this._radian += this._radian < 0 ? 2 * Math.PI : 0;
       this._adjustFrameSpeed = false;
-      this._moveCount++;
       this.increaseSteps();
     }
   };
@@ -692,9 +690,13 @@
     return this._colliders[type] || this._colliders['default'];
   };
 
+  Game_CharacterBase.prototype.defaultColliderConfig = function() {
+    return 'box,48,48';
+  };
+
   Game_CharacterBase.prototype.setupColliders = function() {
     this._colliders = {};
-    var defaultCollider = 'box, 36, 24, 6, 24';
+    var defaultCollider = this.defaultColliderConfig();
     var notes = this.notes(true);
     var configs = {};
     var multi = /<colliders>([\s\S]*)<\/colliders>/i.exec(notes);
@@ -725,28 +727,28 @@
   };
 
   Game_CharacterBase.prototype.makeBounds = function() {
-    var minX;
-    var maxX;
-    var minY;
-    var maxY;
+    var minX = null;
+    var maxX = null;
+    var minY = null;
+    var maxY = null;
     for (var type in this._colliders) {
       if (!this._colliders.hasOwnProperty(type)) continue;
       var edge = this._colliders[type].edge();
-      if (!minX || minX > edge.x1 - this._px) {
+      if (minX === null || minX > edge.x1) {
         minX = edge.x1;
       }
-      if (!maxX || maxX < edge.x2 - this._px) {
+      if (maxX === null || maxX < edge.x2) {
         maxX = edge.x2;
       }
-      if (!minY || minY > edge.y1 - this._py) {
+      if (minY === null || minY > edge.y1) {
         minY = edge.y1;
       }
-      if (!maxY || maxY < edge.y2 - this._py) {
+      if (maxY === null || maxY < edge.y2) {
         maxY = edge.y2;
       }
     }
-    var w = maxX - minX;
-    var h = maxY - minY;
+    var w = maxX - minX + 1;
+    var h = maxY - minY + 1;
     this._colliders['bounds'] = new Box_Collider(w, h, minX, minY);
     this._colliders['bounds'].isTile = false;
     this._colliders['bounds']._charaId = String(this.charaId());
