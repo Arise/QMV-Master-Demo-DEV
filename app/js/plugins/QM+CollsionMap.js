@@ -122,7 +122,7 @@ if (!Imported.QMovement) {
   };
 
   Game_Map.prototype.setupCollisionMap = function() {
-    var cm = /<cm[=|:](.*?)>/i.exec($dataMap.note);
+    var cm = /<cm:(.*?)>/i.exec($dataMap.note);
     // regionmaps are disabled
     //var rm = /<rm[=|:](.*?)>/i.exec($dataMap.note);
     this.loadCollisionmap(cm ? cm[1] : null);
@@ -223,8 +223,8 @@ if (!Imported.QMovement) {
     while (r1 <= r2) {
       r3 = r1 + collider._radian;
       var pos = collider.circlePosition(r3);
-      var x = Math.floor(pos[0]);
-      var y = Math.floor(pos[1]);
+      var x = Math.floor(pos.x);
+      var y = Math.floor(pos.y);
       if (!passableColors.contains(ColliderManager.collisionMap.bitmap.getColor(x, y))) {
         return false;
       }
