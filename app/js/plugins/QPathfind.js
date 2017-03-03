@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QPathfind = '1.0.1';
+Imported.QPathfind = '1.0.2';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QPathfind requires QPlus to work.';
@@ -19,7 +19,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QPathfind>
  * A* Pathfinding algorithm
- * @author Quxios  | Version 1.0.1
+ * @author Quxios  | Version 1.0.2
  *
  * @requires QPlus
  *
@@ -239,7 +239,6 @@ function QPathfind() {
   };
 
   QPathfind.prototype.beforeStart = function() {
-    //console.time('Pathfind');
     var x = this._endNode.x;
     var y = this._endNode.y;
     var canPass = true;
@@ -248,10 +247,64 @@ function QPathfind() {
     } else {
       canPass = this.character().canPass(x, y, 5);
     }
+    if (!canPass && Imported.QMovement) {
+      canPass = true;
+      if (!this.adjustEndNode()) {
+        canPass = false;
+      }
+    }
     if (!canPass && !this.options.chase) {
-      this.onFail();
+      return this.onFail();
     }
     this.update();
+  };
+
+  QPathfind.prototype.adjustEndNode = function() {
+    console.log('ran');
+    var x1 = this._endNode.x;
+    var y1 = this._endNode.y;
+    var x2 = x1;
+    var y2 = y1;
+    var steps = 0;
+    var horz = 0;
+    var vert = 0;
+    var maxDist = QMovement.tileSize;
+    var neighbors = [];
+    for (var i = 1; i < 9; i++) {
+      if (i < 5) {
+        horz = vert = i * 2;
+      } else {
+        horz = i === 5 || i === 6 ? 4 : 6;
+        vert = i === 5 || i === 7 ? 2 : 8;
+      }
+      x2 = x1;
+      y2 = y1;
+      steps = 0;
+      while (!this.character().canPixelPass(x2, y2, 5, null, '_pathfind')) {
+        x2 = $gameMap.roundPXWithDirection(x2, horz, this.character().moveTiles());
+        y2 = $gameMap.roundPYWithDirection(y2, vert, this.character().moveTiles());
+        steps += this.character().moveTiles();
+        if (steps >= maxDist) break;
+      }
+      if (!this.character().canPixelPass(x2, y2, 5, null, '_pathfind')) continue;
+      var distx1 = Math.abs(this.character()._px - x2);
+      var distx2 = Math.abs(x1 - x2);
+      var disty1 = Math.abs(this.character()._py - y2);
+      var disty2 = Math.abs(y1 - y2);
+      var score = this.heuristic(new Point(distx1, disty1), new Point(distx2, disty2));//Math.sqrt(distx1 * distx1 + disty1 * disty1);
+      //score2 = this.heuristic();//Math.sqrt(distx2 * distx2 + disty2 * disty2);
+      neighbors.push({
+        x: x2,
+        y: y2,
+        score: score
+      });
+    }
+    if (neighbors.length === 0) return false;
+    neighbors.sort(function(a, b) {
+      return a.score - b.score;
+    })
+    this._endNode = this.node(null, new Point(neighbors[0].x, neighbors[0].y));
+    return true;
   };
 
   QPathfind.prototype.update = function() {
@@ -418,7 +471,10 @@ function QPathfind() {
         var node;
         if (Imported.QMovement) {
           if (Math.abs(x2 - xf) < tiles && Math.abs(y2 - yf) < tiles) {
-            node = this.node(current, new Point(xf, yf));
+            // this is as close as we can get
+            // so make a "fake" endnode
+            node = this.node(current, new Point(x2, y2));
+            node.value = this._endNode.value;
             neighbors.push(node);
             continue;
           }
@@ -432,6 +488,7 @@ function QPathfind() {
         neighbors.push(node)
       }
     }
+    // TODO find a way to merge this with top loop
     if (_diagonals) {
       var diags = {
         1: [4, 2],
@@ -460,7 +517,8 @@ function QPathfind() {
           var node;
           if (Imported.QMovement) {
             if (Math.abs(x2 - xf) < tiles && Math.abs(y2 - yf) < tiles) {
-              node = this.node(current, new Point(xf, yf));
+              node = this.node(current, new Point(x2, y2));
+              node.value = this._endNode.value;
               neighbors.push(node);
               continue;
             }
@@ -705,7 +763,9 @@ function QPathfind() {
     var x = this._pathfind._endNode.x;
     var y = this._pathfind._endNode.y;
     this._isPathfinding = false;
-    this.processRouteEnd();
+    if (this._moveRoute) {
+      this.processRouteEnd();
+    }
     var options = this._pathfind.options;
     this._pathfind = new QPathfind(this.charaId(), new Point(x, y), options);
     this._isChasing = options.chase !== null ? options.chase : false;
