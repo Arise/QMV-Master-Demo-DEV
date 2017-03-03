@@ -8,7 +8,7 @@ var $plugins =
 {"name":"QMovement-dev","status":true,"description":"<QMovement>\r\nMore control over character movement","parameters":{"Grid":"1","Tile Size":"48","Off Grid":"true","=================":"","Smart Move":"3","Mid Pass":"false","Move on click":"true","Diagonal":"true","Diagonal Speed":"0","Player Collider":"circle, 36, 24, 6, 24","Event Collider":"box, 36, 24, 6, 24","Show Colliders":"true"}},
 {"name":"QMovement","status":false,"description":"<QMovement>\r\nMore control over character movement","parameters":{"Grid":"1","Tile Size":"48","Off Grid":"true","=================":"","Smart Move":"2","Mid Pass":"false","Move on click":"true","Diagonal":"true","Diagonal Speed":"0","Player Collider":"box, 36, 24, 6, 24","Event Collider":"box, 36, 24, 6, 24","Show Colliders":"true"}},
 {"name":"========================","status":false,"description":"","parameters":{}},
-{"name":"QM+CollsionMap","status":true,"description":"<QMCollisionMap>\r\nQMovement Addon: Adds image collision map feature","parameters":{"Scan Size":"4","Folder":"img/parallaxes/"}},
+{"name":"QM+CollisionMap","status":true,"description":"<QMCollisionMap>\r\nQMovement Addon: Adds image collision map feature","parameters":{"Scan Size":"4","Folder":"img/parallaxes/"}},
 {"name":"========================","status":false,"description":"","parameters":{}},
 {"name":"QTouch","status":false,"description":"<QTouch>\nBetter mouse handling for MV","parameters":{"Mouse Decay":"60","Default Cursor":"icon/cursor-default.png","Pointer Cursor":"icon/cursor-pointer.png"}},
 {"name":"========================","status":false,"description":"","parameters":{}},
