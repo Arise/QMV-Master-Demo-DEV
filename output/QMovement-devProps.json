@@ -108,7 +108,8 @@
       "override - prototype - turnAwayFromCharacter - character",
       "prototype - deltaPXFrom - x",
       "prototype - deltaPYFrom - y",
-      "prototype - pixelDistanceFrom - x, y"
+      "prototype - pixelDistanceFrom - x, y",
+      "prototype - centerWith - character"
     ],
     "Game_Player": [
       "alias - prototype - initMembers - undefined",
