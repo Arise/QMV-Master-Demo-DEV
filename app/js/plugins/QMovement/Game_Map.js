@@ -2,14 +2,6 @@
 // Game_Map
 
 (function() {
-  var Alias_Game_Map_setup = Game_Map.prototype.setup;
-  Game_Map.prototype.setup = function(mapId) {
-    if ($dataMap) {
-      ColliderManager.clear();
-    }
-    Alias_Game_Map_setup.call(this, mapId);
-  };
-
   Game_Map.prototype.tileWidth = function() {
     return QMovement.tileSize;
   };
@@ -25,11 +17,35 @@
     var tiles = this.allTiles(x, y);
     for (var i = 0; i < tiles.length; i++) {
       var flag = flags[tiles[i]];
-      console.log("layer", i, ":", flag);
-      if (flag & 0x20)  console.log("layer", i, "is ladder");
-      if (flag & 0x40)  console.log("layer", i, "is bush");
-      if (flag & 0x80)  console.log("layer", i, "is counter");
-      if (flag & 0x100) console.log("layer", i, "is damage");
+      console.log('layer', i, ':', flag);
+      if (flag & 0x20)  console.log('layer', i, 'is ladder');
+      if (flag & 0x40)  console.log('layer', i, 'is bush');
+      if (flag & 0x80)  console.log('layer', i, 'is counter');
+      if (flag & 0x100) console.log('layer', i, 'is damage');
+    }
+  };
+
+  var Alias_Game_Map_setupEvents = Game_Map.prototype.setupEvents;
+  Game_Map.prototype.setupEvents = function() {
+    ColliderManager.clear();
+    this.setupColliders();
+    Alias_Game_Map_setupEvents.call(this);
+  };
+
+  Game_Map.prototype.setupColliders = function() {
+    ColliderManager._colliderGrid = new Array(this.width());
+    for (var x = 0; x < ColliderManager._colliderGrid.length; x++) {
+      ColliderManager._colliderGrid[x] = [];
+      for (var y = 0; y < this.height(); y++) {
+        ColliderManager._colliderGrid[x].push([]);
+      }
+    }
+    ColliderManager._characterGrid = new Array(this.width());
+    for (var x = 0; x < ColliderManager._characterGrid.length; x++) {
+      ColliderManager._characterGrid[x] = [];
+      for (var y = 0; y < this.height(); y++) {
+        ColliderManager._characterGrid[x].push([]);
+      }
     }
   };
 
@@ -43,7 +59,7 @@
   };
 
   Game_Map.prototype.reloadAllColliders = function() {
-    ColliderManager.clear();
+    this.setupColliders();
     this.reloadTileMap();
     var events = this.events();
     var i, j;
@@ -76,7 +92,7 @@
         for (var i = tiles.length - 1; i >= 0; i--) {
           var flag = flags[tiles[i]];
           if (flag === 16) continue;
-          var colliders = this.getMapCollider(x, y, flag);
+          this.getMapCollider(x, y, flag);
         }
       }
     }
@@ -89,55 +105,62 @@
       flag = flag.slice(flag.length - 12, flag.length);
       flag = parseInt(flag, 2);
     }
-    if (QMovement.regionBoxes[this.regionId(x, y)]) {
-      var regionData = QMovement.regionBoxes[this.regionId(x, y)];
-      var boxData = [];
+    var boxData;
+    if (QMovement.regionColliders[this.regionId(x, y)]) {
+      var regionData = QMovement.regionColliders[this.regionId(x, y)];
+      boxData = [];
       for (var i = 0; i < regionData.length; i++) {
-        var data = [
+        boxData[i] = [
           regionData[i].width || 0,
           regionData[i].height || 0,
           regionData[i].ox || 0,
           regionData[i].oy || 0,
-          regionData[i].tag || ""
-        ];
-        boxData[i] = data;
+          regionData[i].tag || regionData[i].note || '',
+          regionData[i].type || 'box'
+        ]
       }
       flag = 0;
     } else {
-      var boxData = QMovement.tileBoxes[flag];
+      boxData = QMovement.tileBoxes[flag];
     }
     if (!boxData) {
       if (flag & 0x20 || flag & 0x40 || flag & 0x80 || flag & 0x100) {
         boxData = [this.tileWidth(), this.tileHeight(), 0, 0];
       } else {
-        return [];
+        return;
       }
     }
-    var tilebox = [];
     if (boxData[0].constructor === Array) {
       var i = 0;
       for (var i = 0; i < boxData.length; i++) {
-        var newBox = this.makeTileCollider(x, y, realFlag, boxData[i], i);
-        tilebox.push(newBox);
+        this.makeTileCollider(x, y, realFlag, boxData[i], i);
       }
     } else {
-      var newBox = this.makeTileCollider(x, y, realFlag, boxData);
-      tilebox.push(newBox);
+      this.makeTileCollider(x, y, realFlag, boxData, 0);
     }
-    return tilebox;
   };
 
   Game_Map.prototype.makeTileCollider = function(x, y, flag, boxData, index) {
+    // boxData is array [width, height, ox, oy, note, type]
     var x1 = x * this.tileWidth();
     var y1 = y * this.tileHeight();
     var ox = boxData[2] || 0;
     var oy = boxData[3] || 0;
     var w  = boxData[0];
     var h  = boxData[1];
-    var newBox = new Box_Collider(w, h, ox, oy);
+    if (w === 0 || h === 0) return;
+    var type = boxData[5] || 'box';
+    var newBox;
+    if (type === 'circle') {
+      newBox = new Circle_Collider(w, h, ox, oy);
+    } else if (type === 'box') {
+      newBox = new Box_Collider(w, h, ox, oy);
+    } else {
+      return;
+    }
     newBox.isTile = true;
     newBox.moveTo(x1, y1);
-    newBox.note      = boxData[4] || "";
+    newBox.note      = boxData[4] || '';
     newBox.flag      = flag;
     newBox.terrain   = flag >> 12;
     newBox.isWater1  = flag >> 12 === QMovement.water1Tag || /<water1>/i.test(newBox.note);
@@ -157,7 +180,6 @@
       newBox.color = QMovement.collision.toLowerCase();
     }
     ColliderManager.addCollider(newBox, -1);
-    return newBox;
   };
 
   Game_Map.prototype.adjustPX = function(x) {

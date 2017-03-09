@@ -51,5 +51,5 @@ function QMovement() {
     3599: [48, 48],  // Impassable A2, A3, A4
     3727: [48, 48]
   };
-  QMovement.regionBoxes = {}; // will be changable in a separate addon
+  QMovement.regionColliders = {}; // will be changable in a separate addon
 })();

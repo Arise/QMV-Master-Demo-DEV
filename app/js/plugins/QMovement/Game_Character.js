@@ -170,6 +170,26 @@
     }
   };
 
+  Game_Character.prototype.turnTowardCharacter = function(character) {
+    var sx = this.deltaPXFrom(character.cx());
+    var sy = this.deltaPYFrom(character.cy());
+    if (Math.abs(sx) > Math.abs(sy)) {
+      this.setDirection(sx > 0 ? 4 : 6);
+    } else if (sy !== 0) {
+      this.setDirection(sy > 0 ? 8 : 2);
+    }
+  };
+
+  Game_Character.prototype.turnAwayFromCharacter = function(character) {
+    var sx = this.deltaPXFrom(character.cx());
+    var sy = this.deltaPYFrom(character.cy());
+    if (Math.abs(sx) > Math.abs(sy)) {
+      this.setDirection(sx > 0 ? 6 : 4);
+    } else if (sy !== 0) {
+      this.setDirection(sy > 0 ? 2 : 8);
+    }
+  };
+
   Game_Character.prototype.deltaPXFrom = function(x) {
     return $gameMap.deltaPX(this.cx(), x);
   };
@@ -180,5 +200,17 @@
 
   Game_Character.prototype.pixelDistanceFrom = function(x, y) {
     return $gameMap.distance(this.cx(), this.cy(), x, y);
+  };
+
+  // Returns the px, py needed for this character to be center aligned
+  // with the character passed in (align is based off collision collider)
+  Game_Character.prototype.centerWith = function(character) {
+    var dx1 = this.cx() - this.px;
+    var dy1 = this.cy() - this.py;
+    var dx2 = character.cx() - character.px;
+    var dy2 = character.cy() - character.py;
+    var dx = dx1 - dx2;
+    var dy = dy1 - dy2;
+    return new Point(character.px + dx, character.py + dy);
   };
 })();

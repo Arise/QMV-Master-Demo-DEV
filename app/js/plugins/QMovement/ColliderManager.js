@@ -10,34 +10,22 @@ function ColliderManager() {
   ColliderManager._colliderGrid = [];
   ColliderManager._characterGrid = [];
   ColliderManager._sectorSize = 48;
-  ColliderManager._needsRefresh = false;
+  ColliderManager._needsRefresh = true;
   ColliderManager.container = new Sprite();
   ColliderManager.container.alpha = 0.3;
   ColliderManager.visible = QMovement.showColliders;
 
   ColliderManager.clear = function() {
     this._colliders = [];
-    this._colliderGrid = new Array($gameMap.width());
-    for (var x = 0; x < this._colliderGrid.length; x++) {
-      this._colliderGrid[x] = [];
-      for (var y = 0; y < $gameMap.height(); y++) {
-        this._colliderGrid[x].push([]);
-      }
-    }
-    this._characterGrid = new Array($gameMap.width());
-    for (var x = 0; x < this._characterGrid.length; x++) {
-      this._characterGrid[x] = [];
-      for (var y = 0; y < $gameMap.height(); y++) {
-        this._characterGrid[x].push([]);
-      }
-    }
+    this._colliderGrid = [];
+    this._characterGrid = [];
     this.container.removeChildren();
-    ColliderManager._needsRefresh = true;
+    this._needsRefresh = true;
   };
 
   ColliderManager.refresh = function() {
-    // refresh is done inside Game_Map
-    this._needsRefresh = true;
+    this.clear();
+    // rest of refresh is done inside Game_Map
   };
 
   ColliderManager.addCollider = function(collider, duration, ignoreGrid) {

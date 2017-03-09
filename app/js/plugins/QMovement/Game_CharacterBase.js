@@ -90,7 +90,7 @@
 
   Game_CharacterBase.prototype.moveTiles = function() {
     if (QMovement.grid < this.frameSpeed()) {
-      return QMovement.offGrid ? this.frameSpeed() : QMovement.grid
+      return QMovement.offGrid ? this.frameSpeed() : QMovement.grid;
     }
     return QMovement.grid;
   };
@@ -321,6 +321,7 @@
       xSpeed = Math.cos(this._radian);
       ySpeed = Math.sin(this._radian);
     }
+    var prevX = this._realPX;
     if (this._px < this._realPX) {
       this._realPX = Math.max(this._realPX - this.frameSpeed(xSpeed), this._px);
     }
@@ -338,6 +339,7 @@
     this._realX = this._realPX / QMovement.tileSize;
     this._realY = this._realPY / QMovement.tileSize;
     this._freqCount += this.frameSpeed();
+    //console.log(this._freqCount, prevX, this._px);
   };
 
   Game_CharacterBase.prototype.updateArc = function() {
@@ -685,13 +687,13 @@
   };
 
   Game_CharacterBase.prototype.collider = function(type) {
-    if (!$dataMap) return;
+    if (!$dataMap || !$gameMap) return;
     if (!this._colliders) this.setupColliders();
     return this._colliders[type] || this._colliders['default'];
   };
 
   Game_CharacterBase.prototype.defaultColliderConfig = function() {
-    return 'box,48,48';
+    return 'box,0,0';
   };
 
   Game_CharacterBase.prototype.setupColliders = function() {

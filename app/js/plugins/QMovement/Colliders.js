@@ -348,7 +348,7 @@ function Circle_Collider() {
   Circle_Collider.prototype.initialize = function(width, height, ox, oy) {
     ox = ox !== undefined ? ox : 0;
     oy = oy !== undefined ? oy : 0;
-    this._radius = new Point((width - 1) / 2, (height - 1) / 2);
+    this._radius = new Point(width / 2, height / 2);
     var points = [];
     for (var i = 7; i >= 0; i--) {
       var rad = Math.PI / 4 * i + Math.PI;

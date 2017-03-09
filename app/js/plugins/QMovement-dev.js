@@ -3,6 +3,7 @@
   QMovement/Colliders.js
   QMovement/ColliderManager.js
   QMovement/Game_Temp.js
+  QMovement/Game_System.js
   QMovement/Game_Map.js
   QMovement/Game_CharacterBase.js
   QMovement/Game_Character.js
@@ -19,7 +20,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.0.3';
+Imported.QMovement = '1.1.0';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QMovement requires QPlus to work.';
@@ -35,7 +36,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.0.3
+ * @author Quxios  | Version 1.1.0
  *
  * @repo https://github.com/quxios/QMovement
  *

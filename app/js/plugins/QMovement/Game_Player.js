@@ -189,6 +189,37 @@
     }
   };
 
+  Game_Player.prototype.triggerTouchAction = function() {
+    if ($gameTemp.isDestinationValid()) {
+      var dx = $gameTemp.destinationPX() - this.cx();
+      var dy = $gameTemp.destinationPY() - this.cy();
+      var radian = Math.atan2(-dy, dx);
+      radian += radian < 0 ? 2 * Math.PI : 0;
+      var dir = this.radianToDirection(radian, true);
+      var horz = dir;
+      var vert = dir;
+      if ([1, 3, 7, 9].contains(dir)) {
+        if (dir === 1 || dir === 7) horz = 4;
+        if (dir === 1 || dir === 3) vert = 2;
+        if (dir === 3 || dir === 9) horz = 6;
+        if (dir === 7 || dir === 9) vert = 8;
+      }
+      var dist = this.pixelDistanceFrom($gameTemp.destinationPX(), $gameTemp.destinationPY());
+      if (dist <= QMovement.tileSize) {
+        var x1 = $gameMap.roundPXWithDirection(this._px, horz, this.moveTiles());
+        var y1 = $gameMap.roundPYWithDirection(this._py, vert, this.moveTiles());
+        this.startMapEvent(x1, y1, [0, 1, 2], true);
+        if (!$gameMap.isAnyEventStarting()) {
+          return this.checkCounter([0, 1, 2], $gameTemp.destinationPX(), $gameTemp.destinationPY());
+        } else {
+          this.setDirection(dir);
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   Game_Player.prototype.checkCounter = function(triggers, x2, y2) {
     var direction = this.direction();
     var x1 = this._px;
@@ -219,6 +250,16 @@
       var y3 = $gameMap.roundPYWithDirection(y1, direction, dist);
       return this.startMapEvent(x3, y3, triggers, true);
     }
+    return false;
+  };
+
+  Game_Player.prototype.airshipHere = function() {
+    // TODO
+    return false;
+  };
+
+  Game_Player.prototype.shipBoatThere = function(x2, y2) {
+    // TODO
     return false;
   };
 
