@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QPathfind = '1.0.2';
+Imported.QPathfind = '1.1.0';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QPathfind requires QPlus to work.';
@@ -19,7 +19,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QPathfind>
  * A* Pathfinding algorithm
- * @author Quxios  | Version 1.0.2
+ * @author Quxios  | Version 1.1.0
  *
  * @requires QPlus
  *
@@ -142,12 +142,15 @@ if (!Imported.QPlus) {
  * ## Links
  * ============================================================================
  * RPGMakerWebs:
+ *
  *  http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
  *
  * Terms of use:
+ *
  *  https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
  * Like my plugins? Support me on Patreon!
+ *
  *  https://www.patreon.com/quxios
  *
  * @tags pathfind, chase, character, map
@@ -172,7 +175,9 @@ function QPathfind() {
   var _defaultOptions = {
     smart: 0,
     chase: null,
-    breakable: false
+    breakable: false,
+    earlyEnd: true,
+    adjustEnd: false
   }
   // value to use to offset smart ticker when target is far away
   // when target is far away no need to calc as often, so we slow it down with offset
@@ -201,6 +206,8 @@ function QPathfind() {
     this.options.smart = this.options.smart === undefined ? _defaultOptions.smart : this.options.smart;
     this.options.chase = this.options.chase === undefined ? _defaultOptions.chase : this.options.chase;
     this.options.breakable = this.options.breakable === undefined ? _defaultOptions.breakable : this.options.breakable;
+    this.options.earlyEnd  = this.options.earlyEnd === undefined ? _defaultOptions.earlyEnd : this.options.earlyEnd;
+    this.options.adjustEnd = this.options.adjustEnd === undefined ? _defaultOptions.adjustEnd : this.options.adjustEnd;
     if (options.chase !== null) {
       var chasing = QPlus.getCharacter(options.chase);
       if (Imported.QMovement) {
@@ -247,20 +254,19 @@ function QPathfind() {
     } else {
       canPass = this.character().canPass(x, y, 5);
     }
-    if (!canPass && Imported.QMovement) {
+    if (!canPass && !this.options.chase && this.options.adjustEnd) {
       canPass = true;
       if (!this.adjustEndNode()) {
         canPass = false;
       }
     }
-    if (!canPass && !this.options.chase) {
-      return this.onFail();
+    if (!canPass && !this.options.chase && this.options.earlyEnd) {
+      this.onFail();
     }
-    this.update();
+    return canPass;
   };
 
   QPathfind.prototype.adjustEndNode = function() {
-    console.log('ran');
     var x1 = this._endNode.x;
     var y1 = this._endNode.y;
     var x2 = x1;
@@ -268,9 +274,10 @@ function QPathfind() {
     var steps = 0;
     var horz = 0;
     var vert = 0;
-    var maxDist = QMovement.tileSize;
+    var maxDist = Imported.QMovement ? QMovement.tileSize : 1;
     var neighbors = [];
-    for (var i = 1; i < 9; i++) {
+    var dirs = _diagonals ? 9 : 5
+    for (var i = 1; i < dirs; i++) {
       if (i < 5) {
         horz = vert = i * 2;
       } else {
@@ -280,24 +287,31 @@ function QPathfind() {
       x2 = x1;
       y2 = y1;
       steps = 0;
-      while (!this.character().canPixelPass(x2, y2, 5, null, '_pathfind')) {
-        x2 = $gameMap.roundPXWithDirection(x2, horz, this.character().moveTiles());
-        y2 = $gameMap.roundPYWithDirection(y2, vert, this.character().moveTiles());
-        steps += this.character().moveTiles();
-        if (steps >= maxDist) break;
+      if (Imported.QMovement) {
+        while (!this.character().canPixelPass(x2, y2, 5, null, '_pathfind')) {
+          x2 = $gameMap.roundPXWithDirection(x2, horz, this.character().moveTiles());
+          y2 = $gameMap.roundPYWithDirection(y2, vert, this.character().moveTiles());
+          steps += this.character().moveTiles();
+          if (steps >= maxDist) break;
+        }
+      } else {
+        x2 = $gameMap.roundXWithDirection(x1, horz);
+        y2 = $gameMap.roundYWithDirection(y1, vert);
+        if (!this.character().canPass(x2, y2, 5)) {
+          continue;
+        }
       }
-      if (!this.character().canPixelPass(x2, y2, 5, null, '_pathfind')) continue;
-      var distx1 = Math.abs(this.character()._px - x2);
+      if (Imported.QMovement && !this.character().canPixelPass(x2, y2, 5, null, '_pathfind')) continue;
+      var distx1 = Imported.QMovement ? Math.abs(this.character().px - x2) : Math.abs(this.character().x - x2);
       var distx2 = Math.abs(x1 - x2);
-      var disty1 = Math.abs(this.character()._py - y2);
+      var disty1 = Imported.QMovement ? Math.abs(this.character().py - y2) : Math.abs(this.character().y - y2);
       var disty2 = Math.abs(y1 - y2);
-      var score = this.heuristic(new Point(distx1, disty1), new Point(distx2, disty2));//Math.sqrt(distx1 * distx1 + disty1 * disty1);
-      //score2 = this.heuristic();//Math.sqrt(distx2 * distx2 + disty2 * disty2);
+      var score = this.heuristic(new Point(distx1, disty1), new Point(distx2, disty2));
       neighbors.push({
         x: x2,
         y: y2,
         score: score
-      });
+      })
     }
     if (neighbors.length === 0) return false;
     neighbors.sort(function(a, b) {
@@ -451,20 +465,38 @@ function QPathfind() {
                     Math.abs(y - yf) < chara.optTiles();
       var tiles = nearEnd ? chara.moveTiles() : chara.optTiles();
     }
+    var dirs = _diagonals ? 9 : 5
     var i;
-    for (i = 1; i < 5; i++) {
-      var dir = i * 2;
+    for (i = 1; i < dirs; i++) {
+      var horz = 5;
+      var vert = 5;
+      var dir = 5;
+      if (i < 5) {
+        horz = vert = dir = i * 2;
+      } else {
+        horz = i === 5 || i === 6 ? 4 : 6;
+        vert = i === 5 || i === 7 ? 2 : 8;
+      }
       var passed = false;
       var onEnd = false;
       var x2, y2;
       if (Imported.QMovement) {
-        x2 = $gameMap.roundPXWithDirection(x, dir, tiles);
-        y2 = $gameMap.roundPYWithDirection(y, dir, tiles);
-        passed = chara.canPixelPass(x, y, dir, tiles, '_pathfind');
+        x2 = $gameMap.roundPXWithDirection(x, horz, tiles);
+        y2 = $gameMap.roundPYWithDirection(y, vert, tiles);
+        if (i >= 5) {
+          passed = chara.canPixelPassDiagonally(x, y, horz, vert, tiles, '_pathfind');
+        } else {
+          passed = chara.canPixelPass(x, y, dir, tiles, '_pathfind');
+        }
       } else {
-        x2 = $gameMap.roundXWithDirection(x, dir);
-        y2 = $gameMap.roundYWithDirection(y, dir);
-        passed = chara.canPass(x, y, dir);
+        x2 = $gameMap.roundXWithDirection(x, horz);
+        y2 = $gameMap.roundYWithDirection(y, vert);
+        if (i >= 5) {
+          passed = chara.canPassDiagonally(x, y, horz, vert);
+        } else {
+          passed = chara.canPass(x, y, dir);
+        }
+
       }
       var val = x2 + (y2 * this._mapWidth);
       if (passed || val === this._endNode.value) {
@@ -486,51 +518,6 @@ function QPathfind() {
           this._grid[val] = node;
         }
         neighbors.push(node)
-      }
-    }
-    // TODO find a way to merge this with top loop
-    if (_diagonals) {
-      var diags = {
-        1: [4, 2],
-        3: [6, 2],
-        7: [4, 8],
-        9: [6, 8]
-      }
-      for (i = 1; i < 5; i++) {
-        var dir = i * 2;
-        dir = dir < 5 ? dir - 1 : dir + 1;
-        var horz = diags[dir][0];
-        var vert = diags[dir][1];
-        var passed = false;
-        var x2, y2;
-        if (Imported.QMovement) {
-          x2 = $gameMap.roundPXWithDirection(x, horz, tiles);
-          y2 = $gameMap.roundPYWithDirection(y, vert, tiles);
-          passed = chara.canPixelPassDiagonally(x, y, horz, vert, tiles, '_pathfind');
-        } else {
-          x2 = $gameMap.roundXWithDirection(x, horz);
-          y2 = $gameMap.roundYWithDirection(y, vert);
-          passed = chara.canPassDiagonally(x, y, horz, vert);
-        }
-        var val = x2 + (y2 * this._mapWidth);
-        if (passed || val === this._endNode.value) {
-          var node;
-          if (Imported.QMovement) {
-            if (Math.abs(x2 - xf) < tiles && Math.abs(y2 - yf) < tiles) {
-              node = this.node(current, new Point(x2, y2));
-              node.value = this._endNode.value;
-              neighbors.push(node);
-              continue;
-            }
-          }
-          if (this._grid[val]) {
-            node = this._grid[val];
-          } else {
-            node = this.node(current, new Point(x2, y2));
-            this._grid[val] = node;
-          }
-          neighbors.push(node);
-        }
       }
     }
     return neighbors;
@@ -585,15 +572,6 @@ function QPathfind() {
       }
       var command = {};
       if (Imported.QMovement) {
-        // TODO not sure if route is correct
-        /*
-        var radian = Math.atan2(sy, -sx);
-        radian += radian < 0 ? 2 * Math.PI : 0;
-        dist = Math.sqrt(sx * sx + sy * sy);
-        console.log(radian, dist);
-        command.code = 'moveRadian';
-        command.parameters = [radian, dist];
-        */
         command.code = Game_Character.ROUTE_SCRIPT;
         command.parameters = ['qmove(' + dir + ',' + dist + ')'];
       } else {
@@ -636,34 +614,63 @@ function QPathfind() {
     // qPathfind CHARAID X Y
     // qPathfind CHARAID chase CHARAID2
     // qPathfind CHARAID clear
-    var chara = QPlus.getCharacter(args[0]);
+    var chara;
+    if (args[0].toLowerCase() === 'this') {
+      chara = this.character(0);
+    } else {
+      chara = QPlus.getCharacter(args[0]);
+    }
     if (!chara) return;
     var args2 = args.slice(1);
     if (args2[0].toLowerCase() === 'chase') {
-      chara.initChase(args2[1])
+      if (args2[1].toLowerCase() === 'this') {
+        chara.initChase(this.character(0).charaId());
+      } else {
+        chara.initChase(args2[1]);
+      }
       return;
     }
     if (args2[0].toLowerCase() === 'clear') {
       chara.clearPathfind();
       return;
     }
-    var x = QPlus.getArg(args2, /^x(\d+)/i);
-    var y = QPlus.getArg(args2, /^y(\d+)/i);
-    if (Imported.QMovement) {
-      if (x === null) {
-        x = QPlus.getArg(args2, /^px(\d+)/i);
+    var x;
+    var y;
+    if (args2[0].toLowerCase() === 'towards') {
+      var chara2;
+      if (args2[1].toLowerCase() === 'this') {
+        chara2 = this.character(0);
       } else {
-        x = Number(x) * QMovement.tileSize;
+        chara2 = QPlus.getCharacter(args2[1]);
       }
-      if (y === null) {
-        y = QPlus.getArg(args2, /^py(\d+)/i);
+      if (Imported.QMovement) {
+        var pos = chara.centerWith(chara2);
+        x = pos.x;
+        y = pos.y;
       } else {
-        y = Number(y) * QMovement.tileSize;
+        x = chara2.x;
+        y = chara2.y;
+      }
+    } else {
+      x = QPlus.getArg(args2, /^x(\d+)/i);
+      y = QPlus.getArg(args2, /^y(\d+)/i);
+      if (Imported.QMovement) {
+        if (x === null) {
+          x = QPlus.getArg(args2, /^px(\d+)/i);
+        } else {
+          x = Number(x) * QMovement.tileSize;
+        }
+        if (y === null) {
+          y = QPlus.getArg(args2, /^py(\d+)/i);
+        } else {
+          y = Number(y) * QMovement.tileSize;
+        }
       }
     }
     if (x === null && y === null) return;
     chara.initPathfind(Number(x), Number(y), {
-      smart: Number(QPlus.getArg(args2, /^smart(\d+)/i))
+      smart: Number(QPlus.getArg(args2, /^smart(\d+)/i)),
+      adjustEnd: true
     })
     var wait = QPlus.getArg(args2, /^wait$/i);
     if (wait) {
@@ -839,7 +846,8 @@ function QPathfind() {
       var half = QMovement.tileSize / 2;
       this.initPathfind(x - half, y - half, {
         smart: 2,
-        breakable: true
+        breakable: true,
+        adjustEnd: true
       })
       Alias_Game_Player_moveByMouse.call(this, x, y);
     };
@@ -862,6 +870,15 @@ function QPathfind() {
       if (this._movingWithMouse) {
         this.clearMouseMove();
       }
+    };
+
+    var Alias_Game_Player_triggerTouchAction = Game_Player.prototype.triggerTouchAction;
+    Game_Player.prototype.triggerTouchAction = function() {
+      var triggered = Alias_Game_Player_triggerTouchAction.call(this);
+      if (triggered && this._movingWithMouse) {
+        this.clearMouseMove();
+      }
+      return triggered;
     };
   }
 
