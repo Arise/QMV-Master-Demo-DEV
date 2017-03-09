@@ -119,7 +119,7 @@ if (!Imported.QPlus) {
   var Alias_Game_CharacterBase_distancePerFrame = Game_CharacterBase.prototype.distancePerFrame;
   Game_CharacterBase.prototype.distancePerFrame = function() {
     var spd = Alias_Game_CharacterBase_distancePerFrame.call(this);
-    return spd * this._yScale;
+    return spd * (this._yScale || 1);
   };
 
   //-----------------------------------------------------------------------------
