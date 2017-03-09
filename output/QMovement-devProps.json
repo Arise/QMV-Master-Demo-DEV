@@ -7,11 +7,15 @@
       "prototype - destinationPX - undefined",
       "prototype - destinationPY - undefined"
     ],
+    "Game_System": [
+      "alias - prototype - onAfterLoad - undefined"
+    ],
     "Game_Map": [
-      "alias - prototype - setup - mapId",
       "override - prototype - tileWidth - undefined",
       "override - prototype - tileHeight - undefined",
       "prototype - flagAt - x, y",
+      "alias - prototype - setupEvents - undefined",
+      "prototype - setupColliders - undefined",
       "alias - prototype - refreshIfNeeded - undefined",
       "prototype - reloadAllColliders - undefined",
       "prototype - reloadTileMap - undefined",
@@ -100,6 +104,8 @@
       "prototype - subArc - settings",
       "prototype - subQMove - settings",
       "override - prototype - moveRandom - undefined",
+      "override - prototype - turnTowardCharacter - character",
+      "override - prototype - turnAwayFromCharacter - character",
       "prototype - deltaPXFrom - x",
       "prototype - deltaPYFrom - y",
       "prototype - pixelDistanceFrom - x, y"
@@ -122,7 +128,10 @@
       "override - prototype - startMapEvent - x, y, triggers, normal",
       "override - prototype - checkEventTriggerHere - triggers",
       "prototype - checkEventTriggerThere - triggers, x2, y2",
+      "override - prototype - triggerTouchAction - undefined",
       "prototype - checkCounter - triggers, x2, y2",
+      "prototype - airshipHere - undefined",
+      "prototype - shipBoatThere - x2, y2",
       "prototype - moveStraight - d, dist",
       "override - prototype - moveDiagonally - horz, vert"
     ],
