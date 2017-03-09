@@ -1665,7 +1665,6 @@ function ColliderManager() {
       xSpeed = Math.cos(this._radian);
       ySpeed = Math.sin(this._radian);
     }
-    var prevX = this._realPX;
     if (this._px < this._realPX) {
       this._realPX = Math.max(this._realPX - this.frameSpeed(xSpeed), this._px);
     }
@@ -1683,7 +1682,6 @@ function ColliderManager() {
     this._realX = this._realPX / QMovement.tileSize;
     this._realY = this._realPY / QMovement.tileSize;
     this._freqCount += this.frameSpeed();
-    //console.log(this._freqCount, prevX, this._px);
   };
 
   Game_CharacterBase.prototype.updateArc = function() {

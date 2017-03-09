@@ -67,7 +67,8 @@ if (!Imported.QPlus) {
  * CHARAID - The character identifier.
  *
  *  - For player: 0, p, or player
- *  - For events: EVENTID, eEVENTID or eventEVENTID (replace EVENTID with a number)
+ *  - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this
+ *  (replace EVENTID with a number)
  *
  * Possible options:
  *  - xX     - where X is the x position in grid terms
@@ -78,7 +79,30 @@ if (!Imported.QPlus) {
  *   When 1, pathfind will recalculate when its path is blocked
  *   When 2, pathfind will also recalucate at a set interval
  *  - wait   - the event that called this will wait until the pathfind is complete
+ * ----------------------------------------------------------------------------
+ * **Pathfind Towards**
+ * ----------------------------------------------------------------------------
+ * To start a pathfind towards a character, you need to use a plugin command:
+ * ~~~
+ *  qPathfind [CHARAID] towards [TARGETCHARAID] [list of options]
+ * ~~~
+ * CHARAID - The character identifier.
  *
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this
+ *  (replace EVENTID with a number)
+ *
+ * TARGETCHARAID - The CharaID of who you want the CHARAID to move towards
+ *
+ * Possible options:
+ *  - xX     - where X is the x position in grid terms
+ *  - yY     - where Y is the y position in grid terms
+ *  - pxX    - where X is the x position in pixel terms (QMovement only)
+ *  - pyY    - where Y is the y position in pixel terms (QMovement only)
+ *  - smartX - where X is 1 or 2.
+ *   When 1, pathfind will recalculate when its path is blocked
+ *   When 2, pathfind will also recalucate at a set interval
+ *  - wait   - the event that called this will wait until the pathfind is complete
  * ----------------------------------------------------------------------------
  * **Chase**
  * ----------------------------------------------------------------------------
@@ -89,7 +113,8 @@ if (!Imported.QPlus) {
  * CHARAID - The character identifier.
  *
  *  - For player: 0, p, or player
- *  - For events: EVENTID, eEVENTID or eventEVENTID (replace EVENTID with a number)
+ *  - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this
+ *  (replace EVENTID with a number)
  *
  * TARGETCHARAID - The CharaID of who you want the CHARAID to chase
  *
@@ -106,7 +131,8 @@ if (!Imported.QPlus) {
  * CHARAID - The character identifier.
  *
  *  - For player: 0, p, or player
- *  - For events: EVENTID, eEVENTID or eventEVENTID (replace EVENTID with a number)
+ *  - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this
+ *  (replace EVENTID with a number)
  * ----------------------------------------------------------------------------
  * **Examples**
  * ----------------------------------------------------------------------------
