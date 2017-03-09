@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QAudio = '2.1.1';
+Imported.QAudio = '2.2.0';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QAudio requires QPlus to work.';
@@ -19,7 +19,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QAudio>
  * Few new audio features
- * @author Quxios  | Version 2.1.1
+ * @author Quxios  | Version 2.2.0
  *
  * @requires QPlus
  *
@@ -130,12 +130,15 @@ if (!Imported.QPlus) {
  * ## Links
  * ============================================================================
  * RPGMakerWebs:
+ *
  *  http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
  *
  * Terms of use:
+ *
  *  https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
  * Like my plugins? Support me on Patreon!
+ *
  *  https://www.patreon.com/quxios
  *
  * @tags audio, character, proximity
@@ -189,7 +192,11 @@ if (!Imported.QPlus) {
       }
       var bindTo = QPlus.getArg(args2, /^bindTo(.+)/i);
       if (bindTo) {
-        bindTo = QPlus.getCharacter(bindTo);
+        if (bindTo.toLowerCase() === 'this') {
+          bindTo = this.character(0);
+        } else {
+          bindTo = QPlus.getCharacter(bindTo);
+        }
       }
       var x = QPlus.getArg(args2, /^x(\d+)/i);
       if (x === null) {
