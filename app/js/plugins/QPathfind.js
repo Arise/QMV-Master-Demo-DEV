@@ -173,11 +173,12 @@ function QPathfind() {
   var _smartWait = Number(_params['Smart Wait']);
   var _halfOpt = _params['Half Opt'] === 'true';
   var _defaultOptions = {
-    smart: 0,
-    chase: null,
-    breakable: false,
-    earlyEnd: true,
-    adjustEnd: false
+    smart: 0, // 0 no smart, 1 recalc on blocked, 2 recalc at intervals
+    chase: null, // charaID of character it's chasing
+    breakable: false, // moving with input breaks pathfind
+    earlyEnd: true, // end early if final point isn't passable
+    adjustEnd: false, // adjust end point if not passable
+    towards: false // a short A*, returns first 2 steps (similar to Game_Character.prototype.findDirectionTo)
   }
   // value to use to offset smart ticker when target is far away
   // when target is far away no need to calc as often, so we slow it down with offset
@@ -199,6 +200,7 @@ function QPathfind() {
   QPathfind.prototype.initialize = function(charaId, endPoint, options) {
     this.initMembers(charaId, endPoint, options);
     this.beforeStart();
+    this.update();
   };
 
   QPathfind.prototype.initMembers = function(charaId, endPoint, options) {
@@ -208,6 +210,11 @@ function QPathfind() {
     this.options.breakable = this.options.breakable === undefined ? _defaultOptions.breakable : this.options.breakable;
     this.options.earlyEnd  = this.options.earlyEnd === undefined ? _defaultOptions.earlyEnd : this.options.earlyEnd;
     this.options.adjustEnd = this.options.adjustEnd === undefined ? _defaultOptions.adjustEnd : this.options.adjustEnd;
+    this.options.towards   = this.options.towards === undefined ? _defaultOptions.towards : this.options.towards;
+    if (this.options.towards) {
+      this.options.earlyEnd = false;
+      this.options.adjustEnd = false;
+    }
     if (options.chase !== null) {
       var chasing = QPlus.getCharacter(options.chase);
       if (Imported.QMovement) {
@@ -325,7 +332,11 @@ function QPathfind() {
     if (this._completed && this.options.smart > 1) {
       this.updateSmart();
     } else if (!this._completed) {
-      for (var i = 0; i < this._intervals; i++) {
+      var stepsPerFrame = this._intervals;
+      if (this.options.towards) {
+        stepsPerFrame = Math.min(stepsPerFrame, 50);
+      }
+      for (var i = 0; i < stepsPerFrame; i++) {
         if (this.options.chase) {
           var chasing = QPlus.getCharacter(this.options.chase);
           var oldThrough = chasing._through;
@@ -341,6 +352,9 @@ function QPathfind() {
           this.onFail();
           break;
         }
+      }
+      if (this.options.towards) {
+        this.onComplete();
       }
     }
   };
@@ -431,6 +445,10 @@ function QPathfind() {
   QPathfind.prototype.onComplete = function() {
     //console.timeEnd('Pathfind');
     this._completed = true;
+    if (this.options.towards) {
+      var firstSteps = this.createFinalPath().slice(0, 2);
+      return this.character().startPathfind(firstSteps);
+    }
     this.character().startPathfind(this.createFinalPath());
   };
 
@@ -439,6 +457,9 @@ function QPathfind() {
     this._completed = true;
     if (this.options.chase !== null) {
       return;
+    }
+    if (this.options.towards) {
+      return this.onComplete();
     }
     this.character().clearPathfind();
   };
@@ -460,7 +481,9 @@ function QPathfind() {
     var xf = this._endNode.x;
     var yf = this._endNode.y;
     var neighbors = [];
+    var stepDist = 1;
     if (Imported.QMovement) {
+      stepDist = chara.moveTiles();
       var nearEnd = Math.abs(x - xf) < chara.optTiles() &&
                     Math.abs(y - yf) < chara.optTiles();
       var tiles = nearEnd ? chara.moveTiles() : chara.optTiles();
@@ -496,18 +519,15 @@ function QPathfind() {
         } else {
           passed = chara.canPass(x, y, dir);
         }
-
       }
       var val = x2 + (y2 * this._mapWidth);
       if (passed || val === this._endNode.value) {
         var node;
         if (Imported.QMovement) {
-          if (Math.abs(x2 - xf) < tiles && Math.abs(y2 - yf) < tiles) {
+          if (Math.abs(x2 - xf) < stepDist && Math.abs(y2 - yf) < stepDist) {
             // this is as close as we can get
-            // so make a "fake" endnode
-            node = this.node(current, new Point(x2, y2));
-            node.value = this._endNode.value;
-            neighbors.push(node);
+            // so force in endnode
+            neighbors.push(this._endNode);
             continue;
           }
         }

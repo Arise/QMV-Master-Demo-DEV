@@ -23,6 +23,9 @@
 
   Game_Player.prototype.moveByMouse = function(x, y) {
     $gameTemp.setPixelDestination(x, y);
+    if (this.triggerTouchAction()) {
+      return this.clearMouseMove();
+    }
     this._requestMouseMove = false;
     this._movingWithMouse = true;
     // alias with pathfinding addon
@@ -210,8 +213,13 @@
         var y1 = $gameMap.roundPYWithDirection(this._py, vert, this.moveTiles());
         this.startMapEvent(x1, y1, [0, 1, 2], true);
         if (!$gameMap.isAnyEventStarting()) {
-          return this.checkCounter([0, 1, 2], $gameTemp.destinationPX(), $gameTemp.destinationPY());
+          if (this.checkCounter([0, 1, 2], $gameTemp.destinationPX(), $gameTemp.destinationPY())) {
+            this.clearMouseMove();
+            this.setDirection(dir);
+            return true;
+          }
         } else {
+          this.clearMouseMove();
           this.setDirection(dir);
           return true;
         }
