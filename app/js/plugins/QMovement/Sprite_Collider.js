@@ -9,11 +9,11 @@ function Sprite_Collider() {
   Sprite_Collider.prototype = Object.create(Sprite.prototype);
   Sprite_Collider.prototype.constructor = Sprite_Collider;
 
-  Sprite_Collider.prototype.initialize = function(collider, options) {
+  Sprite_Collider.prototype.initialize = function(collider, duration) {
     Sprite.prototype.initialize.call(this);
     this.z = 7;
-    this._duration = options.duration || -1;
-    this._color = options.color || '#ff0000';
+    this._duration = duration || 0;
+    this._color = collider.color || '#ff0000';
     this.setupCollider(collider);
   };
 
