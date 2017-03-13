@@ -45,7 +45,11 @@ if (!Imported.QPlus) {
  *
  *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
- * @tags
+ * Like my plugins? Support me on Patreon!
+ *
+ *  https://www.patreon.com/quxios
+ *
+ * @tags character, sprite, scale
  */
 //=============================================================================
 
