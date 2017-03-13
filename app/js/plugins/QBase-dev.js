@@ -32,11 +32,11 @@ if (!Imported.QPlus) {
  *
  * @requires
  *
+ * @video
+ * 
  * @param
  * @desc
  * @default
- *
- * @video
  *
  * @help
  * ============================================================================
