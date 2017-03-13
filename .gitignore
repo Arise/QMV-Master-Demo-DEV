@@ -34,3 +34,4 @@ app/js/rpg_windows.js
 
 # other
 .vscode
+app/js/plugins/QuasiSight.js
