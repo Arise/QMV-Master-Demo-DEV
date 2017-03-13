@@ -183,7 +183,7 @@ function Polygon_Collider() {
 
   Polygon_Collider.prototype.setRadian = function(radian) {
     radian = radian !== undefined ? radian : 0;
-    this.rotate(radian - this.radian);
+    this.rotate(radian - this._radian);
   };
 
   Polygon_Collider.prototype.rotate = function(radian) {
