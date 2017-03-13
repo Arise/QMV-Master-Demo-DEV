@@ -201,6 +201,9 @@ function ColliderManager() {
 
   ColliderManager.draw = function(collider, duration) {
     if ($gameTemp.isPlaytest()) {
+      // TODO check if already drawn
+      // if drawn, update the sights duration
+      collider.kill = false;
       var sprite = new Sprite_Collider(collider, duration || -1);
       this.container.addChild(sprite);
     }
