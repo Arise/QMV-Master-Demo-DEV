@@ -6,13 +6,11 @@ var Imported = Imported || {};
 Imported.QMRegionColliders = '1.0.0';
 
 if (!Imported.QMovement) {
-  var msg = 'Error: QM+RegionColliders requires QMovement to work.';
-  alert(msg);
-  throw new Error(msg);
+  alert('Error: QM+RegionColliders requires QMovement to work.');
+  throw new Error('Error: QM+RegionColliders requires QMovement to work.');
 } else if (!QPlus.versionCheck(Imported.QMovement, '1.1.0')) {
-  var msg = 'Error: QM+RegionColliders requires QPlus 1.1.0 or newer to work.';
-  alert(msg);
-  throw new Error(msg);
+  alert('Error: QM+RegionColliders requires QPlus 1.1.0 or newer to work.');
+  throw new Error('Error: QM+RegionColliders requires QPlus 1.1.0 or newer to work.');
 }
 
 //=============================================================================

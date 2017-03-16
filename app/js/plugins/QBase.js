@@ -6,13 +6,11 @@ var Imported = Imported || {};
 Imported.QName = '1.0.0';
 
 if (!Imported.QPlus) {
-  var msg = 'Error: QName requires QPlus to work.';
-  alert(msg);
-  throw new Error(msg);
+  alert('Error: QName requires QPlus to work.');
+  throw new Error('Error: QName requires QPlus to work.');
 } else if (!QPlus.versionCheck(Imported.QPlus, 'x.y.z')) {
-  var msg = 'Error: QName requires QPlus x.y.z or newer to work.';
-  alert(msg);
-  throw new Error(msg);
+  alert('Error: QName requires QPlus x.y.z or newer to work.');
+  throw new Error('Error: QName requires QPlus x.y.z or newer to work.');
 }
 
 //=============================================================================

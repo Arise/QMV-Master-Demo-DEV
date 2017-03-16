@@ -6,13 +6,11 @@ var Imported = Imported || {};
 Imported.QSight = '1.0.0';
 
 if (!Imported.QPlus) {
-  var msg = 'Error: QSight requires QPlus to work.';
-  alert(msg);
-  throw new Error(msg);
-} if (Imported.QMovement && QPlus.versionCheck(Imported.QMovement, '1.1.1')) {
-  var msg = 'Error: QSight requires QMovement 1.1.1+ to work.';
-  alert(msg);
-  throw new Error(msg);
+  alert('Error: QSight requires QPlus to work.');
+  throw new Error('Error: QSight requires QPlus to work.');
+} if (Imported.QMovement && !QPlus.versionCheck(Imported.QMovement, '1.1.1')) {
+  alert('Error: QSight requires QMovement 1.1.1+ to work.');
+  throw new Error('Error: QSight requires QMovement 1.1.1+ to work.');
 }
 
 //=============================================================================
@@ -100,7 +98,7 @@ if (!Imported.QPlus) {
  * ----------------------------------------------------------------------------
  * TODO
  * ~~~
- *  qSight CHARAID SHAPE RANGE SWITCH TARGETID
+ *  qSight CHARAID check SHAPE RANGE SWITCH TARGETID
  * ~~~
  * ----------------------------------------------------------------------------
  * **Toggle charcter invisible**
@@ -157,8 +155,6 @@ function QSight() {
 
   if (Imported.QMovement) {
     QSight.shadowCast = function(collider, from, length) {
-      //var radianWithPoint = {};
-      //var pointWithRadian = {};
       var radians = [];
       var points = [];
       var vertices = collider._vertices;
@@ -186,6 +182,8 @@ function QSight() {
           maxI = i;
         }
       }
+      // TODO figure out a better way tol calc the radians
+      // so I don't need to "fix" the min/max values
       if (Math.abs(max - min) > Math.PI) {
         min = 0;
         max = 0;
@@ -221,12 +219,14 @@ function QSight() {
         points: polyPoints,
         origin: new Point(points[minI].x, points[minI].y)
       }
-      //return [points, radianWithPoint[min].x, radianWithPoint[min].y];
       /*
       // New Method that outlines object, casting the shadow
       // behind the object instead.
       // Not enabled for now because it's most likely more
-      // performant and not needed.
+      // performant and not needed. Though if you are to create
+      // a lighting system with shadows and want to use this shadow
+      // casting function, then you should use the bottom method
+      // instead.
       var minIndex = points.indexOf(radianWithPoint[min]);
       var firstHalf = points.splice(0, minIndex);
       points = points.concat(firstHalf);
@@ -273,16 +273,47 @@ function QSight() {
 
   var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
-    if (command.toLowerCase() === "qsight") {
-      if (args[0].toLowerCase() === "setinvisible") {
-        var charaId = Number(args[1]);
-        var chara = charaId === 0 ? $gamePlayer : $gameMap.event(charaId);
-        if (!chara) return;
-        chara._invisible = args[1].toLowerCase() === "true";
-        return;
-      }
+    if (command.toLowerCase() === 'qsight') {
+      return this.qSightCommand(args);
     }
     Alias_Game_Interpreter_pluginCommand.call(this, command, args);
+  };
+
+  Game_Interpreter.prototype.qSightCommand = function(args) {
+    var chara;
+    if (args[0].toLowerCase() === 'this') {
+      chara = this.character(0);
+    } else {
+      chara = QPlus.getCharacter(args[0]);
+    }
+    var args2 = args.slice(1);
+    if (!chara) return;
+    //QPlus.getArg(args2, /lock/i)
+    if (args2[0].toLowerCase() === 'invisible') {
+      chara._invisible = args2[1].toLowerCase() === 'true';
+      return;
+    }
+    if (args2[0].toLowerCase() === 'check') {
+      var shape = args2[1];
+      var range = Number(args[2]);
+      var handler = args[3];
+      var target = args[4] || 0;
+      if (target === 'this') {
+        target = this.character(0).charaId();
+      }
+      var canSee = chara.checkSight({
+        shape: shape,
+        range: range,
+        targetId: target
+      })
+      if (/^[0-9]+$/.test(handler)) {
+        $gameSwitches.setValue(Number(handler), canSee);
+      } else if (chara.constructor === Game_Event) {
+        var key = [chara._mapId, chara._eventId, handler];
+        $gameSelfSwitches.setValue(key, canSee);
+      }
+      return canSee;
+    }
   };
 
   //-----------------------------------------------------------------------------
@@ -362,16 +393,16 @@ function QSight() {
   Game_CharacterBase.prototype.updateSight = function() {
     this.updateSightCache();
     var canSee = this.checkSight(this._sight);
-    this._sight.reshape = false;
     var handler = this._sight.handler;
     if (handler) {
       if (/^[0-9]+$/.test(handler)) {
         $gameSwitches.setValue(Number(handler), canSee);
       } else if (this.constructor === Game_Event) {
-        var key = [this._mapId, this._eventId, handler.toUpperCase()];
+        var key = [this._mapId, this._eventId, handler];
         $gameSelfSwitches.setValue(key, canSee);
       }
     }
+    this._sight.reshape = false;
   };
 
   Game_CharacterBase.prototype.updateSightCache = function() {

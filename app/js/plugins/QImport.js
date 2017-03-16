@@ -6,13 +6,11 @@ var Imported = Imported || {};
 Imported.QImport = '1.0.0';
 
 if (!Imported.QPlus) {
-  var msg = 'Error: QImport requires QPlus to work.';
-  alert(msg);
-  throw new Error(msg);
+  alert('Error: QImport requires QPlus to work.');
+  throw new Error('Error: QImport requires QPlus to work.');
 } else if (!QPlus.versionCheck(Imported.QPlus, '1.1.1')) {
-  var msg = 'Error: QImport requires QPlus 1.1.1 or newer to work.';
-  alert(msg);
-  throw new Error(msg);
+  alert('Error: QImport requires QPlus 1.1.1 or newer to work.');
+  throw new Error('Error: QImport requires QPlus 1.1.1 or newer to work.');
 }
 
 //=============================================================================
@@ -227,6 +225,7 @@ function QImport() {
 
   QImport.importNote = function(data, prop, match, args) {
     var type = args.shift();
+    var obj;
     switch (type) {
       case 'actor': {
         obj = $dataActors[Number(args[0])];

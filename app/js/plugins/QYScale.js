@@ -6,9 +6,8 @@ var Imported = Imported || {};
 Imported.QYScale = '1.0.0';
 
 if (!Imported.QPlus) {
-  var msg = 'Error: QYScale requires QPlus to work.';
-  alert(msg);
-  throw new Error(msg);
+  alert('Error: QYScale requires QPlus to work.');
+  throw new Error('Error: QYScale requires QPlus to work.');
 }
 
 //=============================================================================
