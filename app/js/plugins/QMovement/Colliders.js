@@ -142,9 +142,9 @@ function Polygon_Collider() {
 
   Polygon_Collider.prototype.gridEdge = function() {
     var x1 = this._xMin + this.x + this.ox;
-    var x2 = this._xMax + this.x + this.ox;
+    var x2 = this._xMax + this.x + this.ox - 1;
     var y1 = this._yMin + this.y + this.oy;
-    var y2 = this._yMax + this.y + this.oy;
+    var y2 = this._yMax + this.y + this.oy - 1;
     x1 = Math.floor(x1 / QMovement.tileSize);
     x2 = Math.floor(x2 / QMovement.tileSize);
     y1 = Math.floor(y1 / QMovement.tileSize);
