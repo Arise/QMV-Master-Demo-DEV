@@ -169,7 +169,10 @@
     newBox.isBush    = (flag & 0x40)  || /<bush>/i.test(newBox.note);
     newBox.isCounter = (flag & 0x80)  || /<counter>/i.test(newBox.note);
     newBox.isDamage  = (flag & 0x100) || /<damage>/i.test(newBox.note);
-    newBox.id = this._tileCounter++;
+    var vx = x * this.height() * this.width();
+    var vy = y * this.height();
+    var vz = index;
+    newBox.location  = vx + vy + vz;
     if (newBox.isWater2) {
       newBox.color = QMovement.water2.toLowerCase();
     } else if (newBox.isWater1) {
