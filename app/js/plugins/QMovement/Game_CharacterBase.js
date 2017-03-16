@@ -348,7 +348,7 @@
       var newRad = Math.max(this._currentRad - this.angularSpeed(), this._targetRad);
     }
     var x1 = this._pivotX + this._radiusL * Math.cos(newRad);
-    var y1 = this._pivotY + this._radiusH * -Math.sin(newRad);
+    var y1 = this._pivotY + this._radiusH * Math.sin(newRad);
     this._currentRad = newRad;
     this._px = this._realPX = x1;
     this._py = this._realPY = y1;
@@ -421,7 +421,7 @@
 
   Game_CharacterBase.prototype.moveStraight = function(d, dist) {
     dist = dist || this.moveTiles();
-    this.setMovementSuccess(this.canPixelPass(this.px, this.py, d, dist));
+    this.setMovementSuccess(this.canPixelPass(this._px, this._py, d, dist));
     var originalSpeed = this._moveSpeed;
     if (this.smartMove() === 1 || this.smartMove() > 2) {
       this.smartMoveSpeed(d);
@@ -448,7 +448,7 @@
 
   Game_CharacterBase.prototype.moveDiagonally = function(horz, vert, dist) {
     dist = dist || this.moveTiles();
-    this.setMovementSuccess(this.canPixelPassDiagonally(this.px, this.py, horz, vert, dist));
+    this.setMovementSuccess(this.canPixelPassDiagonally(this._px, this._py, horz, vert, dist));
     var originalSpeed = this._moveSpeed;
     if (this.smartMove() === 1 || this.smartMove() > 2) this.smartMoveSpeed([horz, vert]);
     if (this.isMovementSucceeded()) {
@@ -470,9 +470,9 @@
     }
     this._moveSpeed = originalSpeed;
     if (!this.isMovementSucceeded() && this.smartMove() > 1) {
-      if (this.canPixelPass(this.px, this.py, horz)) {
+      if (this.canPixelPass(this._px, this._py, horz)) {
         this.moveStraight(horz);
-      } else if (this.canPixelPass(this.px, this.py, vert)) {
+      } else if (this.canPixelPass(this._px, this._py, vert)) {
         this.moveStraight(vert);
       }
     }
@@ -483,7 +483,7 @@
     var realDir = this.radianToDirection(radian, true);
     var dir = this.radianToDirection(radian);
     var xAxis = Math.cos(radian);
-    var yAxis = -Math.sin(radian);
+    var yAxis = Math.sin(radian);
     var horzSteps = Math.abs(xAxis) * dist;
     var vertSteps = Math.abs(yAxis) * dist;
     var horz = xAxis > 0 ? 6 : xAxis < 0 ? 4 : 0;
@@ -513,9 +513,9 @@
     }
     if (!this.isMovementSucceeded() && this.smartMove() > 1) {
       if ([1, 3, 7, 9].contains(realDir)) {
-        if (this.canPixelPass(this.px, this.py, horz, horzSteps)) {
+        if (this.canPixelPass(this._px, this._py, horz, horzSteps)) {
           this.moveStraight(horz, horzSteps);
-        } else if (this.canPixelPass(this.px, this.py, vert, vertSteps)) {
+        } else if (this.canPixelPass(this._px, this._py, vert, vertSteps)) {
           this.moveStraight(vert, vertSteps);
         }
       } else {
@@ -535,7 +535,7 @@
       }
       return this.fixedDiagMove(diag[dir][0], diag[dir][1], dist);
     }
-    this.setMovementSuccess(this.canPixelPass(this.px, this.py, dir, dist));
+    this.setMovementSuccess(this.canPixelPass(this._px, this._py, dir, dist));
     if (this.isMovementSucceeded()) {
       this._diagonal = false;
       this._adjustFrameSpeed = false;
@@ -552,7 +552,7 @@
   };
 
   Game_CharacterBase.prototype.fixedDiagMove = function(horz, vert, dist) {
-    this.setMovementSuccess(this.canPixelPassDiagonally(this.px, this.py, horz, vert));
+    this.setMovementSuccess(this.canPixelPassDiagonally(this._px, this._py, horz, vert));
     if (this.isMovementSucceeded()) {
       this._diagonal = this.direction8(horz, vert);
       this._adjustFrameSpeed = false;
@@ -583,7 +583,7 @@
     var cc = cc ? 1 : -1;
     var dx = this._px - pivotX;
     var dy = this._py - pivotY;
-    var rad = Math.atan2(-dy, dx);
+    var rad = Math.atan2(dy, dx);
     frames = frames || 1;
     rad += rad < 0 ? 2 * Math.PI : 0;
     this._currentRad = rad;
@@ -653,7 +653,7 @@
       this._realPY = y1;
       this._px = x2;
       this._py = y2;
-      this._radian = Math.atan2(y1 - y2, x2 - x1);
+      this._radian = Math.atan2(y2 - y1, x2 - x1);
       this._radian += this._radian < 0 ? 2 * Math.PI : 0;
       this._adjustFrameSpeed = false;
       this.increaseSteps();
