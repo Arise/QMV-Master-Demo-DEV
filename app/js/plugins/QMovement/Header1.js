@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.1.0';
+Imported.QMovement = '1.1.1';
 
 if (!Imported.QPlus) {
   var msg = 'Error: QMovement requires QPlus to work.';
@@ -19,7 +19,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.1.0
+ * @author Quxios  | Version 1.1.1
  *
  * @repo https://github.com/quxios/QMovement
  *
