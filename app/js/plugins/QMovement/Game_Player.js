@@ -84,7 +84,7 @@
 
   Game_Player.prototype.moveWithAnalog = function() {
     var horz = Input._dirAxesA.x;
-    var vert = -Input._dirAxesA.y;
+    var vert = Input._dirAxesA.y;
     if (horz === 0 && vert === 0) return;
     var radian = Math.atan2(vert, horz);
     radian += radian < 0 ? Math.PI * 2 : 0;
@@ -196,7 +196,7 @@
     if ($gameTemp.isDestinationValid()) {
       var dx = $gameTemp.destinationPX() - this.cx();
       var dy = $gameTemp.destinationPY() - this.cy();
-      var radian = Math.atan2(-dy, dx);
+      var radian = Math.atan2(dy, dx);
       radian += radian < 0 ? 2 * Math.PI : 0;
       var dir = this.radianToDirection(radian, true);
       var horz = dir;
