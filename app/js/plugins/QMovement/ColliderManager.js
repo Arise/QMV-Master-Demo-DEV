@@ -63,9 +63,7 @@ function ColliderManager() {
   };
 
   ColliderManager.removeSprite = function(sprite) {
-    if (sprite) {
-      this.container.removeChild(sprite);
-    }
+    this.container.removeChild(sprite);
   };
 
   ColliderManager.updateGrid = function(collider, prevGrid) {
@@ -80,6 +78,7 @@ function ColliderManager() {
       grid = this._colliderGrid;
       currGrid = collider.sectorEdge();
     }
+    // TODO make this into 1 single 2d loop
     var x, y;
     if (prevGrid) {
       if (currGrid.x1 == prevGrid.x1 && currGrid.y1 === prevGrid.y1 &&
@@ -113,10 +112,10 @@ function ColliderManager() {
   ColliderManager.removeFromGrid = function(collider) {
     var edge;
     var grid;
-    if (collider._colliders) {
+    if (collider._colliders) { // Is a character obj
       grid = this._characterGrid;
       currGrid = collider.collider('bounds').sectorEdge();
-    } else {
+    } else { // is a collider
       grid = this._colliderGrid;
       currGrid = collider.sectorEdge();
     }
@@ -130,6 +129,8 @@ function ColliderManager() {
     }
   };
 
+  // TODO create a similar function that gets
+  // characters that intersect with the collider passed in
   ColliderManager.getCharactersNear = function(collider, only) {
     var grid = collider.sectorEdge();
     var arr = [];
@@ -141,6 +142,9 @@ function ColliderManager() {
         if (y < 0 || y >= this.sectorRows()) continue;
         var charas = this._characterGrid[x][y];
         for (i = 0; i < charas.length; i++) {
+          if (arr.contains(charas[i])) {
+            continue;
+          }
           if (only) {
             if (only(charas[i]) === 'break') {
               isBreaking = true;
@@ -148,9 +152,7 @@ function ColliderManager() {
             }
             if (!only(charas[i])) continue;
           }
-          if (!arr.contains(charas[i])) {
-            arr.push(charas[i]);
-          }
+          arr.push(charas[i]);
         }
         if (isBreaking) break;
       }
@@ -161,7 +163,6 @@ function ColliderManager() {
   };
 
   ColliderManager.getCollidersNear = function(collider, only) {
-    only = only || function() { return true; };
     var grid = collider.sectorEdge();
     var arr = [];
     var isBreaking = false;
@@ -172,6 +173,9 @@ function ColliderManager() {
         if (y < 0 || y >= this.sectorRows()) continue;
         var colliders = this._colliderGrid[x][y];
         for (i = 0; i < colliders.length; i++) {
+          if (arr.contains(colliders[i])) {
+            continue;
+          }
           if (only) {
             if (only(colliders[i]) === 'break') {
               isBreaking = true;
@@ -179,9 +183,7 @@ function ColliderManager() {
             }
             if (!only(colliders[i])) continue;
           }
-          if (!arr.contains(colliders[i])) {
-            arr.push(colliders[i]);
-          }
+          arr.push(colliders[i]);
         }
         if (isBreaking) break;
       }
@@ -201,8 +203,14 @@ function ColliderManager() {
 
   ColliderManager.draw = function(collider, duration) {
     if ($gameTemp.isPlaytest()) {
-      // TODO check if already drawn
-      // if drawn, update the sights duration
+      var sprites = this.container.children;
+      for (var i = 0; i < sprites.length; i++) {
+        if (sprites[i]._collider.id === collider.id) {
+          sprites[i]._collider.kill = false;
+          sprites[i]._duration = duration;
+          return;
+        }
+      }
       collider.kill = false;
       var sprite = new Sprite_Collider(collider, duration || -1);
       this.container.addChild(sprite);

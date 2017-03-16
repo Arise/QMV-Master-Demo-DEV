@@ -15,6 +15,7 @@ function Sprite_Collider() {
     this._duration = duration || 0;
     this._color = collider.color || '#ff0000';
     this.setupCollider(collider);
+    this.checkChanges();
   };
 
   Sprite_Collider.prototype._setupCollider = function(collider) {
@@ -22,7 +23,6 @@ function Sprite_Collider() {
     this.bitmap = new Bitmap(collider.width, collider.height);
     this.drawCollider();
   };
-
 
   Sprite_Collider.prototype.setupCollider = function(collider) {
     this._collider = collider;
@@ -80,7 +80,7 @@ function Sprite_Collider() {
 
   Sprite_Collider.prototype.updateDecay = function() {
     this._duration--;
-    if (this._duration <= 0) {
+    if (this._duration <= 0 || this._collider.kill) {
       ColliderManager.removeSprite(this);
       this._collider = null;
     }
