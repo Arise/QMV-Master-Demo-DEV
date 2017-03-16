@@ -9,7 +9,7 @@ function ColliderManager() {
   ColliderManager._colliders = [];
   ColliderManager._colliderGrid = [];
   ColliderManager._characterGrid = [];
-  ColliderManager._sectorSize = 48;
+  ColliderManager._sectorSize = QMovement.tileSize;
   ColliderManager._needsRefresh = true;
   ColliderManager.container = new Sprite();
   ColliderManager.container.alpha = 0.3;
@@ -111,6 +111,7 @@ function ColliderManager() {
 
   ColliderManager.removeFromGrid = function(collider) {
     var edge;
+    var currGrid;
     var grid;
     if (collider._colliders) { // Is a character obj
       grid = this._characterGrid;
@@ -205,7 +206,7 @@ function ColliderManager() {
     if ($gameTemp.isPlaytest()) {
       var sprites = this.container.children;
       for (var i = 0; i < sprites.length; i++) {
-        if (sprites[i]._collider.id === collider.id) {
+        if (sprites[i]._collider && sprites[i]._collider.id === collider.id) {
           sprites[i]._collider.kill = false;
           sprites[i]._duration = duration;
           return;
