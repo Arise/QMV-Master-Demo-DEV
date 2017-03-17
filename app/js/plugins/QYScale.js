@@ -20,7 +20,7 @@ if (!Imported.QPlus) {
  *
  * @development
  *
- * @video TODO
+ * @video https://youtu.be/3zAB1WYA1kc
  *
  * @help
  * ============================================================================
