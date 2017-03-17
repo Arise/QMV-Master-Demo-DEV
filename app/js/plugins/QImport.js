@@ -1,5 +1,5 @@
 //=============================================================================
-// QImport
+// QImport DEV
 //=============================================================================
 
 var Imported = Imported || {};
@@ -16,10 +16,12 @@ if (!Imported.QPlus) {
 //=============================================================================
  /*:
  * @plugindesc <QImport>
- * desc
+ * Lets you import text from other game objects or from txt files
  * @author Quxios  | Version 1.0.0
  *
  * @requires QPlus
+ *
+ * @development
  *
  * @help
  * ============================================================================
@@ -27,52 +29,70 @@ if (!Imported.QPlus) {
  * ============================================================================
  * TODO
  * - Add more features
- * - Create help
- *
- * ----------------------------------------------------------------------------
- * Notetags for database items
- * ----------------------------------------------------------------------------
- * <import: type, from, from2>
- *  type: set to text or note
- *  from: if type is text, set this to the path of the text file
- *        if type is note, set to the database to read;
- *        actor, class, skill, item, weapon, armor, enemy, or state
- *  from2: if type is text ignore this
- *         if type is note, set this to the id from that database
- *
- * example:
- *   <import:text,text/file.txt>
- * Will import the text from the file located in text/file.txt
- *   <import:note,actor,2>
- * Will import the notes from actor 2
- * ----------------------------------------------------------------------------
- * Notetags for events
- * ----------------------------------------------------------------------------\
- * <import: type, from, from2>
- *  type: set to text, note or event
- *  from: if type is text, set this to the path of the text file
- *        if type is note, set to the database to read;
- *        actor, class, skill, item, weapon, armor, enemy, or state
- *        if type is event, set to the mapId the event is located
- *  from2: if type is text ignore this
- *         if type is note, set this to the id from that database
- *         if type is event, set to the event id
- *
- * example:
- *   <import:event,1,2>
- * Will replace that event with the event 2 from map 1
- *
- * <importing>
- * Will search that events show text, comments and script for <import:> tags
- * W.I.P.
+ * - Create better help
  * ============================================================================
  * ## How to use
  * ============================================================================
- *
+ * TODO create better help
  * ----------------------------------------------------------------------------
- * **Sub section**
+ * **Notetags for database items**
  * ----------------------------------------------------------------------------
+ * ~~~
+ *  <import: type, from, from2>
+ * ~~~
+ *  - type: set to text or note
+ *  - from: if type is text, set this to the path of the text file
+ *          if type is note, set to the database to read;
+ *          actor, class, skill, item, weapon, armor, enemy, or state
+ *  - from2: if type is text ignore this
+ *           if type is note, set this to the id from that database
  *
+ * example:
+ * ~~~
+ *  <import:text,text/file.txt>
+ * ~~~
+ * Will import the text from the file located in text/file.txt
+ * ~~~
+ *  <import:note,actor,2>
+ * ~~~
+ * Will import the notes from actor 2
+ * ----------------------------------------------------------------------------
+ * **Notetags for events**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ *  <importing>
+ * ~~~
+ * Marks that event as needs importing. Required if an <import> tags are used
+ * in that events pages.
+ *
+ * ~~~
+ *  <import: type, from, from2>
+ * ~~~
+ *  - type: set to text, note or event
+ *  - from: if type is text, set this to the path of the text file
+ *          if type is note, set to the database to read;
+ *          actor, class, skill, item, weapon, armor, enemy, or state
+ *          if type is event, set to the mapId the event is located
+ *  - from2: if type is text ignore this
+ *           if type is note, set this to the id from that database
+ *           if type is event, set to the event id
+ *
+ * example:
+ * ~~~
+ *  <import:event,1,2>
+ * ~~~
+ * Will replace the event with that note with the event 2 from map 1
+ * ----------------------------------------------------------------------------
+ * **Importing in event pages**
+ * ----------------------------------------------------------------------------
+ * To use <import> inside an event page, you need to use the <imnporting>
+ * notetag first.
+ *
+ * Inside a "Show Text", "Comment" or "Script"
+ * ~~~
+ *  <import:path>
+ * ~~~
+ *  - path: Set this to the path of the text file to import into
  * ============================================================================
  * ## Links
  * ============================================================================

@@ -1,5 +1,5 @@
 //=============================================================================
-// QM RegionColliders
+// QM RegionColliders DEV
 //=============================================================================
 
 var Imported = Imported || {};
@@ -19,13 +19,9 @@ if (!Imported.QMovement) {
  * QMovement Addon: Allows you to add colliders on regions
  * @author Quxios  | Version 1.0.0
  *
+ * @development
+ *
  * @requires QMovement
- *
- * @video
- *
- * @param
- * @desc
- * @default
  *
  * @help
  * ============================================================================
@@ -118,8 +114,7 @@ if (!Imported.QMovement) {
 // QM RegionColliders
 
 (function() {
-  var _params = QPlus.getParams('<QMRegionColliders>');
-  var _src = 'data/RegionColliders.json'
+  var _src = 'data/RegionColliders.json';
 
   function onSuccess(json) {
     QMovement.regionColliders = json;
