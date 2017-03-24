@@ -15,7 +15,7 @@
   };
 
   Scene_Map.prototype.processMapTouch = function() {
-    if ( $gamePlayer.canClick() && TouchInput.isTriggered() || this._touchCount > 0) {
+    if (TouchInput.isTriggered() || this._touchCount > 0) {
       if (TouchInput.isPressed()) {
         if (this._touchCount === 0 || this._touchCount >= 15) {
           var x = $gameMap.canvasToMapPX(TouchInput.x);
@@ -26,16 +26,12 @@
             x += QMovement.tileSize / 2 - ox;
             y += QMovement.tileSize / 2 - oy;
           }
-          if (!TouchInput.isMousePressed()) {
-            $gameTemp.setIsMapTouched(true);
-          }
           $gameTemp.setPixelDestination(x, y);
           $gamePlayer.requestMouseMove();
         }
         this._touchCount++;
       } else {
         this._touchCount = 0;
-        $gameTemp.setIsMapTouched(false);
       }
     }
   };
