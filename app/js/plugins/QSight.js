@@ -26,7 +26,7 @@ if (!Imported.QPlus) {
  * @video
  *
  * @param Show
- * @desc Set this to true to show sight and shadows
+ * @desc Set this to true to show sight and shadows (For QMovement only)
  * When true, it will only appear during playtest
  * @default false
  *
@@ -268,8 +268,6 @@ function QSight() {
 
   //-----------------------------------------------------------------------------
   // Game_Interpreter
-  //
-  // The interpreter for running event commands.
 
   var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -288,7 +286,6 @@ function QSight() {
     }
     var args2 = args.slice(1);
     if (!chara) return;
-    //QPlus.getArg(args2, /lock/i)
     if (args2[0].toLowerCase() === 'invisible') {
       chara._invisible = args2[1].toLowerCase() === 'true';
       return;
@@ -350,7 +347,6 @@ function QSight() {
 
   Game_CharacterBase.prototype.sightNeedsUpdate = function() {
     if (!this._sight) return false;
-    var cache = this._sight.cache;
     var target = QPlus.getCharacter(this._sight.targetId);
     var dx = this._realX - target._realX;
     var dy = this._realY - target._realY;
@@ -358,8 +354,8 @@ function QSight() {
       // Target too far away
       return false;
     }
-    if (cache.dir !== this._direction) {
-      // Direction changed, so sight changes
+    if (this._sight.cache.dir !== this._direction) {
+      // Direction changed, so sight changed
       return true;
     }
     // Check if anything requested an update
@@ -413,14 +409,14 @@ function QSight() {
     }
   };
 
-  // options is an obj that needs the following props:
-  //  shape [String] - box, circle or poly
-  //  range [Number] - range of sight in tiles
-  //  targetId [String] - charaId of who to look for
-  Game_CharacterBase.prototype.checkSight = function(options) {
-    var target = QPlus.getCharacter(options.targetId);
-    if (!target) return false;
-    if (Imported.QMovement) {
+  if (Imported.QMovement) {
+    // options is an obj that needs the following props:
+    //  shape [String] - box, circle or poly
+    //  range [Number] - range of sight in tiles
+    //  targetId [String] - charaId of who to look for
+    Game_CharacterBase.prototype.checkSight = function(options) {
+      var target = QPlus.getCharacter(options.targetId);
+      if (!target) return false;
       if (!options.cache) {
         options.cache = {
           tiles: {},
@@ -434,13 +430,9 @@ function QSight() {
       if (!this.isInsideSightShape(target, options)) return false;
       if (this.isInsideTileShadow(target, options)) return false;
       if (this.isInsideEventShadow(target, options)) return false;
-    } else {
-      // TODO run line cast
-    }
-    return true;
-  };
+      return true;
+    };
 
-  if (Imported.QMovement) {
     Game_CharacterBase.prototype.isInsideSightShape = function(target, options) {
       if (options.base.isPolygon()) {
         var rad = this._radian;
@@ -583,6 +575,109 @@ function QSight() {
       collider.moveTo(this.cx(), this.cy());
       return collider;
     };
+  } else {
+    // options is an obj that needs the following props:
+    //  shape [String] - box, circle or poly
+    //  range [Number] - range of sight in tiles
+    //  targetId [String] - charaId of who to look for
+    Game_CharacterBase.prototype.checkSight = function(options) {
+      var target = QPlus.getCharacter(options.targetId);
+      if (!target) return false;
+      if (!this.isInsideSightShape(target, options)) return false;
+      this._lookingFor = target;
+      var canSee = this.canSeeAt(target.x, target.y);
+      this._lookingFor = null;
+      return canSee;
+    };
+
+    Game_CharacterBase.prototype.isInsideSightShape = function(target, options) {
+      var dx = target._realX - this._realX;
+      var dy = target._realY - this._realY;
+      if (Math.abs(dx) > options.range) return false;
+      if (Math.abs(dy) > options.range) return false;
+      if (options.shape === 'poly') {
+        var radian1 = Math.atan2(dy, dx);
+        if (radian1 < 0) radian1 += Math.PI * 2;
+        var radian2 = this.directionToRadian();
+        var dr = Math.abs(radian1 - radian2);
+        return dr <= Math.PI / 4
+      } else if (options.shape == 'box') {
+        return Math.abs(dx) <= options.range && Math.abs(dy) <= options.range;
+      } else if (options.shape == 'circle') {
+        var dist = Math.abs(dx) + Math.abs(dy);
+        return dist <= options.range;
+      }
+    }
+
+    Game_CharacterBase.prototype.canSeeAt = function(x, y) {
+      var x1 = this.x;
+      var y1 = this.y;
+      var dx = x - x1;
+      var dy = y - y1;
+      var radian = Math.atan2(dy, dx);
+      if (radian < 0) radian += Math.PI * 2;
+      var dist = Math.abs(dx) + Math.abs(dy);
+      var sin = Math.sin(radian);
+      var cos = Math.cos(radian);
+      var diags = {
+        1: [4, 2], 3: [6, 2],
+        7: [4, 8], 9: [6, 8]
+      }
+      var directions = {
+        '1,0': 6,   '0,1': 2,
+        '-1,0': 4,  '0,-1': 8,
+        '1,1': 3,   '-1,1': 1,
+        '-1,-1': 7, '1,-1': 9
+      }
+      var canSee = true;
+      for (var i = 0; i < dist; i++) {
+        var prevX = Math.round(x1);
+        var prevY = Math.round(y1);
+        x1 += cos;
+        y1 += sin;
+        var dirX = Math.sign(Math.round(x1) - this.x);
+        var dirY = Math.sign(Math.round(y1) - this.y);
+        var dir = directions[`${dirX},${dirY}`];
+        if (Math.round(x1) === x && Math.round(y1) === y) break;
+        if ([1, 3, 7, 9].contains(dir)) {
+          var horz = diags[dir][0];
+          var vert = diags[dir][1];
+          if (!this.canPassDiagonally(prevX, prevY, horz, vert)) {
+            canSee = false;
+            break;
+          }
+        } else {
+          if (!this.canPass(prevX, prevY, dir)) {
+            canSee = false;
+            break;
+          }
+        }
+      }
+      return canSee;
+    };
+
+    var Alias_Game_CharacterBase_isCollidedWithCharacters = Game_CharacterBase.prototype.isCollidedWithCharacters;
+    Game_CharacterBase.prototype.isCollidedWithCharacters = function(x, y) {
+      if (this._lookingFor) {
+        var charas = $gameMap.eventsXyNt(x, y).filter(function(e) {
+          return e && e !== this._lookingFor && e.castsShadow();
+        }.bind(this))
+        if (this !== $gamePlayer && this.pos($gamePlayer.x, $gamePlayer.y)) {
+          charas.push($gamePlayer);
+        }
+        return charas.length > 0;
+      } else {
+        return Alias_Game_CharacterBase_isCollidedWithCharacters.call(this, x, y);
+      }
+    };
+
+    var Alias_Game_Event_isCollidedWithPlayerCharacters = Game_Event.prototype.isCollidedWithPlayerCharacters ;
+    Game_Event.prototype.isCollidedWithPlayerCharacters = function(x, y) {
+      if (this._lookingFor === $gamePlayer) {
+        return false;
+      }
+      return Alias_Game_Event_isCollidedWithPlayerCharacters.call(this, x, y);
+    };
   }
 
   Game_CharacterBase.prototype.castsShadow = function() {
@@ -621,7 +716,9 @@ function QSight() {
       tiles: {}
     }
     if (this._sight) {
-      this._sight.base.kill = true;
+      if (this._sight.base) {
+        this._sight.base.kill = true;
+      }
       // TODO should I kill the cache?
       cache.tiles = this._sight.cache.tiles;
       cache.events = this._sight.cache.events;
