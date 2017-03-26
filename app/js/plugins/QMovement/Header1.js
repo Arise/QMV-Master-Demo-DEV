@@ -11,7 +11,7 @@ if (!Imported.QPlus) {
 } else if (!QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
   alert('Error: QName requires QPlus 1.1.3 or newer to work.');
   throw new Error('Error: QName requires QPlus 1.1.3 or newer to work.');
-} 
+}
 
 //=============================================================================
  /*:
@@ -250,6 +250,63 @@ if (!Imported.QPlus) {
  * Will make the character do a full 360 arc clockwise around the point 480, 480
  * and it'll take 60 frames.
  * ============================================================================
+ * ## Plugin Commands
+ * ============================================================================
+ * **Transfer**
+ * ----------------------------------------------------------------------------
+ * MV event transfers are grid based. So this plugin command lets you map transfer
+ * to a pixel x / y position.
+ * ~~~
+ *  qMovement transfer [MAPID] [X] [Y] [OPTIONS]
+ * ~~~
+ * MAPID - The id of the map to transfer to
+ *
+ * X - The x position to transfer to, in pixels
+ *
+ * Y - The y position to transfer to, in pixels
+ *
+ * Possible options:
+ *
+ * - dirX: Set X to the dir to face after the transfer. Can be 2, 4, 6, 8, or for
+ * diagonals 1, 3, 7, 9
+ * - fadeBlack: Will fade black when transfering
+ * - fadeWhite: Will fade white when transfering
+ *
+ * Example:
+ * ~~~
+ *  qMovement transfer 1 100 116 dir2 fadeBlack
+ * ~~~
+ * Will transfer the player to map 1 at x100, y116. There will be a black fade
+ * and player will be facing down
+ * ~~~
+ *  qMovement transfer 1 100 116
+ * ~~~
+ * Will transfer the player to map 1 at x100, y116. There will be no fade and
+ * players direction won't change
+ * ----------------------------------------------------------------------------
+ * **Set Pos**
+ * ----------------------------------------------------------------------------
+ * This command will let you move a character to a x / y pixel position. Note
+ * this will not "walk" the character to that position! This will place the
+ * character at this position, similar to a transfer.
+ * ~~~
+ *  qMovement setPos [CHARAID] [X] [Y] [OPTIONS]
+ * ~~~
+ * CHARAID - The character identifier.
+ *
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this
+ *  (replace EVENTID with a number)
+ *
+ * X - The x position to set to, in pixels
+ *
+ * Y - The y position to set to, in pixels
+ *
+ * Possible options:
+ *
+ * - dirX: Set X to the dir to face after the transfer. Can be 2, 4, 6, 8, or for
+ * diagonals 1, 3, 7, 9
+ * ============================================================================
  * ## Addons
  * ============================================================================
  * **Pathfind**
@@ -279,12 +336,20 @@ if (!Imported.QPlus) {
  * ----------------------------------------------------------------------------
  * **Collision Map**
  * ----------------------------------------------------------------------------
- * TODO add link
+ * https://quxios.github.io/#/plugins/QM+CollisionMap
  *
  * Collision Map is an addon for this plugin that lets you use images for
  * collisions. Note that collision map checks are a lot heavier then normal
  * collision checks. So this plugin can make your game laggier if used with
  * other heavy plugins.
+ *
+ * ----------------------------------------------------------------------------
+ * **Region Colliders**
+ * ----------------------------------------------------------------------------
+ * https://quxios.github.io/#/plugins/QM+RegionColliders
+ *
+ * Region Colliders is an addon for this plugin that lets you add colliders
+ * to regions by creating a json file.
  *
  * ============================================================================
  * ## Links

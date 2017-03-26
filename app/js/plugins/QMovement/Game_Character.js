@@ -17,53 +17,43 @@
     var params = command.parameters;
     switch (command.code) {
       case gc.ROUTE_MOVE_DOWN: {
-        this.subQMove("2, 1," + QMovement.tileSize);
-        //this._moveRouteIndex++;
+        this.subQMove('2, 1,' + QMovement.tileSize);
         break;
       }
       case gc.ROUTE_MOVE_LEFT: {
-        this.subQMove("4, 1," + QMovement.tileSize);
-        //this._moveRouteIndex++;
+        this.subQMove('4, 1,' + QMovement.tileSize);
         break;
       }
       case gc.ROUTE_MOVE_RIGHT: {
-        this.subQMove("6, 1," + QMovement.tileSize);
-        //this._moveRouteIndex++;
+        this.subQMove('6, 1,' + QMovement.tileSize);
         break;
       }
       case gc.ROUTE_MOVE_UP: {
-        this.subQMove("8, 1," + QMovement.tileSize);
-        //this._moveRouteIndex++;
+        this.subQMove('8, 1,' + QMovement.tileSize);
         break;
       }
       case gc.ROUTE_MOVE_LOWER_L: {
-        this.subQMove("1, 1," + QMovement.tileSize);
-        //this._moveRouteIndex++;
+        this.subQMove('1, 1,' + QMovement.tileSize);
         break;
       }
       case gc.ROUTE_MOVE_LOWER_R: {
-        this.subQMove("3, 1," + QMovement.tileSize);
-        //this._moveRouteIndex++;
+        this.subQMove('3, 1,' + QMovement.tileSize);
         break;
       }
       case gc.ROUTE_MOVE_UPPER_L: {
-        this.subQMove("7, 1," + QMovement.tileSize);
-        //this._moveRouteIndex++;
+        this.subQMove('7, 1,' + QMovement.tileSize);
         break;
       }
       case gc.ROUTE_MOVE_UPPER_R: {
-        this.subQMove("9, 1," + QMovement.tileSize);
-        //this._moveRouteIndex++;
+        this.subQMove('9, 1,' + QMovement.tileSize);
         break;
       }
       case gc.ROUTE_MOVE_FORWARD: {
-        this.subQMove("5, 1," + QMovement.tileSize);
-        //this._moveRouteIndex++;
+        this.subQMove('5, 1,' + QMovement.tileSize);
         break;
       }
       case gc.ROUTE_MOVE_BACKWARD: {
-        this.subQMove("0, 1," + QMovement.tileSize);
-        //this._moveRouteIndex++;
+        this.subQMove('0, 1,' + QMovement.tileSize);
         break;
       }
       case gc.ROUTE_TURN_DOWN:
@@ -88,11 +78,13 @@
     var code = command.code;
     var params = command.parameters;
     if (command.code === gc.ROUTE_SCRIPT) {
-      var qmove = /^qmove\((.*)\)/i.exec(params[0]);
-      var arc   = /^arc\((.*)\)/i.exec(params[0]);
-      if (qmove) this.subQMove(qmove[1]);
-      if (arc)   this.subArc(arc[1]);
-      if (qmove || arc) return true;
+      var qmove  = /^qmove\((.*)\)/i.exec(params[0]);
+      var qmove2 = /^qmove2\((.*)\)/i.exec(params[0]);
+      var arc    = /^arc\((.*)\)/i.exec(params[0]);
+      if (qmove)  this.subQMove(qmove[1]);
+      if (qmove2) this.subQMove2(qmove2[1]);
+      if (arc)    this.subArc(arc[1]);
+      if (qmove || qmove2 || arc) return true;
     }
     return false;
   };
@@ -104,8 +96,8 @@
         this.arc(params[0], params[1], eval(params[2]), params[3], params[4]);
         break;
       }
-      case 'moveRadian': {
-        this.moveRadian(params[0], params[1]);
+      case 'fixedRadianMove': {
+        this.fixedRadianMove(params[0], params[1]);
         break;
       }
       case 'fixedMove': {
@@ -139,7 +131,8 @@
     var tot   = amt * multi;
     var steps = Math.floor(tot / this.moveTiles());
     var moved = 0;
-    for (var i = 0; i < steps; i++) {
+    var i;
+    for (i = 0; i < steps; i++) {
       moved += this.moveTiles();
       var cmd = {};
       cmd.code = 'fixedMove';
@@ -158,6 +151,29 @@
         cmd.code = 'fixedMoveBackward';
         cmd.parameters = [tot - moved];
       }
+      this._moveRoute.list.splice(this._moveRouteIndex + 1 + i, 0, cmd);
+    }
+    this._moveRoute.list.splice(this._moveRouteIndex, 1);
+  };
+
+  Game_Character.prototype.subQMove2 = function(settings) {
+    settings  = QPlus.stringToAry(settings);
+    var radian = settings[0];
+    var dist = settings[1];
+    var maxSteps = Math.floor(dist / this.moveTiles());
+    var steps = 0;
+    var i;
+    for (i = 0; i < maxSteps; i++) {
+      steps += this.moveTiles();
+      var cmd = {};
+      cmd.code = 'fixedRadianMove';
+      cmd.parameters = [radian, this.moveTiles()];
+      this._moveRoute.list.splice(this._moveRouteIndex + 1, 0, cmd);
+    }
+    if (steps < dist) {
+      var cmd = {};
+      cmd.code = 'fixedRadianMove';
+      cmd.parameters = [radian, dist - steps];
       this._moveRoute.list.splice(this._moveRouteIndex + 1 + i, 0, cmd);
     }
     this._moveRoute.list.splice(this._moveRouteIndex, 1);

@@ -279,6 +279,59 @@ function Polygon_Collider() {
     }
     return odd;
   };
+
+  Polygon_Collider.prototype.bestPairFrom = function(point) {
+    var vertices = this._vertices;
+    var radians = [];
+    var points = [];
+    for (var i = 0; i < vertices.length; i++) {
+      var radian = Math.atan2(vertices[i].y - point.y, vertices[i].x - point.x);
+      radian += radian < 0 ? 2 * Math.PI : 0;
+      radians.push(radian);
+      points.push(new Point(vertices[i].x, vertices[i].y));
+    }
+    var bestPair = [];
+    var currI = 0;
+    var max = -Math.PI * 2;
+    while (points.length > 0) {
+      var curr = points.shift();
+      for (var i = 0; i < points.length; i++) {
+        var dr = radians[currI] - radians[currI + i + 1];
+        if (Math.abs(dr) > max) {
+          max = Math.abs(dr);
+          bestPair = [currI, currI + i + 1];
+        }
+      }
+      currI++;
+    }
+    return bestPair;
+  };
+
+  // returns a new polygon
+  Polygon_Collider.prototype.stretchedPoly = function(radian, dist) {
+    var xComponent = Math.cos(radian) * dist;
+    var yComponent = Math.sin(radian) * dist;
+    var x1 = this.x + xComponent;
+    var y1 = this.y + yComponent;
+    var bestPair = this.bestPairFrom(new Point(x1, y1));
+    var vertices = this._vertices;
+    var pointsA = [];
+    var pointsB = [];
+    for (var i = 0; i < vertices.length; i++) {
+      var x2 = vertices[i].x - this.x;
+      var y2 = vertices[i].y - this.y;
+      pointsA.push(new Point(x2, y2));
+      pointsB.push(new Point(x2 + xComponent, y2 + yComponent));
+    }
+    var points = [];
+    points.push(pointsA[bestPair[0]]);
+    points.push(pointsB[bestPair[0]]);
+    points.push(pointsB[bestPair[1]]);
+    points.push(pointsA[bestPair[1]]);
+    var polygon = new Polygon_Collider(points);
+    polygon.moveTo(this.x, this.y);
+    return polygon;
+  };
 })();
 
 //-----------------------------------------------------------------------------

@@ -52,7 +52,6 @@
       "prototype - canPass - x, y, dir",
       "prototype - canPixelPass - x, y, dir, dist, type",
       "override - prototype - canPassDiagonally - x, y, horz, vert",
-      "prototype - _canPixelPassDiagonally - x, y, horz, vert, dist, type",
       "prototype - canPixelPassDiagonally - x, y, horz, vert, dist, type",
       "prototype - collisionCheck - x, y, dir, dist, type",
       "prototype - middlePass - x, y, dir, dist, type",
@@ -61,6 +60,7 @@
       "prototype - ignoreCharacters - type",
       "prototype - valid - type",
       "prototype - passableColors - undefined",
+      "prototype - canPassToFrom - xf, yf, xi, yi, type",
       "override - prototype - checkEventTriggerTouchFront - d",
       "override - prototype - isOnLadder - undefined",
       "override - prototype - isOnBush - undefined",
@@ -79,6 +79,7 @@
       "prototype - moveStraight - d, dist",
       "prototype - moveDiagonally - horz, vert, dist",
       "prototype - moveRadian - radian, dist",
+      "prototype - fixedRadianMove - radian, dist",
       "prototype - fixedMove - dir, dist",
       "prototype - fixedDiagMove - horz, vert, dist",
       "prototype - fixedMoveBackward - dist",
@@ -103,6 +104,7 @@
       "prototype - processQMoveCommands - command",
       "prototype - subArc - settings",
       "prototype - subQMove - settings",
+      "prototype - subQMove2 - settings",
       "override - prototype - moveRandom - undefined",
       "override - prototype - turnTowardCharacter - character",
       "override - prototype - turnAwayFromCharacter - character",
@@ -144,6 +146,10 @@
       "override - prototype - moveTypeRandom - undefined",
       "override - prototype - checkEventTriggerTouch - x, y"
     ],
+    "Game_Interpreter": [
+      "alias - prototype - pluginCommand - command, args",
+      "prototype - qMovementCommand - args"
+    ],
     "Scene_Map": [
       "alias - prototype - updateMain - undefined",
       "override - prototype - processMapTouch - undefined"
@@ -178,7 +184,9 @@
       "prototype - moveTo - x, y",
       "prototype - intersects - other",
       "prototype - inside - other",
-      "prototype - containsPoint - x, y"
+      "prototype - containsPoint - x, y",
+      "prototype - bestPairFrom - point",
+      "prototype - stretchedPoly - radian, dist"
     ],
     "Box_Collider": [
       "prototype - initialize - width, height, ox, oy",

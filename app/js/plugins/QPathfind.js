@@ -47,6 +47,11 @@ if (!Imported.QPlus) {
  * Slightly increases pathfinding accuracy.
  * @default true
  *
+ * @param Dash on Mouse
+ * @desc Should player dash when mouse clicking?
+ * MV Default: true
+ * @default true
+ *
  * @help
  * ============================================================================
  * ## About
@@ -177,7 +182,7 @@ if (!Imported.QPlus) {
  *
  *  https://www.patreon.com/quxios
  *
- * @tags pathfind, chase, character, map
+ * @tags pathfind, chase, character
  */
 //=============================================================================
 
@@ -196,8 +201,8 @@ function QPathfind() {
   var _intervals = Number(_params['Intervals']);
   var _smartWait = Number(_params['Smart Wait']);
   var _halfOpt = _params['Half Opt'] === 'true';
-  var _jump = false; // Experimental, not complete
-  var _jumpDist = 144;
+  var _dashOnMouse = _params['Dash on Mouse'] === 'true';
+  var _anyAngle = true;
   var _defaultOptions = {
     smart: 0, // 0 no smart, 1 recalc on blocked, 2 recalc at intervals
     chase: null, // charaID of character it's chasing
@@ -460,12 +465,7 @@ function QPathfind() {
     }
     this._openNodes.splice(currI, 1);
     this._closed[this._current.value] = true;
-    var neighbors;
-    if (_jump) {
-      neighbors = this.findSuccessor(this._current);
-    } else {
-      neighbors = this.findNeighbors(this._current);
-    }
+    var neighbors = this.findNeighbors(this._current);
     j = neighbors.length;
     for (i = 0; i < j; i++) {
       if (this._closed[neighbors[i].value]) continue;
@@ -547,98 +547,6 @@ function QPathfind() {
     return neighbors;
   };
 
-  QPathfind.prototype.findSuccessor = function(current) {
-    var successors = [];
-    var neighbors = this.findNeighbors(current);
-    for (var i = 0; i < neighbors.length; i++) {
-      var dx = neighbors[i].x - current.x;
-      var dy = neighbors[i].y - current.y;
-      var rad = Math.atan2(dy, dx);
-      rad += rad < 0 ? Math.PI * 2 : 0;
-      var dir = this.character().radianToDirection(rad, true);
-      if (dir === current.from) {
-        continue;
-      }
-      var jump = this.jump(neighbors[i], dir);
-      var rad2 = rad - Math.PI;
-      rad2 += rad2 < 0 ? Math.PI * 2 : 0;
-      jump.from = this.character().radianToDirection(rad2, true);
-      successors.push(jump);
-    }
-    return successors;
-  };
-
-  // Similar idea from jump point search
-  QPathfind.prototype.jump = function(current, dir) {
-    var chara = this.character();
-    var x = current.x;
-    var y = current.y;
-    var xf = this._endNode.x;
-    var yf = this._endNode.y;
-    var stepDist = 1;
-    if (Imported.QMovement) {
-      stepDist = chara.moveTiles();
-      var nearEnd = Math.abs(x - xf) < chara.optTiles() &&
-                    Math.abs(y - yf) < chara.optTiles();
-      var tiles = nearEnd ? chara.moveTiles() : chara.optTiles();
-    }
-    var diags = {
-      1: [4, 2], 3: [6, 2],
-      7: [4, 8], 9: [6, 8]
-    }
-    var horz = dir;
-    var vert = dir;
-    var isDiag = [1, 3, 7, 9].contains(dir);
-    if (isDiag) {
-      horz = diags[dir][0];
-      vert = diags[dir][1];
-    }
-    var passed = true;
-    var totalDist = 0;
-    while (true) {
-      if (Imported.QMovement) {
-        if (isDiag) {
-          passed = chara.canPixelPassDiagonally(x, y, horz, vert, tiles, '_pathfind');
-        } else {
-          passed = chara.canPixelPass(x, y, dir, tiles, '_pathfind');
-        }
-        if (passed) {
-          x = $gameMap.roundPXWithDirection(x, horz, tiles);
-          y = $gameMap.roundPYWithDirection(y, vert, tiles);
-          // TODO check for edges
-        }
-      } else {
-        if (isDiag) {
-          passed = chara.canPassDiagonally(x, y, horz, vert);
-        } else {
-          passed = chara.canPass(x, y, dir);
-        }
-        if (passed) {
-          x = $gameMap.roundXWithDirection(x, horz);
-          y = $gameMap.roundYWithDirection(y, vert);
-          // TODO check for edges
-        }
-      }
-      totalDist += stepDist;
-      if (totalDist > _jumpDist) {
-        break;
-      }
-      if (Math.abs(x - xf) < stepDist || Math.abs(y - yf) < stepDist) {
-        break;
-      }
-      if (!passed) {
-        break;
-      }
-    }
-    var node = this.getNodeAt(current, x, y);
-    if (Imported.QMovement) {
-      if (Math.abs(x - xf) < stepDist && Math.abs(y - yf) < stepDist) {
-        node.value = this._endNode.value; // force early end
-      }
-    }
-    return node;
-  };
-
   QPathfind.prototype.onComplete = function() {
     //console.timeEnd('Pathfind');
     this._completed = true;
@@ -665,7 +573,13 @@ function QPathfind() {
     var node = this._current;
     var path = [node];
     while (node.parent) {
-      node = node.parent;
+      var next = node.parent;
+      if (_anyAngle) {
+        while (next.parent && this.character().canPassToFrom(next.parent.x, next.parent.y, node.x, node.y)) {
+          next = next.parent;
+        }
+      }
+      node = next;
       path.unshift(node);
     }
     return path;
@@ -720,8 +634,21 @@ function QPathfind() {
       }
       var command = {};
       if (Imported.QMovement) {
-        command.code = Game_Character.ROUTE_SCRIPT;
-        command.parameters = ['qmove(' + dir + ',' + dist + ')'];
+        if (_anyAngle) {
+          // TODO
+          // make a move cmd for this to move it step by step
+          // and not the move by the full dist
+          //command.code = 'fixedRadianMove';
+          var radian = Math.atan2(-sy, -sx);
+          if (radian < 0) radian += Math.PI * 2;
+          dist = Math.sqrt(sx * sx + sy * sy);
+          //command.parameters = [radian, dist];
+          command.code = Game_Character.ROUTE_SCRIPT;
+          command.parameters = ['qmove2(' + radian + ',' + dist + ')'];
+        } else {
+          command.code = Game_Character.ROUTE_SCRIPT;
+          command.parameters = ['qmove(' + dir + ',' + dist + ')'];
+        }
       } else {
         command.code = codes[dir];
       }
@@ -1035,6 +962,20 @@ function QPathfind() {
       return triggered;
     };
   }
+
+  if (!_dashOnMouse) {
+    Game_Player.prototype.updateDashing = function() {
+      if (this.isMoving()) {
+        return;
+      }
+      if (this.canMove() && !this.isInVehicle() && !$gameMap.isDashDisabled()) {
+        this._dashing = this.isDashButtonPressed();
+      } else {
+        this._dashing = false;
+      }
+    };
+  }
+
 
   //-----------------------------------------------------------------------------
   // Game_Event

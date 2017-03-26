@@ -155,24 +155,19 @@ function QSight() {
 
   if (Imported.QMovement) {
     QSight.shadowCast = function(collider, from, length) {
-      var radians = [];
-      var points = [];
       var vertices = collider._vertices;
-      var i, j;
-      for (i = 0, j = vertices.length; i < j; i++) {
+      var radians = [];
+      var min = Math.PI * 2;
+      var max = 0;
+      var minI = 0;
+      var maxI = 0;
+      for (var i = 0; i < vertices.length; i++) {
         var x1 = vertices[i].x;
         var y1 = vertices[i].y;
         var point = new Point(x1, y1);
         var radian = Math.atan2(y1 - from.cy(), x1 - from.cx());
         radian += radian < 0 ? 2 * Math.PI : 0;
         radians.push(radian);
-        points.push(point);
-      }
-      var min = radians[0];
-      var max = radians[0];
-      var minI = 0;
-      var maxI = 0;
-      for (i = 1, j = radians.length; i < j; i++) {
         if (min > radians[i]) {
           min = radians[i];
           minI = i;
@@ -185,11 +180,11 @@ function QSight() {
       // TODO figure out a better way tol calc the radians
       // so I don't need to "fix" the min/max values
       if (Math.abs(max - min) > Math.PI) {
-        min = 0;
-        max = 0;
+        min = Math.PI * 2;
+        max = -Math.PI * 2;
         minI = 0;
         maxI = 0;
-        for (i = 0, j = radians.length; i < j; i++) {
+        for (var i = 0; i < radians.length; i++) {
           if (radians[i] > Math.PI) {
             radians[i] -= 2 * Math.PI;
           }
@@ -204,8 +199,8 @@ function QSight() {
         }
       }
       var l = length * 1.5;
-      var x1 = points[maxI].x - points[minI].x;
-      var y1 = points[maxI].y - points[minI].y;
+      var x1 = vertices[maxI].x - vertices[minI].x;
+      var y1 = vertices[maxI].y - vertices[minI].y;
       var x2 = x1 + l * Math.cos(max);
       var y2 = y1 + l * Math.sin(max);
       var x3 = l * Math.cos(min);
@@ -217,7 +212,7 @@ function QSight() {
       polyPoints.push(new Point(x3, y3));
       return {
         points: polyPoints,
-        origin: new Point(points[minI].x, points[minI].y)
+        origin: new Point(vertices[minI].x, vertices[minI].y)
       }
       /*
       // New Method that outlines object, casting the shadow

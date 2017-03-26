@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QCamera = '1.1.0';
+Imported.QCamera = '1.1.1';
 
 if (!Imported.QPlus) {
   alert('Error: QCamera requires QPlus to work.');
@@ -17,7 +17,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QCamera>
  * Better Camera control
- * @author Quxios  | Version 1.1.0
+ * @author Quxios  | Version 1.1.1
  *
  * @requires QPlus
  *
@@ -240,7 +240,7 @@ function Sprite_Bars() {
     this._scrollDistance  = this._scrollRest;
     this._scrollSpeed     = speed || null;
     this._scrollFrames    = frames || null;
-    this._scrollRadian    = Math.atan2(-distanceY, distanceX);
+    this._scrollRadian    = Math.atan2(distanceY, distanceX);
   };
 
   Game_Map.prototype.scrollTo = function(chara, speed, frames) {
@@ -248,6 +248,8 @@ function Sprite_Bars() {
     var centerY = this.displayCenterY();
     var distanceX = (chara._realX + 0.5) - centerX;
     var distanceY = (chara._realY + 0.5) - centerY;
+    distanceX = Math.floor(distanceX * 1000) / 1000;
+    distanceY = Math.floor(distanceY * 1000) / 1000;
     if (Math.abs(distanceX) >= this.width() - 1) {
       distanceX -= this.width() * Math.sign(distanceX);
     }
@@ -281,13 +283,15 @@ function Sprite_Bars() {
   var Alias_Game_Map_displayX = Game_Map.prototype.displayX;
   Game_Map.prototype.displayX = function() {
     var x = Alias_Game_Map_displayX.call(this);
-    return x + _cameraOX / this.tileWidth();
+    x += _cameraOX / this.tileWidth();
+    return Math.floor(x * 1000) / 1000;
   };
 
   var Alias_Game_Map_displayY = Game_Map.prototype.displayY;
   Game_Map.prototype.displayY = function() {
     var y = Alias_Game_Map_displayY.call(this);
-    return y + _cameraOY / this.tileHeight();
+    y += _cameraOY / this.tileHeight();
+    return Math.floor(y * 1000) / 1000;
   };
 
   Game_Map.prototype.displayCenterX = function() {
@@ -389,12 +393,12 @@ function Sprite_Bars() {
 
   var Alias_Game_CharacterBase_update = Game_CharacterBase.prototype.update;
   Game_CharacterBase.prototype.update = function() {
-    var lastScrolledX  = this.scrolledX();
-    var lastScrolledY  = this.scrolledY();
+    var lastScrolledX = this.scrolledX();
+    var lastScrolledY = this.scrolledY();
     Alias_Game_CharacterBase_update.call(this);
     if ($gameMap._scrollTarget === this.charaId()) {
       if (_offset === 0) {
-        this.updateNormalScroll(lastScrolledX, lastScrolledY)
+        this.updateNormalScroll(lastScrolledX, lastScrolledY);
       } else {
         this.updateQScroll();
       }

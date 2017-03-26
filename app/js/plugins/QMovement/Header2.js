@@ -9,7 +9,7 @@ function QMovement() {
   var _params = QPlus.getParams('<QMovement>');
 
   QMovement.grid = Number(_params['Grid']) || 1;
-  QMovement.tileSize = Number(_params['Tile Size'])
+  QMovement.tileSize = Number(_params['Tile Size']);
   QMovement.offGrid = _params['Off Grid'] === 'true';
   QMovement.smartMove = Number(_params['Smart Move']);
   QMovement.midPass = _params['Mid Pass'] === 'true';
@@ -51,5 +51,19 @@ function QMovement() {
     3599: [48, 48],  // Impassable A2, A3, A4
     3727: [48, 48]
   };
+  var rs = QMovement.tileSize / 48;
+  for (var key in QMovement.tileBoxes) {
+    if (QMovement.tileBoxes.hasOwnProperty(key)) {
+      for (var i = 0; i < QMovement.tileBoxes[key].length; i++) {
+        if (QMovement.tileBoxes[key][i].constructor === Array) {
+          for (var j = 0; j < QMovement.tileBoxes[key][i].length; j++) {
+            QMovement.tileBoxes[key][i][j] *= rs;
+          }
+        } else {
+          QMovement.tileBoxes[key][i] *= rs;
+        }
+      }
+    }
+  }
   QMovement.regionColliders = {}; // will be changable in a separate addon
 })();
