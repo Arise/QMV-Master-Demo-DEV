@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.1.3';
+Imported.QMovement = '1.1.4';
 
 if (!Imported.QPlus) {
   alert('Error: QMovement requires QPlus to work.');
@@ -17,7 +17,7 @@ if (!Imported.QPlus) {
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.1.3
+ * @author Quxios  | Version 1.1.4
  *
  * @repo https://github.com/quxios/QMovement
  *
@@ -751,6 +751,9 @@ function Polygon_Collider() {
     var yComponent = Math.sin(radian) * dist;
     var x1 = this.x + xComponent;
     var y1 = this.y + yComponent;
+    // TODO func still needs work
+    // not sure if this is incorrect or if bestPairFrom() is
+    // returning incorrect values at certain points
     var bestPair = this.bestPairFrom(new Point(x1, y1));
     var vertices = this._vertices;
     var pointsA = [];
@@ -1796,6 +1799,8 @@ function ColliderManager() {
     return colors;
   };
 
+  // TODO
+  // this is still incomplete, gives incorrect values in some cases
   Game_CharacterBase.prototype.canPassToFrom = function(xf, yf, xi, yi, type) {
     xi = xi === undefined ? this._px : xi;
     yi = yi === undefined ? this._py : yi;
@@ -1816,7 +1821,7 @@ function ColliderManager() {
     //  delete this._colliders['_stretched'];
     //  return false;
     //}
-    ColliderManager.draw(this._colliders['_stretched'], 240);
+    //ColliderManager.draw(this._colliders['_stretched'], 240);
     delete this._colliders['_stretched'];
     return false;
   };
