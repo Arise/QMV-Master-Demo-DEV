@@ -245,6 +245,8 @@
     return colors;
   };
 
+  // TODO
+  // this is still incomplete, gives incorrect values in some cases
   Game_CharacterBase.prototype.canPassToFrom = function(xf, yf, xi, yi, type) {
     xi = xi === undefined ? this._px : xi;
     yi = yi === undefined ? this._py : yi;
@@ -265,7 +267,7 @@
     //  delete this._colliders['_stretched'];
     //  return false;
     //}
-    ColliderManager.draw(this._colliders['_stretched'], 240);
+    //ColliderManager.draw(this._colliders['_stretched'], 240);
     delete this._colliders['_stretched'];
     return false;
   };

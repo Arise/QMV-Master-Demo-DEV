@@ -313,6 +313,9 @@ function Polygon_Collider() {
     var yComponent = Math.sin(radian) * dist;
     var x1 = this.x + xComponent;
     var y1 = this.y + yComponent;
+    // TODO func still needs work
+    // not sure if this is incorrect or if bestPairFrom() is
+    // returning incorrect values at certain points
     var bestPair = this.bestPairFrom(new Point(x1, y1));
     var vertices = this._vertices;
     var pointsA = [];
