@@ -9,7 +9,7 @@ var $plugins =
 {"name":"QMovement","status":false,"description":"<QMovement>\r\nMore control over character movement","parameters":{"Grid":"1","Tile Size":"48","Off Grid":"true","=================":"","Smart Move":"2","Mid Pass":"false","Move on click":"true","Diagonal":"true","Diagonal Speed":"0","Player Collider":"box, 36, 24, 6, 24","Event Collider":"box, 36, 24, 6, 24","Show Colliders":"true"}},
 {"name":"========================","status":false,"description":"","parameters":{}},
 {"name":"QM+CollisionMap","status":false,"description":"<QMCollisionMap>\r\nQMovement Addon: Adds image collision map feature","parameters":{"Scan Size":"4","Folder":"img/parallaxes/"}},
-{"name":"QM+RegionColliders","status":true,"description":"<QMRegionColliders>\r\nQMovement Addon: Allows you to add colliders on regions","parameters":{"":""}},
+{"name":"QM+RegionColliders","status":false,"description":"<QMRegionColliders>\r\nQMovement Addon: Allows you to add colliders on regions","parameters":{"":""}},
 {"name":"========================","status":false,"description":"","parameters":{}},
 {"name":"QTouch","status":true,"description":"<QTouch>\nBetter mouse handling for MV","parameters":{"Mouse Decay":"60","Default Cursor":"icon/cursor-default.png","Pointer Cursor":"icon/cursor-pointer.png"}},
 {"name":"========================","status":false,"description":"","parameters":{}},
@@ -26,5 +26,5 @@ var $plugins =
 {"name":"========================","status":false,"description":"","parameters":{}},
 {"name":"QImport","status":true,"description":"<QImport>\r\ndesc","parameters":{"":""}},
 {"name":"QPathfind","status":true,"description":"<QPathfind>\r\nA* Pathfinding algorithm","parameters":{"Diagonals":"true","Intervals":"1000","Smart Wait":"60","=============":"","Half Opt":"true"}},
-{"name":"QSight","status":true,"description":"<QSight>\r\nReal time line of sight","parameters":{"Show":"true"}}
+{"name":"QSight","status":true,"description":"<QSight>\r\nReal time line of sight","parameters":{"See Through Terrain":"1","Show":"true"}}
 ];
