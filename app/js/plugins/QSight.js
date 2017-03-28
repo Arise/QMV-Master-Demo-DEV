@@ -8,22 +8,27 @@ Imported.QSight = '1.0.0';
 if (!Imported.QPlus) {
   alert('Error: QSight requires QPlus to work.');
   throw new Error('Error: QSight requires QPlus to work.');
-} if (Imported.QMovement && !QPlus.versionCheck(Imported.QMovement, '1.1.1')) {
-  alert('Error: QSight requires QMovement 1.1.1+ to work.');
-  throw new Error('Error: QSight requires QMovement 1.1.1+ to work.');
+} if (Imported.QMovement && !QPlus.versionCheck(Imported.QMovement, '1.1.4')) {
+  alert('Error: QSight requires QMovement 1.1.4+ to work.');
+  throw new Error('Error: QSight requires QMovement 1.1.4+ to work.');
 }
 
 //=============================================================================
  /*:
  * @plugindesc <QSight>
  * Real time line of sight
- * @author Quxios  | Version 1.0.0
+ * @author Quxios  | Version 1.0.0 DEV
  *
  * @development
  *
  * @requires QPlus
  *
  * @video
+ *
+ * @param See Through Terrain
+ * @desc Set this to a list of terrains that characters can see through
+ * Separate terrain ids with a comma, ex: 1, 2, 3
+ * @default
  *
  * @param Show
  * @desc Set this to true to show sight and shadows (For QMovement only)
@@ -38,7 +43,7 @@ if (!Imported.QPlus) {
  * sight is similar to a sensor plugin, except characters can't see behind
  * objects that block their view.
  *
- * This plugin has built in compatibilty for QMovement. When using QMovement
+ * This plugin has built-in compatibilty for QMovement. When using QMovement
  * the line of sight will be more accurate since it'll use a shadow casting
  * algorithm. When not using QMovement it'll use a simple ray casting.
  * ============================================================================
@@ -74,20 +79,24 @@ if (!Imported.QPlus) {
  * ~~~
  *
  * * Note: I left out TARGET because it defaults to player
- * ----------------------------------------------------------------------------
- * **See through events/tiles**
+ * ============================================================================
+ * ## See through events/tiles
+ * ============================================================================
+ * **See through events**
  * ----------------------------------------------------------------------------
  * To make an event see through add the following note or comment:
  * ~~~
  *  <invisible>
  * ~~~
  * * Note: Notes are applied to all the pages in the event, comments are page based.
- *
- * For events;
+ * ----------------------------------------------------------------------------
+ * **See through tiles**
+ * ----------------------------------------------------------------------------
  * Set the tile's terrain id to the no shadow terrain id set in the plugin
  * parameters.
- * When using QMovement and QM+RegionColliders, create a RegionCollider and
- * add the following in the note:
+ *
+ * When using QMovement and QM+RegionColliders, you can also create a RegionCollider
+ * and add the following in the note:
  * ~~~
  *  <noShadow>
  * ~~~
@@ -96,17 +105,35 @@ if (!Imported.QPlus) {
  * ============================================================================
  * **Check sight**
  * ----------------------------------------------------------------------------
- * TODO
+ * Use this plugin command to manually check if a character can see another
+ * character.
  * ~~~
  *  qSight CHARAID check SHAPE RANGE SWITCH TARGETID
  * ~~~
+ * CHARAID - The character identifier.
+ *
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this
+ *  (replace EVENTID with a number)
+ *
+ * SHAPE  - box, circle or poly
+ * RANGE  - How far the character can see, in grid spaces
+ * SWITCH - Which switch to toggle. Set to a number or A, B, C, D for self switch
+ * TARGETID - Set to the CHARAID of who to look for
  * ----------------------------------------------------------------------------
  * **Toggle charcter invisible**
  * ----------------------------------------------------------------------------
- * TODO
+ * To make a character be invisible use the following
  * ~~~
  *  qSight CHARAID visible BOOL
  * ~~~
+ * CHARAID - The character identifier.
+ *
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this
+ *  (replace EVENTID with a number)
+ *
+ * BOOL - Set this to true or false
  * ============================================================================
  * ## Links
  * ============================================================================
@@ -135,6 +162,7 @@ function QSight() {
 
 (function() {
   var _params = QPlus.getParams('<QSight>');
+  var _seeThrough = _params['See Through Terrain'].split(',').map(Number);
   var _show = _params['Show'] === 'true';
 
   QSight._requestingUpdate = [];
@@ -157,47 +185,11 @@ function QSight() {
     QSight.shadowCast = function(collider, from, length) {
       var vertices = collider._vertices;
       var radians = [];
-      var min = Math.PI * 2;
-      var max = 0;
-      var minI = 0;
-      var maxI = 0;
-      for (var i = 0; i < vertices.length; i++) {
-        var x1 = vertices[i].x;
-        var y1 = vertices[i].y;
-        var point = new Point(x1, y1);
-        var radian = Math.atan2(y1 - from.cy(), x1 - from.cx());
-        radian += radian < 0 ? 2 * Math.PI : 0;
-        radians.push(radian);
-        if (min > radians[i]) {
-          min = radians[i];
-          minI = i;
-        }
-        if (max < radians[i]) {
-          max = radians[i];
-          maxI = i;
-        }
-      }
-      // TODO figure out a better way tol calc the radians
-      // so I don't need to "fix" the min/max values
-      if (Math.abs(max - min) > Math.PI) {
-        min = Math.PI * 2;
-        max = -Math.PI * 2;
-        minI = 0;
-        maxI = 0;
-        for (var i = 0; i < radians.length; i++) {
-          if (radians[i] > Math.PI) {
-            radians[i] -= 2 * Math.PI;
-          }
-          if (min > radians[i]) {
-            min = radians[i];
-            minI = i;
-          }
-          if (max < radians[i]) {
-            max = radians[i];
-            maxI = i;
-          }
-        }
-      }
+      var bestPair = collider.bestPairFrom(new Point(from.cx(), from.cy()));
+      var minI = bestPair[0];
+      var maxI = bestPair[1];
+      var min = Math.atan2(vertices[minI].y - from.cy(), vertices[minI].x - from.cx());
+      var max = Math.atan2(vertices[maxI].y - from.cy(), vertices[maxI].x - from.cx());
       var l = length * 1.5;
       var x1 = vertices[maxI].x - vertices[minI].x;
       var y1 = vertices[maxI].y - vertices[minI].y;
@@ -214,50 +206,6 @@ function QSight() {
         points: polyPoints,
         origin: new Point(vertices[minI].x, vertices[minI].y)
       }
-      /*
-      // New Method that outlines object, casting the shadow
-      // behind the object instead.
-      // Not enabled for now because it's most likely more
-      // performant and not needed. Though if you are to create
-      // a lighting system with shadows and want to use this shadow
-      // casting function, then you should use the bottom method
-      // instead.
-      var minIndex = points.indexOf(radianWithPoint[min]);
-      var firstHalf = points.splice(0, minIndex);
-      points = points.concat(firstHalf);
-      finalPoints = [];
-      midPoints = [];
-      points.reverse();
-      var first = points.pop();
-      points.unshift(first);
-      var x, y, dx, dy, rad;
-      var l = settings.length;
-      for (i = 0, j = points.length; i < j; i++) {
-        x = points[i].x - radianWithPoint[min].x;
-        y = points[i].y - radianWithPoint[min].y;
-        finalPoints.push(new Point(x, y));
-        if (points[i] === radianWithPoint[max]) {
-          break;
-        } else if (points[i] !== radianWithPoint[min]) {
-          rad =  pointWithRadian[JSON.stringify(points[i])]
-          dx = points[i].x - radianWithPoint[min].x;
-          dy = points[i].y - radianWithPoint[min].y;
-          x = dx + l * Math.cos(rad);
-          y = dy + l * -Math.sin(rad);
-          midPoints.push(new Point(x, y));
-        }
-      }
-      var x1 = radianWithPoint[max].x - radianWithPoint[min].x;
-      var y1 = radianWithPoint[max].y - radianWithPoint[min].y;
-      var x2 = x1 + l * Math.cos(max);
-      var y2 = y1 + l * -Math.sin(max);
-      var x3 = l * Math.cos(min);
-      var y3 = l * -Math.sin(min);
-      finalPoints.push(new Point(x2, y2));
-      finalPoints = finalPoints.concat(midPoints.reverse());
-      finalPoints.push(new Point(x3, y3));
-      return [finalPoints, radianWithPoint[min].x, radianWithPoint[min].y];
-      */
     };
   }
 
@@ -281,7 +229,7 @@ function QSight() {
     }
     var args2 = args.slice(1);
     if (!chara) return;
-    if (args2[0].toLowerCase() === 'invisible') {
+    if (args2[0].toLowerCase() === 'visible') {
       chara._invisible = args2[1].toLowerCase() === 'true';
       return;
     }
@@ -455,7 +403,7 @@ function QSight() {
         if (tile.isLadder || tile.isBush || tile.isDamage) {
           return false;
         }
-        if (/<noshadow>/i.test(tile.note)) {
+        if (_seeThrough.contains(tile.terrain) || /<noshadow>/i.test(tile.note)) {
           return false;
         }
         if (tile.intersects(options.base)) {
@@ -465,7 +413,7 @@ function QSight() {
             shadowData = QSight.shadowCast(tile, this, options.range * QMovement.tileSize);
             shadow = new Polygon_Collider(shadowData.points);
             shadow.moveTo(shadowData.origin.x, shadowData.origin.y);
-            shadow.color = "#000000";
+            shadow.color = '#000000';
             options.cache.tiles[tile.id] = shadow;
             tileIds.push(tile.id);
           } else {
@@ -649,6 +597,18 @@ function QSight() {
         }
       }
       return canSee;
+    };
+
+    var Alias_Game_CharacterBase_isMapPassable = Game_CharacterBase.prototype.isMapPassable;
+    Game_CharacterBase.prototype.isMapPassable = function(x, y, d) {
+      if (this._lookingFor) {
+        var x2 = $gameMap.roundXWithDirection(x, d);
+        var y2 = $gameMap.roundYWithDirection(y, d);
+        if ($gameMap.terrainTag(x2, y2)) {
+          return true;
+        }
+      }
+      return Alias_Game_CharacterBase_isMapPassable.call(this, x, y, d);
     };
 
     var Alias_Game_CharacterBase_isCollidedWithCharacters = Game_CharacterBase.prototype.isCollidedWithCharacters;
