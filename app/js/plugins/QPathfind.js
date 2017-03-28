@@ -5,12 +5,9 @@
 var Imported = Imported || {};
 Imported.QPathfind = '1.2.0';
 
-if (!Imported.QPlus) {
-  alert('Error: QPathfind requires QPlus to work.');
-  throw new Error('Error: QPathfind requires QPlus to work.');
-} else if (!QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
-  alert('Error: QName requires QPlus 1.1.3 or newer to work.');
-  throw new Error('Error: QName requires QPlus 1.1.3 or newer to work.');
+if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
+  alert('Error: QPathfind requires QPlus 1.1.3 or newer to work.');
+  throw new Error('Error: QPathfind requires QPlus 1.1.3 or newer to work.');
 }
 
 //=============================================================================
@@ -203,6 +200,7 @@ function QPathfind() {
   var _halfOpt = _params['Half Opt'] === 'true';
   var _dashOnMouse = _params['Dash on Mouse'] === 'true';
   var _anyAngle = true;
+  if (_anyAngle && Imported.QMovement && _diagonals) _diagonals = false;
   var _defaultOptions = {
     smart: 0, // 0 no smart, 1 recalc on blocked, 2 recalc at intervals
     chase: null, // charaID of character it's chasing
@@ -284,7 +282,7 @@ function QPathfind() {
   };
 
   QPathfind.prototype.beforeStart = function() {
-    //console.time('Pathfind');
+    console.time('Pathfind');
     var x = this._endNode.x;
     var y = this._endNode.y;
     var canPass = true;
@@ -518,6 +516,7 @@ function QPathfind() {
         x2 = $gameMap.roundPXWithDirection(x, horz, tiles);
         y2 = $gameMap.roundPYWithDirection(y, vert, tiles);
         if (i >= 4) {
+          //passed = chara.canPassToFrom(x, y, x2, y2, '_pathfind');
           passed = chara.canPixelPassDiagonally(x, y, horz, vert, tiles, '_pathfind');
         } else {
           passed = chara.canPixelPass(x, y, dir, tiles, '_pathfind');
@@ -548,7 +547,7 @@ function QPathfind() {
   };
 
   QPathfind.prototype.onComplete = function() {
-    //console.timeEnd('Pathfind');
+    console.timeEnd('Pathfind');
     this._completed = true;
     if (this.options.towards) {
       var firstSteps = this.createFinalPath().slice(0, 2);
@@ -638,11 +637,9 @@ function QPathfind() {
           // TODO
           // make a move cmd for this to move it step by step
           // and not the move by the full dist
-          //command.code = 'fixedRadianMove';
           var radian = Math.atan2(-sy, -sx);
           if (radian < 0) radian += Math.PI * 2;
           dist = Math.sqrt(sx * sx + sy * sy);
-          //command.parameters = [radian, dist];
           command.code = Game_Character.ROUTE_SCRIPT;
           command.parameters = ['qmove2(' + radian + ',' + dist + ')'];
         } else {
