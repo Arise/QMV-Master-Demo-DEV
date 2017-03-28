@@ -5,10 +5,7 @@
 var Imported = Imported || {};
 Imported.QName = '1.0.0';
 
-if (!Imported.QPlus) {
-  alert('Error: QName requires QPlus to work.');
-  throw new Error('Error: QName requires QPlus to work.');
-} else if (!QPlus.versionCheck(Imported.QPlus, 'x.y.z')) {
+if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, 'x.y.z')) {
   alert('Error: QName requires QPlus x.y.z or newer to work.');
   throw new Error('Error: QName requires QPlus x.y.z or newer to work.');
 }
