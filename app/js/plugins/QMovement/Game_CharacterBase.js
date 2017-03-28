@@ -144,11 +144,16 @@
     type = type || 'collision';
     var x1 = $gameMap.roundPXWithDirection(x, horz, dist);
     var y1 = $gameMap.roundPYWithDirection(y, vert, dist);
-    if (!this.canPixelPass(x1, y1, 5, null, type)) return false;
-    if (QMovement.midPass) {
-      var x2 = $gameMap.roundPXWithDirection(x, horz, dist / 2);
-      var y2 = $gameMap.roundPYWithDirection(y, vert, dist / 2);
-      if (!this.canPixelPass(x2, y2, 5, null, type)) return false;
+    if (dist === this.moveTiles()) {
+      if (!this.canPixelPass(x1, y1, 5, null, type)) return false;
+      if (QMovement.midPass) {
+        var x2 = $gameMap.roundPXWithDirection(x, horz, dist / 2);
+        var y2 = $gameMap.roundPYWithDirection(y, vert, dist / 2);
+        if (!this.canPixelPass(x2, y2, 5, null, type)) return false;
+      }
+    } else {
+      return (this.canPixelPass(x, y, vert, dist, type) && this.canPixelPass(x, y1, horz, dist, type)) &&
+             (this.canPixelPass(x, y, horz, dist, type) && this.canPixelPass(x1, y, vert, dist, type));
     }
     return true;
   };
@@ -245,31 +250,28 @@
     return colors;
   };
 
-  // TODO
-  // this is still incomplete, gives incorrect values in some cases
-  Game_CharacterBase.prototype.canPassToFrom = function(xf, yf, xi, yi, type) {
+  Game_CharacterBase.prototype.canPassToFrom = function(xf, yf, xi, yi, type, ll) {
     xi = xi === undefined ? this._px : xi;
     yi = yi === undefined ? this._py : yi;
     type = type || 'collision';
+    // TODO remove this check by having the start and end colliders
+    // be included in the _stretched collider
     if (!this.canPixelPass(xi, yi, 5, null, type) || !this.canPixelPass(xf, yf, 5, null, type)) {
+      this.collider(type).moveTo(this._px, this._py);
       return false;
     }
-    var collider = this.collider(type);
-    collider.moveTo(xi, yi);
     var dx = xf - xi;
     var dy = yf - yi;
     var radian = Math.atan2(dy, dx);
     if (radian < 0) radian += Math.PI * 2;
     var dist = Math.sqrt(dx * dx + dy * dy);
-    this._colliders['_stretched'] = collider.stretchedPoly(radian, dist);
-    ColliderManager.draw(this._colliders['_stretched'], 240);
-    //if (!this.canPixelPass(xi, yi, 5, null, '_stretched')) {
-    //  delete this._colliders['_stretched'];
-    //  return false;
-    //}
-    //ColliderManager.draw(this._colliders['_stretched'], 240);
+    this._colliders['_stretched'] = this.collider(type).stretchedPoly(radian, dist);
+    if (!this.canPixelPass(xi, yi, 5, null, '_stretched')) {
+      delete this._colliders['_stretched'];
+      return false;
+    }
     delete this._colliders['_stretched'];
-    return false;
+    return true;
   };
 
   Game_CharacterBase.prototype.checkEventTriggerTouchFront = function(d) {
@@ -528,7 +530,7 @@
     var vert = yAxis > 0 ? 2 : yAxis < 0 ? 8 : 0;
     var x2 = $gameMap.roundPXWithDirection(this._px, horz, horzSteps);
     var y2 = $gameMap.roundPYWithDirection(this._py, vert, vertSteps);
-    this.setMovementSuccess(this.canPixelPass(x2, y2, null));
+    this.setMovementSuccess(this.canPassToFrom(x2, y2, this.px, this.py, null, true));
     if (this.isMovementSucceeded() && QMovement.midPass) {
       var x3 = $gameMap.roundPXWithDirection(this._px, horz, horzSteps / 2);
       var y3 = $gameMap.roundPYWithDirection(this._py, vert, vertSteps / 2);
