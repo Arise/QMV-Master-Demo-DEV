@@ -1,16 +1,16 @@
 //=============================================================================
-// QM RegionColliders DEV
+// QM RegionColliders
 //=============================================================================
 
 var Imported = Imported || {};
 Imported.QMRegionColliders = '1.0.0';
 
-if (!Imported.QMovement) {
-  alert('Error: QM+RegionColliders requires QMovement to work.');
-  throw new Error('Error: QM+RegionColliders requires QMovement to work.');
-} else if (!QPlus.versionCheck(Imported.QMovement, '1.1.0')) {
-  alert('Error: QM+RegionColliders requires QPlus 1.1.0 or newer to work.');
-  throw new Error('Error: QM+RegionColliders requires QPlus 1.1.0 or newer to work.');
+if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
+  alert('Error: QM+RegionColliders requires QPlus 1.1.5 or newer to work.');
+  throw new Error('Error: QM+RegionColliders requires QPlus 1.1.5 or newer to work.');
+} else if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.1.0')) {
+  alert('Error: QM+RegionColliders requires QMovement 1.1.0 or newer to work.');
+  throw new Error('Error: QM+RegionColliders requires QMovement 1.1.0 or newer to work.');
 }
 
 //=============================================================================
@@ -18,8 +18,6 @@ if (!Imported.QMovement) {
  * @plugindesc <QMRegionColliders>
  * QMovement Addon: Allows you to add colliders on regions
  * @author Quxios  | Version 1.0.0
- *
- * @development
  *
  * @requires QMovement
  *
@@ -114,15 +112,13 @@ if (!Imported.QMovement) {
 // QM RegionColliders
 
 (function() {
-  var _src = 'data/RegionColliders.json';
 
-  function onSuccess(json) {
-    QMovement.regionColliders = json;
-  };
-
-  function onError(err) {
-    alert("Failed to load 'data/RegionColliders.json'");
-  };
-
-  QPlus.request(_src, onSuccess, onError);
+  QPlus.request('data/RegionColliders.json')
+    .onSuccess(function(json) {
+      QMovement.regionColliders = json;
+    })
+    .onError(function() {
+      QMovement.regionColliders = {};
+      alert('Failed to load ' + this.url);
+    })
 })()
