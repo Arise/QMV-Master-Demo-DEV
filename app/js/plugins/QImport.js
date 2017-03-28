@@ -5,12 +5,9 @@
 var Imported = Imported || {};
 Imported.QImport = '1.0.0';
 
-if (!Imported.QPlus) {
-  alert('Error: QImport requires QPlus to work.');
-  throw new Error('Error: QImport requires QPlus to work.');
-} else if (!QPlus.versionCheck(Imported.QPlus, '1.1.1')) {
-  alert('Error: QImport requires QPlus 1.1.1 or newer to work.');
-  throw new Error('Error: QImport requires QPlus 1.1.1 or newer to work.');
+if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
+  alert('Error: QImport requires QPlus 1.1.5 or newer to work.');
+  throw new Error('Error: QImport requires QPlus 1.1.5 or newer to work.');
 }
 
 //=============================================================================
@@ -105,7 +102,7 @@ if (!Imported.QPlus) {
  * Like my plugins? Support me on Patreon!
  *  https://www.patreon.com/quxios
  *
- * @tags
+ * @tags import, txt
  */
 //=============================================================================
 
@@ -143,7 +140,7 @@ function QImport() {
       var data = q.pop();
       var regex = /<import:(.*)?>/ig;
       var notes = data.note;
-      for (;;) {
+      while (true) {
         var match = regex.exec(notes);
         if (match) {
           this.import(data, 'note', match);
@@ -189,7 +186,7 @@ function QImport() {
       var cmd = page.list[i];
       if (!codes.contains(cmd.code)) continue;
       var regex = /<import:(.*)?>/ig;
-      for (;;) {
+      while (true) {
         var match = regex.exec(cmd.parameters[0]);
         if (match) {
           if (cmd.code === 108 || cmd.code === 408) {
@@ -280,6 +277,7 @@ function QImport() {
         break;
       }
     }
+    var val = '';
     if (obj) {
       val = obj.note || '';
     }
@@ -293,17 +291,18 @@ function QImport() {
     } else {
       this._wait = true;
       this._request.push(data);
-      QPlus.request(args[0], function(response) {
-        QImport._wait = false;
-        QImport._cache[args[0]] = response;
-        data[prop] = data[prop].replace(val, response);
-        DataManager.extractMetadata(data);
-        var i = QImport._request.indexOf(data);
-        QImport._request.splice(i, 1);
-        data = null;
-        args = null;
-        match = null;
-      });
+      QPlus.request(args[0])
+        .onSuccess(function(response) {
+          QImport._wait = false;
+          QImport._cache[args[0]] = response;
+          data[prop] = data[prop].replace(val, response);
+          DataManager.extractMetadata(data);
+          var i = QImport._request.indexOf(data);
+          QImport._request.splice(i, 1);
+          data = null;
+          args = null;
+          match = null;
+        })
     }
     data[prop] = data[prop].replace(match, val);
   };
@@ -324,24 +323,25 @@ function QImport() {
       var mapPath = 'data/Map%1.json'.format(mapId.padZero(3));
       this._wait = true;
       this._request.push(data);
-      QPlus.request(mapPath, function(response) {
-        if (response.events && response.events[eventId]) {
-          QImport._cache[key] = response;
-          for (var props in data) {
-            if (props === 'x' || props === 'y') {
-              continue;
+      QPlus.request(mapPath)
+        .onSuccess(function(response) {
+          if (response.events && response.events[eventId]) {
+            QImport._cache[key] = response;
+            for (var props in data) {
+              if (props === 'x' || props === 'y') {
+                continue;
+              }
+              data[props] = response.events[eventId][props];
             }
-            data[props] = response.events[eventId][props];
+            DataManager.extractMetadata(data);
           }
-          DataManager.extractMetadata(data);
-        }
-        QImport._wait = false;
-        var i = QImport._request.indexOf(data);
-        QImport._request.splice(i, 1);
-        data = null;
-        args = null;
-        match = null;
-      });
+          QImport._wait = false;
+          var i = QImport._request.indexOf(data);
+          QImport._request.splice(i, 1);
+          data = null;
+          args = null;
+          match = null;
+        })
       var val = '<REQUESTING' + key + '>';
       data[prop] = data[prop].replace(match, val);
     }
