@@ -60,7 +60,7 @@
       "prototype - ignoreCharacters - type",
       "prototype - valid - type",
       "prototype - passableColors - undefined",
-      "prototype - canPassToFrom - xf, yf, xi, yi, type",
+      "prototype - canPassToFrom - xf, yf, xi, yi, type, ll",
       "override - prototype - checkEventTriggerTouchFront - d",
       "override - prototype - isOnLadder - undefined",
       "override - prototype - isOnBush - undefined",
@@ -164,7 +164,7 @@
   },
   "new": {
     "Polygon_Collider": [
-      "prototype - initialize - points",
+      "prototype - initialize - points, x, y",
       "prototype - isPolygon - undefined",
       "prototype - isBox - undefined",
       "prototype - isCircle - undefined",
