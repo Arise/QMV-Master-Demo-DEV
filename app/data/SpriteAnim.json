@@ -1,4 +1,36 @@
 {
+  "inyo": {
+    "isV2": true,
+    "poses": {
+      "idle": {
+        "format": "B",
+        "speed": 15,
+        "frames": 1,
+        "anchorX": 0.5,
+        "anchorY": 1,
+        "adjust": true,
+        "diagonals": true
+      },
+      "move": {
+        "format": "B",
+        "speed": 8,
+        "frames": 8,
+        "anchorX": 0.5,
+        "anchorY": 1,
+        "adjust": true,
+        "diagonals": true
+      },
+      "dash": {
+        "format": "B",
+        "speed": 15,
+        "frames": 8,
+        "anchorX": 0.5,
+        "anchorY": 1,
+        "adjust": true,
+        "diagonals": true
+      }
+    }
+  },
   "test": {
     "cols": 12,
     "rows": 8,
