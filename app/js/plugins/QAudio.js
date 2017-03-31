@@ -65,7 +65,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.0.1')) {
  *
  * (Note: If no x, y or bindTo are set, it will play at players position)
  * ----------------------------------------------------------------------------
- * **Examples**
+ * **Examples 1**
  * ----------------------------------------------------------------------------
  * ~~~
  *   qAudio start Battle1
@@ -105,7 +105,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.0.1')) {
  *  qAudio clear
  * ~~~
  * ----------------------------------------------------------------------------
- * **Examples**
+ * **Examples 2**
  * ----------------------------------------------------------------------------
  * First make a qAudio with an Id like:
  * ~~~
