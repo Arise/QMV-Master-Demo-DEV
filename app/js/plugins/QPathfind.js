@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QPathfind = '1.2.0';
+Imported.QPathfind = '1.3.0';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
   alert('Error: QPathfind requires QPlus 1.1.3 or newer to work.');
@@ -14,7 +14,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  /*:
  * @plugindesc <QPathfind>
  * A* Pathfinding algorithm
- * @author Quxios  | Version 1.2.0
+ * @author Quxios  | Version 1.3.0
  *
  * @requires QPlus
  *
@@ -23,6 +23,10 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  * @param Diagonals
  * @desc Set to true to enable diagonals in the route
  * Set to false to disable diagonals
+ * @default false
+ *
+ * @param Any Angle
+ * @desc (Only for QMovement) Set to true to enable moving in any angle
  * @default false
  *
  * @param Intervals
@@ -183,7 +187,6 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  */
 //=============================================================================
 
-
 //=============================================================================
 // QPathfind
 
@@ -193,13 +196,12 @@ function QPathfind() {
 
 (function() {
   var _params = QPlus.getParams('<QPathfind>');
-
   var _diagonals = _params['Diagonals'] === 'true';
   var _intervals = Number(_params['Intervals']);
   var _smartWait = Number(_params['Smart Wait']);
   var _halfOpt = _params['Half Opt'] === 'true';
   var _dashOnMouse = _params['Dash on Mouse'] === 'true';
-  var _anyAngle = true;
+  var _anyAngle = _params['Any Angle'] === 'true'
   if (_anyAngle && Imported.QMovement && _diagonals) _diagonals = false;
   var _defaultOptions = {
     smart: 0, // 0 no smart, 1 recalc on blocked, 2 recalc at intervals
@@ -282,7 +284,7 @@ function QPathfind() {
   };
 
   QPathfind.prototype.beforeStart = function() {
-    console.time('Pathfind');
+    //console.time('Pathfind');
     var x = this._endNode.x;
     var y = this._endNode.y;
     var canPass = true;
@@ -547,7 +549,7 @@ function QPathfind() {
   };
 
   QPathfind.prototype.onComplete = function() {
-    console.timeEnd('Pathfind');
+    //console.timeEnd('Pathfind');
     this._completed = true;
     if (this.options.towards) {
       var firstSteps = this.createFinalPath().slice(0, 2);
@@ -559,7 +561,7 @@ function QPathfind() {
   QPathfind.prototype.onFail = function() {
     //console.timeEnd('Pathfind');
     this._completed = true;
-    if (this.options.chase !== null) {
+    if (this.options.chase !== null || this.options.chasePos !== null) {
       return;
     }
     if (this.options.towards) {
@@ -574,7 +576,7 @@ function QPathfind() {
     while (node.parent) {
       var next = node.parent;
       if (_anyAngle) {
-        while (next.parent && this.character().canPassToFrom(next.parent.x, next.parent.y, node.x, node.y)) {
+        while (next.parent && this.character().canPassToFrom(node.x, node.y, next.parent.x, next.parent.y)) {
           next = next.parent;
         }
       }
@@ -911,22 +913,27 @@ function QPathfind() {
   if (Imported.QMovement) {
     var Alias_Game_Player_requestMouseMove = Game_Player.prototype.requestMouseMove;
     Game_Player.prototype.requestMouseMove = function() {
+      if (this._pathfind && !this._pathfind._completed) {
+        return; // still calculating last request
+      }
       Alias_Game_Player_requestMouseMove.call(this);
-      if (this._isPathfinding) {
+      if (this._isPathfinding && this._requestMouseMove) {
         this._isPathfinding = false;
         this.processRouteEnd();
+        this._pathfind = null;
       }
-      this._pathfind = null;
     };
 
     var Alias_Game_Player_moveByMouse = Game_Player.prototype.moveByMouse;
     Game_Player.prototype.moveByMouse = function(x, y) {
-      var half = QMovement.tileSize / 2;
-      this.initPathfind(x - half, y - half, {
-        smart: 2,
-        breakable: true,
-        adjustEnd: true
-      })
+      if (this._requestMouseMove) {
+        var half = QMovement.tileSize / 2;
+        this.initPathfind(x - half, y - half, {
+          smart: 2,
+          breakable: true,
+          adjustEnd: true
+        })
+      }
       Alias_Game_Player_moveByMouse.call(this, x, y);
     };
 
@@ -934,13 +941,6 @@ function QPathfind() {
     Game_Player.prototype.clearMouseMove = function() {
       Alias_Game_Player_clearMouseMove.call(this);
       this.clearPathfind();
-    };
-
-    Game_Player.prototype._clearPathfind = function() {
-      Game_Character.prototype.clearPathfind.call(this);
-      if (this._movingWithMouse) {
-        this.clearMouseMove();
-      }
     };
 
     Game_Player.prototype.onPathfindComplete = function() {
@@ -962,7 +962,7 @@ function QPathfind() {
 
   if (!_dashOnMouse) {
     Game_Player.prototype.updateDashing = function() {
-      if (this.isMoving()) {
+      if (Imported.QMovement ? this.startedMoving() : this.isMoving()) {
         return;
       }
       if (this.canMove() && !this.isInVehicle() && !$gameMap.isDashDisabled()) {
@@ -972,7 +972,6 @@ function QPathfind() {
       }
     };
   }
-
 
   //-----------------------------------------------------------------------------
   // Game_Event
