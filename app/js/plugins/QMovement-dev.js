@@ -179,7 +179,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  * **Collider Notetag**
  * ----------------------------------------------------------------------------
  * ~~~
- * <collider: shape, width, height, ox, oy>
+ *  <collider: shape, width, height, ox, oy>
  * ~~~
  * This notetag sets all collider types to these values.
  * - Shape: Set to box or circle
@@ -191,9 +191,9 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  * **Colliders Notetag**
  * ----------------------------------------------------------------------------
  * ~~~
- * <colliders>
- * type: shape, width, height, ox, oy
- * </colliders>
+ *  <colliders>
+ *  type: shape, width, height, ox, oy
+ *  </colliders>
  * ~~~
  * This notetag sets all collider types to these values.
  * - Type: The type of collider, set to default, collision or interaction
@@ -208,11 +208,11 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  *
  * Example:
  * ~~~
- * <colliders>
- * default: box, 48, 48
- * collision: circle, 24, 24, 12, 12
- * interaction: box: 32, 32, 8, 8
- * </colliders>
+ *  <colliders>
+ *  default: box, 48, 48
+ *  collision: circle, 24, 24, 12, 12
+ *  interaction: box: 32, 32, 8, 8
+ *  </colliders>
  * ~~~
  * ============================================================================
  * ## Move Routes
@@ -321,6 +321,32 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  *
  * - dirX: Set X to the dir to face after the transfer. Can be 2, 4, 6, 8, or for
  * diagonals 1, 3, 7, 9
+ * ============================================================================
+ * ## Tips
+ * ============================================================================
+ * **No closed open spaces!**
+ * ----------------------------------------------------------------------------
+ * For performance reasons, you should try to avoid having open spaces that are
+ * closed off.
+ * ![Example](https://quxios.github.io/imgs/qmovement/openSpaces.png)
+ * On the left we can see some tiles that have a collider border, but their inside
+ * is "open". This issue is should be corrected when using QPathfind because
+ * if someone was to click inside that "open" space, it is passable and QPathfind
+ * will try to find a way in even though there is no way in and will cause massive
+ * lag. The fix can be pretty simple, you could add a CollisionMap (though that
+ * may be another issue in its own) or add a RegionCollider to fill up the full
+ * tile like I did on the correct side of that image.
+ * ----------------------------------------------------------------------------
+ * **Collision Maps - Heavy**
+ * ----------------------------------------------------------------------------
+ * Try to use collision maps only if you absolutely need to. Collision maps
+ * can be very large images which will make your game use more memory and can
+ * cause some slower pcs to start lagging. The collision checking for collision
+ * maps are also take about 2-4x more time to compute and is a lot less accurate
+ * since it only checks if the colliders edge collided with the collision map.
+ * So using collision maps, might be pretty, but use it with caution as it can
+ * slow down your game! A better solution for this would be to use a PolygonMap
+ * where you create polygon colliders and add them into the map.
  * ============================================================================
  * ## Addons
  * ============================================================================
