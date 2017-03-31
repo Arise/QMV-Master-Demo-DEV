@@ -250,7 +250,7 @@
     return colors;
   };
 
-  Game_CharacterBase.prototype.canPassToFrom = function(xf, yf, xi, yi, type, ll) {
+  Game_CharacterBase.prototype.canPassToFrom = function(xf, yf, xi, yi, type) {
     xi = xi === undefined ? this._px : xi;
     yi = yi === undefined ? this._py : yi;
     type = type || 'collision';

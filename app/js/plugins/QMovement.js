@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.1.4';
+Imported.QMovement = '1.1.5';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
   alert('Error: Movemente requires QPlus 1.1.3 or newer to work.');
@@ -14,7 +14,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.1.4
+ * @author Quxios  | Version 1.1.5
  *
  * @repo https://github.com/quxios/QMovement
  *
@@ -1830,7 +1830,7 @@ function ColliderManager() {
     return colors;
   };
 
-  Game_CharacterBase.prototype.canPassToFrom = function(xf, yf, xi, yi, type, ll) {
+  Game_CharacterBase.prototype.canPassToFrom = function(xf, yf, xi, yi, type) {
     xi = xi === undefined ? this._px : xi;
     yi = yi === undefined ? this._py : yi;
     type = type || 'collision';
@@ -2613,6 +2613,7 @@ function ColliderManager() {
   var Alias_Game_Player_initMembers = Game_Player.prototype.initMembers;
   Game_Player.prototype.initMembers = function() {
     Alias_Game_Player_initMembers.call(this);
+    this._lastMouseRequested = 0;
     this._requestMouseMove = false;
     this._movingWithMouse = false;
   };
@@ -2626,17 +2627,21 @@ function ColliderManager() {
   };
 
   Game_Player.prototype.requestMouseMove = function() {
-    this._requestMouseMove = true;
+    var currFrame = Graphics.frameCount;
+    var dt = currFrame - this._lastMouseRequested;
+    if (dt >= 5) {
+      this._lastMouseRequested = currFrame;
+      this._requestMouseMove = true;
+    } else {
+      this._requestMouseMove = false;
+    }
   };
 
   Game_Player.prototype.moveByMouse = function(x, y) {
-    $gameTemp.setPixelDestination(x, y);
     if (this.triggerTouchAction()) {
       return this.clearMouseMove();
     }
-    this._requestMouseMove = false;
     this._movingWithMouse = true;
-    // alias with pathfinding addon
   };
 
   Game_Player.prototype.clearMouseMove = function() {
@@ -2651,14 +2656,17 @@ function ColliderManager() {
       var direction = QMovement.diagonal ? Input.dir8 : Input.dir4;
       if (direction > 0) {
         this.clearMouseMove();
-      } else if ($gameTemp.isDestinationValid() && this._requestMouseMove) {
+      } else if ($gameTemp.isDestinationValid()) {
         if (!QMovement.moveOnClick) {
           $gameTemp.clearDestination();
           return;
         }
-        var x = $gameTemp.destinationPX();
-        var y = $gameTemp.destinationPY();
-        return this.moveByMouse(x, y);
+        this.requestMouseMove();
+        if (this._requestMouseMove) {
+          var x = $gameTemp.destinationPX();
+          var y = $gameTemp.destinationPY();
+          return this.moveByMouse(x, y);
+        }
       }
       if (Imported.QInput && Input.preferGamepad() && QMovement.offGrid) {
         this.moveWithAnalog();
@@ -3000,7 +3008,6 @@ function ColliderManager() {
             y += QMovement.tileSize / 2 - oy;
           }
           $gameTemp.setPixelDestination(x, y);
-          $gamePlayer.requestMouseMove();
         }
         this._touchCount++;
       } else {

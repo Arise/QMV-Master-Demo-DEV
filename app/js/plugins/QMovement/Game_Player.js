@@ -5,6 +5,7 @@
   var Alias_Game_Player_initMembers = Game_Player.prototype.initMembers;
   Game_Player.prototype.initMembers = function() {
     Alias_Game_Player_initMembers.call(this);
+    this._lastMouseRequested = 0;
     this._requestMouseMove = false;
     this._movingWithMouse = false;
   };
@@ -18,17 +19,21 @@
   };
 
   Game_Player.prototype.requestMouseMove = function() {
-    this._requestMouseMove = true;
+    var currFrame = Graphics.frameCount;
+    var dt = currFrame - this._lastMouseRequested;
+    if (dt >= 5) {
+      this._lastMouseRequested = currFrame;
+      this._requestMouseMove = true;
+    } else {
+      this._requestMouseMove = false;
+    }
   };
 
   Game_Player.prototype.moveByMouse = function(x, y) {
-    $gameTemp.setPixelDestination(x, y);
     if (this.triggerTouchAction()) {
       return this.clearMouseMove();
     }
-    this._requestMouseMove = false;
     this._movingWithMouse = true;
-    // alias with pathfinding addon
   };
 
   Game_Player.prototype.clearMouseMove = function() {
@@ -43,14 +48,17 @@
       var direction = QMovement.diagonal ? Input.dir8 : Input.dir4;
       if (direction > 0) {
         this.clearMouseMove();
-      } else if ($gameTemp.isDestinationValid() && this._requestMouseMove) {
+      } else if ($gameTemp.isDestinationValid()) {
         if (!QMovement.moveOnClick) {
           $gameTemp.clearDestination();
           return;
         }
-        var x = $gameTemp.destinationPX();
-        var y = $gameTemp.destinationPY();
-        return this.moveByMouse(x, y);
+        this.requestMouseMove();
+        if (this._requestMouseMove) {
+          var x = $gameTemp.destinationPX();
+          var y = $gameTemp.destinationPY();
+          return this.moveByMouse(x, y);
+        }
       }
       if (Imported.QInput && Input.preferGamepad() && QMovement.offGrid) {
         this.moveWithAnalog();

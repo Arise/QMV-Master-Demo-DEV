@@ -27,7 +27,6 @@
             y += QMovement.tileSize / 2 - oy;
           }
           $gameTemp.setPixelDestination(x, y);
-          $gamePlayer.requestMouseMove();
         }
         this._touchCount++;
       } else {
