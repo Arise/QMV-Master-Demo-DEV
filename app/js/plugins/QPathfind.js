@@ -229,9 +229,10 @@ function QPathfind() {
   //   QPathfind.onFail > Game_Character.clearPathfind
 
   QPathfind.prototype.initialize = function(charaId, endPoint, options) {
+    console.log('new');
     this.initMembers(charaId, endPoint, options);
     this.beforeStart();
-    this.update();
+    //this.update();
   };
 
   QPathfind.prototype.initMembers = function(charaId, endPoint, options) {
@@ -266,6 +267,7 @@ function QPathfind() {
     this._startNode = this.node(null, startPoint);
     this._startNode.visited = true;
     this._endNode = this.node(null, endPoint);
+    this._originalEnd = this.node(null, endPoint);
     this._openNodes = [this._startNode];
     this._grid = {};
     this._grid[this._startNode.value] = this._startNode;
@@ -561,7 +563,7 @@ function QPathfind() {
   QPathfind.prototype.onFail = function() {
     //console.timeEnd('Pathfind');
     this._completed = true;
-    if (this.options.chase !== null || this.options.chasePos !== null) {
+    if (this.options.chase !== null) {
       return;
     }
     if (this.options.towards) {
@@ -636,9 +638,6 @@ function QPathfind() {
       var command = {};
       if (Imported.QMovement) {
         if (_anyAngle) {
-          // TODO
-          // make a move cmd for this to move it step by step
-          // and not the move by the full dist
           var radian = Math.atan2(-sy, -sx);
           if (radian < 0) radian += Math.PI * 2;
           dist = Math.sqrt(sx * sx + sy * sy);
@@ -828,12 +827,21 @@ function QPathfind() {
 
   // if using QMovement, x and y are pixel values
   Game_Character.prototype.initPathfind = function(x, y, options) {
+    if (this._pathfind) {
+      var oldX = this._pathfind._originalEnd.x;
+      var oldY = this._pathfind._originalEnd.y;
+      if (x === oldX && y === oldY) {
+        // TODO check if any options changed
+        return;
+      }
+    }
     if (this._isPathfinding) {
       this.clearPathfind();
     }
     options = options || {};
     this._pathfind = new QPathfind(this.charaId(), new Point(x, y), options);
     this._isChasing = options.chase !== null ? options.chase : false;
+    this._pathfind.update();
   };
 
   Game_Character.prototype.initChase = function(charaId) {
@@ -914,26 +922,21 @@ function QPathfind() {
     var Alias_Game_Player_requestMouseMove = Game_Player.prototype.requestMouseMove;
     Game_Player.prototype.requestMouseMove = function() {
       if (this._pathfind && !this._pathfind._completed) {
-        return; // still calculating last request
+        this._requestMouseMove = false;
+        return;
       }
       Alias_Game_Player_requestMouseMove.call(this);
-      if (this._isPathfinding && this._requestMouseMove) {
-        this._isPathfinding = false;
-        this.processRouteEnd();
-        this._pathfind = null;
-      }
     };
 
     var Alias_Game_Player_moveByMouse = Game_Player.prototype.moveByMouse;
     Game_Player.prototype.moveByMouse = function(x, y) {
-      if (this._requestMouseMove) {
-        var half = QMovement.tileSize / 2;
-        this.initPathfind(x - half, y - half, {
-          smart: 2,
-          breakable: true,
-          adjustEnd: true
-        })
-      }
+      var half = QMovement.tileSize / 2;
+      this.initPathfind(x - half, y - half, {
+        smart: 2,
+        breakable: true,
+        adjustEnd: true
+      })
+      $gameTemp.setPixelDestination(x, y);
       Alias_Game_Player_moveByMouse.call(this, x, y);
     };
 

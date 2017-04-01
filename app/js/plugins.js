@@ -25,6 +25,6 @@ var $plugins =
 {"name":"QMap","status":false,"description":"<QMap>\r\ndesc","parameters":{"":""}},
 {"name":"========================","status":false,"description":"","parameters":{}},
 {"name":"QImport","status":true,"description":"<QImport>\r\ndesc","parameters":{"":""}},
-{"name":"QPathfind","status":true,"description":"<QPathfind>\r\nA* Pathfinding algorithm","parameters":{"Diagonals":"true","Intervals":"1000","Smart Wait":"60","=============":"","Half Opt":"true"}},
+{"name":"QPathfind","status":true,"description":"<QPathfind>\r\nA* Pathfinding algorithm","parameters":{"Diagonals":"true","Any Angle":"false","Intervals":"500","Smart Wait":"60","=============":"","Half Opt":"true","Dash on Mouse":"true"}},
 {"name":"QSight","status":true,"description":"<QSight>\r\nReal time line of sight","parameters":{"See Through Terrain":"1","Show":"true"}}
 ];
