@@ -35,3 +35,5 @@ app/js/rpg_windows.js
 # other
 .vscode
 app/js/plugins/QuasiSight.js
+app/js/plugins/Q_IsoCam.js
+app/js/plugins/_QCamera.js
