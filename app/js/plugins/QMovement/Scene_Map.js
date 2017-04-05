@@ -34,4 +34,17 @@
       }
     }
   };
+
+  Scene_Map.prototype.updateCallMenu = function() {
+    if (this.isMenuEnabled()) {
+      if (this.isMenuCalled()) {
+        this.menuCalling = true;
+      }
+      if (this.menuCalling && !$gamePlayer.startedMoving()) {
+        this.callMenu();
+      }
+    } else {
+      this.menuCalling = false;
+    }
+  };
 })();

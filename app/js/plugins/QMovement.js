@@ -1593,13 +1593,13 @@ function ColliderManager() {
 
   Game_Map.prototype.canvasToMapPX = function(x) {
     var tileWidth = this.tileWidth();
-    var originX = this._displayX * tileWidth;
+    var originX = this.displayX() * tileWidth;
     return this.roundPX(originX + x);
   };
 
   Game_Map.prototype.canvasToMapPY = function(y) {
     var tileHeight = this.tileHeight();
-    var originY = this._displayY * tileHeight;
+    var originY = this.displayY() * tileHeight;
     return this.roundPY(originY + y);
   };
 })();
@@ -3039,6 +3039,19 @@ function ColliderManager() {
       } else {
         this._touchCount = 0;
       }
+    }
+  };
+
+  Scene_Map.prototype.updateCallMenu = function() {
+    if (this.isMenuEnabled()) {
+      if (this.isMenuCalled()) {
+        this.menuCalling = true;
+      }
+      if (this.menuCalling && !$gamePlayer.startedMoving()) {
+        this.callMenu();
+      }
+    } else {
+      this.menuCalling = false;
     }
   };
 })();

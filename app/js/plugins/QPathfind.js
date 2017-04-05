@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QPathfind = '1.3.1';
+Imported.QPathfind = '1.4.0';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
   alert('Error: QPathfind requires QPlus 1.1.3 or newer to work.');
@@ -14,11 +14,11 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  /*:
  * @plugindesc <QPathfind>
  * A* Pathfinding algorithm
- * @author Quxios  | Version 1.3.1
+ * @author Quxios  | Version 1.4.0
  *
  * @requires QPlus
  *
- * @video
+ * @video TODO
  *
  * @param Diagonals
  * @desc Set to true to enable diagonals in the route
@@ -42,11 +42,6 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  * @param =============
  * @desc Spacer
  * @default
- *
- * @param Half Opt
- * @desc (Only for QMovement) Uses half the value from Optimize Move Tiles.
- * Slightly increases pathfinding accuracy.
- * @default true
  *
  * @param Dash on Mouse
  * @desc Should player dash when mouse clicking?
@@ -215,7 +210,7 @@ function QPathfind() {
   var _smartOT = 300;
   // debug will show the console timers
   var _debug = false;
-  var _smartInterval = !true; // not workign as intended, makes it worse
+  var _smartInterval = !true; // not working as intended, makes it worse
 
   //-----------------------------------------------------------------------------
   // QPathfind
@@ -278,6 +273,7 @@ function QPathfind() {
     this._current = null;
     this._completed = false;
     this._tick = 0;
+    this._forceReq = false;
     if (this.options.smart > 1) {
       // TODO smart wait should probably be calculated
       // based on how many pathfinders there are
@@ -409,7 +405,9 @@ function QPathfind() {
     // TODO try to make this even "smarter"
     this._tick++;
     var ot = 0;
-    if (this.options.chase !== undefined) {
+    if (!this._forceReq && this.options.chase !== undefined) {
+      // TODO return if already touching the character it's chasing
+      // TODO if character hasn't moved in X frames force a restart
       var chasing = QPlus.getCharacter(this.options.chase);
       var p1 = new Point(chasing.x, chasing.y);
       var p2 = new Point(this.character().x, this.character().y);
@@ -418,8 +416,8 @@ function QPathfind() {
       if (dist > range) {
         ot = _smartOT;
       }
-      // If endpoint hasn't changed, no need to recalc
       if (!this.options.towards && !this._failed) {
+        // If endpoint hasn't changed, no need to recalc
         if (Imported.QMovement) {
           if (this._endNode.x === chasing.px && this._endNode.y === chasing.py) {
             return;
@@ -434,6 +432,13 @@ function QPathfind() {
     if (this._tick > this._smartTime + ot) {
       return this.character().restartPathfind();
     }
+  };
+
+  QPathfind.prototype.requestRestart = function(ot) {
+    if (!this._completed) return;
+    ot = ot === undefined ? 0 : ot;
+    this._tick = this._smartTime - ot;
+    this._forceReq = true;
   };
 
   QPathfind.prototype.node = function(parent, point) {
@@ -570,7 +575,7 @@ function QPathfind() {
     this._completed = true;
     this._failed = false;
     if (this.options.towards) {
-      var firstSteps = this.createFinalPath().slice(0, 2);
+      var firstSteps = this.createFinalPath().slice(0, 3);
       return this.character().startPathfind(firstSteps);
     }
     this.character().startPathfind(this.createFinalPath());
@@ -581,11 +586,11 @@ function QPathfind() {
     QPathfind._pathfinders--;
     this._completed = true;
     this._failed = true;
-    if (this.options.chase !== undefined) {
-      return;
-    }
     if (this.options.towards) {
       return this.onComplete();
+    }
+    if (this.options.chase !== undefined) {
+      return;
     }
     this.character().clearPathfind();
   };
@@ -599,10 +604,20 @@ function QPathfind() {
         while (next.parent && this.character().canPassToFrom(node.x, node.y, next.parent.x, next.parent.y, '_pathfind')) {
           next = next.parent;
         }
+      } else if (_diagonals) {
+        while (next.parent) {
+          var dx = node.x - next.parent.x;
+          var dy = node.y - next.parent.y;
+          var rad = Math.atan2(dy, dx);
+          rad += rad < 0 ? Math.PI * 2 : 0;
+          var deg = Math.floor(rad * 180 / Math.PI);
+          if ([45, 135, 225, 315].contains(deg) && this.character().canPassToFrom(node.x, node.y, next.parent.x, next.parent.y, '_pathfind')) {
+            next = next.parent;
+          } else {
+            break;
+          }
+        }
       }
-      // TODO diagonals are pretty expensive in QMovement so
-      // remove them from the A* and calc if can move diagonals here instead
-      // similar to how Any Angle does it. Should inc performance
       node = next;
       path.unshift(node);
     }
@@ -638,6 +653,7 @@ function QPathfind() {
       7: 7, 9: 8
     }
     for (var i = 1; i < path.length; i++) {
+      if (!path[i]) break;
       var sx = current.x - path[i].x;
       var sy = current.y - path[i].y;
       var dist, dir;
@@ -877,8 +893,6 @@ function QPathfind() {
 
   Game_Character.prototype.restartPathfind = function() {
     if (!this._pathfind._completed) return;
-    // TODO chasing needs more work
-    // its restarting too often
     var x = this._pathfind._endNode.x;
     var y = this._pathfind._endNode.y;
     this._isPathfinding = false;
@@ -897,7 +911,9 @@ function QPathfind() {
 
   Game_Character.prototype.onPathfindComplete = function() {
     if (this._isChasing !== false) {
-      this._pathfind._tick += _smartOT;
+      this._isPathfinding = false;
+      this.processRouteEnd();
+      this._pathfind.requestRestart(5);
       return;
     }
     this._isPathfinding = false;
@@ -933,7 +949,10 @@ function QPathfind() {
     if (this._isPathfinding) {
       var moveRoute = this._moveRoute;
       if (moveRoute && (!this.isMovementSucceeded() && this._pathfind.options.smart > 0)) {
-        return this.restartPathfind();
+        this._isPathfinding = false;
+        this.processRouteEnd();
+        this._pathfind.requestRestart(5);
+        return;
       }
     }
     Alias_Game_Character_advanceMoveRouteIndex.call(this);

@@ -40,6 +40,20 @@ Imported.QPlus = '1.2.0';
  * ~~~
  * This will be ignored if the next page has direction fix enabled
  *
+ * ----------------------------------------------------------------------------
+ * **No tilemap**
+ * ----------------------------------------------------------------------------
+ * You can disable the tile map by adding this note to a map
+ * ~~~
+ *  <noTilemap>
+ * ~~~
+ * This will replace the tilemap with a simple light weight sprite container.
+ * Using this may increase performance. So if you have a map that doesn't use
+ * any tiles and is all parallax, then you should considering using this.
+ *
+ * * Note, there's a chance this may break some plugins if they call functions in
+ * the original tilemap class.
+ *
  * ============================================================================
  * ## Plugin Commands
  * ============================================================================
@@ -77,10 +91,10 @@ Imported.QPlus = '1.2.0';
  *
  * Possible options:
  *
- *  - only  - Will only apply to the characters listed
+ *  - only - Will only apply to the characters listed
  *
  * ----------------------------------------------------------------------------
- * **Examples**
+ * **Global lock Examples**
  * ----------------------------------------------------------------------------
  * ~~~
  *  globalLock 2
@@ -109,12 +123,15 @@ Imported.QPlus = '1.2.0';
  * ## Links
  * ============================================================================
  * RPGMakerWebs:
+ *
  *  http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
  *
  * Terms of use:
+ *
  *  https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
  * Like my plugins? Support me on Patreon!
+ *
  *  https://www.patreon.com/quxios
  *
  * @tags core, character
@@ -652,6 +669,10 @@ function SimpleTilemap() {
     }
   };
 
+  Game_CharacterBase.prototype.setSelfSwitch = function() {
+    return;
+  };
+
   var Alias_Game_Character_updateRoutineMove = Game_Character.prototype.updateRoutineMove;
   Game_Character.prototype.updateRoutineMove = function() {
     if (this._globalLocked >= 1) {
@@ -659,6 +680,7 @@ function SimpleTilemap() {
     }
     Alias_Game_Character_updateRoutineMove.call(this);
   };
+
 
   //-----------------------------------------------------------------------------
   // Game_Player
@@ -744,6 +766,14 @@ function SimpleTilemap() {
   Game_Event.prototype.setupPageSettings = function() {
     Alias_Game_Event_setupPageSettings.call(this);
     this.setupComments();
+  };
+
+  Game_Event.prototype.setSelfSwitch = function(selfSwitch, bool) {
+    var mapId = this._mapId;
+    var eventId = this._eventId;
+    if (!mapId || !eventId) return;
+    var key = [mapId, eventId, selfSwitch];
+    $gameSelfSwitches.setValue(key, bool);
   };
 
   //-----------------------------------------------------------------------------

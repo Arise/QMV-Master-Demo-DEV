@@ -152,7 +152,8 @@
     ],
     "Scene_Map": [
       "alias - prototype - updateMain - undefined",
-      "override - prototype - processMapTouch - undefined"
+      "override - prototype - processMapTouch - undefined",
+      "override - prototype - updateCallMenu - undefined"
     ],
     "Sprite_Destination": [
       "override - prototype - updatePosition - undefined"
