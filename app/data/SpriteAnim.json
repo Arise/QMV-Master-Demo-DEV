@@ -1,37 +1,6 @@
 {
-  "inyo": {
-    "isV2": true,
-    "poses": {
-      "idle": {
-        "format": "B",
-        "speed": 15,
-        "frames": 1,
-        "anchorX": 0.5,
-        "anchorY": 1,
-        "adjust": true,
-        "diagonals": true
-      },
-      "move": {
-        "format": "B",
-        "speed": 8,
-        "frames": 8,
-        "anchorX": 0.5,
-        "anchorY": 1,
-        "adjust": true,
-        "diagonals": true
-      },
-      "dash": {
-        "format": "B",
-        "speed": 15,
-        "frames": 8,
-        "anchorX": 0.5,
-        "anchorY": 1,
-        "adjust": true,
-        "diagonals": true
-      }
-    }
-  },
   "test": {
+    "name": "test",
     "cols": 12,
     "rows": 8,
     "anchorX": 0.5,
@@ -39,205 +8,134 @@
     "sampleImg": "E:\\GitHub\\QMV-Master-Demo\\img\\characters\\%test-Actor1.png",
     "poses": {
       "move2": {
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          1,
-          0,
-          1,
-          2
-        ]
+        "name": "move2",
+        "speed": 10,
+        "adjust": false,
+        "pattern": []
       },
       "move4": {
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          13,
-          12,
-          13,
-          14
-        ]
+        "name": "move4",
+        "speed": 10,
+        "adjust": false,
+        "pattern": []
       },
       "move6": {
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          25,
-          24,
-          25,
-          26
-        ]
+        "name": "move6",
+        "speed": 10,
+        "adjust": false,
+        "pattern": []
       },
       "move8": {
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          37,
-          36,
-          37,
-          38
-        ]
+        "name": "move8",
+        "speed": 10,
+        "adjust": false,
+        "pattern": []
       },
       "idle2": {
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          4,
-          3,
-          4,
-          5
-        ]
+        "name": "idle2",
+        "speed": 10,
+        "adjust": false,
+        "pattern": []
       },
       "idle4": {
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          16,
-          15,
-          16,
-          17
-        ]
+        "name": "idle4",
+        "speed": 10,
+        "adjust": false,
+        "pattern": []
       },
       "idle6": {
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          28,
-          27,
-          28,
-          29
-        ]
+        "name": "idle6",
+        "speed": 10,
+        "adjust": false,
+        "pattern": []
       },
       "idle8": {
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          40,
-          39,
-          40,
-          41
-        ]
+        "name": "idle8",
+        "speed": 10,
+        "adjust": false,
+        "pattern": []
       },
       "idleA2": {
-        "speed": 15,
+        "name": "idleA2",
+        "speed": 10,
         "adjust": false,
-        "pattern": [
-          4,
-          7,
-          10
-        ]
+        "pattern": []
       },
       "idleA4": {
-        "speed": 15,
+        "name": "idleA4",
+        "speed": 10,
         "adjust": false,
-        "pattern": [
-          16,
-          19,
-          22
-        ]
+        "pattern": []
       },
       "idleA6": {
-        "speed": 15,
+        "name": "idleA6",
+        "speed": 10,
         "adjust": false,
-        "pattern": [
-          28,
-          31,
-          34
-        ]
+        "pattern": []
       },
       "idleA8": {
-        "speed": 15,
+        "name": "idleA8",
+        "speed": 10,
         "adjust": false,
-        "pattern": [
-          40,
-          43,
-          46
-        ]
+        "pattern": []
       },
       "idleB4x4": {
-        "speed": 15,
+        "name": "idleB4x4",
+        "speed": 10,
         "adjust": false,
-        "pattern": [
-          12,
-          13,
-          14
-        ]
+        "pattern": []
       },
       "idleB4x2": {
-        "speed": 15,
+        "name": "idleB4x2",
+        "speed": 10,
         "adjust": false,
-        "pattern": [
-          0,
-          1,
-          2
-        ]
+        "pattern": []
       },
       "idleB4x6": {
-        "speed": 15,
+        "name": "idleB4x6",
+        "speed": 10,
         "adjust": false,
-        "pattern": [
-          24,
-          25,
-          26
-        ]
+        "pattern": []
       },
       "idleB4x8": {
-        "speed": 15,
+        "name": "idleB4x8",
+        "speed": 10,
         "adjust": false,
-        "pattern": [
-          36,
-          37,
-          38
-        ]
+        "pattern": []
       },
       "test2": {
+        "name": "test2",
         "speed": 10,
         "adjust": false,
-        "pattern": [
-          48,
-          49,
-          50,
-          51,
-          52,
-          53
-        ]
+        "pattern": []
       },
       "test4": {
+        "name": "test4",
         "speed": 10,
         "adjust": false,
-        "pattern": [
-          60,
-          61,
-          62,
-          63,
-          64,
-          65
-        ]
+        "pattern": []
       },
       "test6": {
+        "name": "test6",
         "speed": 10,
         "adjust": false,
-        "pattern": [
-          72,
-          73,
-          74,
-          75,
-          76,
-          77
-        ]
+        "pattern": []
       },
       "test8": {
+        "name": "test8",
         "speed": 10,
         "adjust": false,
-        "pattern": [
-          84,
-          85,
-          86,
-          87,
-          88,
-          89
-        ]
+        "pattern": []
       }
     }
+  },
+  "Config1": {
+    "name": "Config1",
+    "cols": 1,
+    "rows": 1,
+    "anchorX": 0.5,
+    "anchorY": 1,
+    "sampleImg": "",
+    "poses": {}
   }
 }
