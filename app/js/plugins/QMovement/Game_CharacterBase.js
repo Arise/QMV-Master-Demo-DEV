@@ -340,7 +340,6 @@
   };
 
   Game_CharacterBase.prototype.updateMove = function() {
-    if (this.isArcing()) return;
     var xSpeed = 1;
     var ySpeed = 1;
     if (this._adjustFrameSpeed) {
@@ -359,10 +358,8 @@
     if (this._py > this._realPY) {
       this._realPY = Math.min(this._realPY + this.frameSpeed(ySpeed), this._py);
     }
-    this._x = Math.floor(this._px / QMovement.tileSize);
-    this._y = Math.floor(this._py / QMovement.tileSize);
-    this._realX = this._realPX / QMovement.tileSize;
-    this._realY = this._realPY / QMovement.tileSize;
+    this._x = this._realX = this._realPX / QMovement.tileSize;
+    this._y = this._realY = this._realPY / QMovement.tileSize;
     this._freqCount += this.frameSpeed();
   };
 
@@ -378,10 +375,8 @@
     this._currentRad = newRad;
     this._px = this._realPX = x1;
     this._py = this._realPY = y1;
-    this._x = Math.floor(this._px / QMovement.tileSize);
-    this._y = Math.floor(this._py / QMovement.tileSize);
-    this._realX = this._realPX / QMovement.tileSize;
-    this._realY = this._realPY / QMovement.tileSize;
+    this._x = this._realX = this._realPX / QMovement.tileSize;
+    this._y = this._realY = this._realPY / QMovement.tileSize;
     this.moveColliders(x1, y1);
     this.checkEventTriggerTouchFront(this._direction);
   };
