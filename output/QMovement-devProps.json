@@ -8,16 +8,19 @@
       "prototype - destinationPY - undefined"
     ],
     "Game_System": [
+      "alias - prototype - onBeforeSave - undefined",
       "alias - prototype - onAfterLoad - undefined"
     ],
     "Game_Map": [
+      "alias - prototype - setup - mapId",
+      "alias - prototype - setupEvents - undefined",
+      "prototype - setupColliders - undefined",
       "override - prototype - tileWidth - undefined",
       "override - prototype - tileHeight - undefined",
       "prototype - flagAt - x, y",
-      "alias - prototype - setupEvents - undefined",
-      "prototype - setupColliders - undefined",
       "alias - prototype - refreshIfNeeded - undefined",
-      "prototype - reloadAllColliders - undefined",
+      "prototype - reloadColliders - undefined",
+      "prototype - clearColliders - undefined",
       "prototype - reloadTileMap - undefined",
       "prototype - setupMapColliders - undefined",
       "prototype - getMapCollider - x, y, flag",
@@ -88,6 +91,7 @@
       "prototype - smartMoveDir8 - dir",
       "prototype - smartMoveSpeed - dir",
       "prototype - reloadColliders - undefined",
+      "prototype - removeColliders - undefined",
       "prototype - collider - type",
       "prototype - defaultColliderConfig - undefined",
       "prototype - setupColliders - undefined",
