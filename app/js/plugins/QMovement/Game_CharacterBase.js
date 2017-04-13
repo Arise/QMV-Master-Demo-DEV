@@ -687,12 +687,16 @@
   };
 
   Game_CharacterBase.prototype.reloadColliders = function() {
+    this.removeColliders();
+    this.setupColliders();
+  };
+
+  Game_CharacterBase.prototype.removeColliders = function() {
     for (var collider in this._colliders) {
       if (!this._colliders.hasOwnProperty(collider)) continue;
       ColliderManager.remove(this._colliders[collider]);
       this._colliders[collider] = null;
     }
-    this.setupColliders();
   };
 
   Game_CharacterBase.prototype.collider = function(type) {
@@ -767,7 +771,7 @@
   };
 
   Game_CharacterBase.prototype.moveColliders = function(x, y) {
-    if (!$dataMap) return;
+    if (!$dataMap || !$gameMap) return;
     x = typeof x === 'number' ? x : this.px;
     y = typeof y === 'number' ? y : this.py;
     var prev = this._colliders['bounds'].sectorEdge();

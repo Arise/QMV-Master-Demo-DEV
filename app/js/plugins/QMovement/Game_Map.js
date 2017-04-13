@@ -2,27 +2,12 @@
 // Game_Map
 
 (function() {
-  Game_Map.prototype.tileWidth = function() {
-    return QMovement.tileSize;
-  };
-
-  Game_Map.prototype.tileHeight = function() {
-    return QMovement.tileSize;
-  };
-
-  Game_Map.prototype.flagAt = function(x, y) {
-    var x = x || $gamePlayer.x;
-    var y = y || $gamePlayer.y;
-    var flags = this.tilesetFlags();
-    var tiles = this.allTiles(x, y);
-    for (var i = 0; i < tiles.length; i++) {
-      var flag = flags[tiles[i]];
-      console.log('layer', i, ':', flag);
-      if (flag & 0x20)  console.log('layer', i, 'is ladder');
-      if (flag & 0x40)  console.log('layer', i, 'is bush');
-      if (flag & 0x80)  console.log('layer', i, 'is counter');
-      if (flag & 0x100) console.log('layer', i, 'is damage');
-    }
+  var Alias_Game_Map_setup = Game_Map.prototype.setup;
+  Game_Map.prototype.setup = function(mapId) {
+    Alias_Game_Map_setup.call(this, mapId);
+    if (!$dataMap) return;
+    this.reloadColliders();
+    ColliderManager._needsRefresh = false;
   };
 
   var Alias_Game_Map_setupEvents = Game_Map.prototype.setupEvents;
@@ -49,16 +34,39 @@
     }
   };
 
+  Game_Map.prototype.tileWidth = function() {
+    return QMovement.tileSize;
+  };
+
+  Game_Map.prototype.tileHeight = function() {
+    return QMovement.tileSize;
+  };
+
+  Game_Map.prototype.flagAt = function(x, y) {
+    var x = x || $gamePlayer.x;
+    var y = y || $gamePlayer.y;
+    var flags = this.tilesetFlags();
+    var tiles = this.allTiles(x, y);
+    for (var i = 0; i < tiles.length; i++) {
+      var flag = flags[tiles[i]];
+      console.log('layer', i, ':', flag);
+      if (flag & 0x20)  console.log('layer', i, 'is ladder');
+      if (flag & 0x40)  console.log('layer', i, 'is bush');
+      if (flag & 0x80)  console.log('layer', i, 'is counter');
+      if (flag & 0x100) console.log('layer', i, 'is damage');
+    }
+  };
+
   var Alias_Game_Map_refreshIfNeeded = Game_Map.prototype.refreshIfNeeded;
   Game_Map.prototype.refreshIfNeeded = function() {
     Alias_Game_Map_refreshIfNeeded.call(this);
     if (ColliderManager._needsRefresh) {
-      this.reloadAllColliders();
+      this.reloadColliders();
       ColliderManager._needsRefresh = false;
     }
   };
 
-  Game_Map.prototype.reloadAllColliders = function() {
+  Game_Map.prototype.reloadColliders = function() {
     this.setupColliders();
     this.reloadTileMap();
     var events = this.events();
@@ -74,6 +82,23 @@
     var followers = $gamePlayer.followers()._data;
     for (i = 0, j = followers.length; i < j; i++) {
       followers[i].reloadColliders();
+    }
+  };
+
+  Game_Map.prototype.clearColliders = function() {
+    var events = this.events();
+    var i, j;
+    for (i = 0, j = events.length; i < j; i++) {
+      events[i].removeColliders();
+    }
+    var vehicles = this._vehicles;
+    for (i = 0, j = vehicles.length; i < j; i++) {
+      vehicles[i].removeColliders();
+    }
+    $gamePlayer.removeColliders();
+    var followers = $gamePlayer.followers()._data;
+    for (i = 0, j = followers.length; i < j; i++) {
+      followers[i].removeColliders();
     }
   };
 
