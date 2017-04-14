@@ -13,42 +13,40 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
 //=============================================================================
  /*:
  * @plugindesc <QImport>
- * Lets you import text from other game objects or from txt files
+ * Lets you import text from other game objects or txt files
  * @author Quxios  | Version 1.0.0
  *
  * @requires QPlus
- *
- * @development
  *
  * @help
  * ============================================================================
  * ## About
  * ============================================================================
- * TODO
- * - Add more features
- * - Create better help
+ * This plugin is used to help ease development of configurations by letting
+ * you import from different sources. If you have a note tag that is going to
+ * be used in multiple game objects, you can configure just one of them and have
+ * the rest import the notes from that "master" object. Then whenever you edit
+ * the "master" all the ones that are importing from it will also get the change.
  * ============================================================================
  * ## How to use
  * ============================================================================
- * TODO create better help
- * ----------------------------------------------------------------------------
  * **Notetags for database items**
  * ----------------------------------------------------------------------------
  * ~~~
- *  <import: type, from, from2>
+ *  <import: TYPE, FROM, FROM2>
  * ~~~
- *  - type: set to text or note
- *  - from: if type is text, set this to the path of the text file
- *          if type is note, set to the database to read;
- *          actor, class, skill, item, weapon, armor, enemy, or state
- *  - from2: if type is text ignore this
- *           if type is note, set this to the id from that database
+ * - TYPE: set to text or note
+ * - FROM: if TYPE is text, set this to the path of the text file
+ *  if TYPE is note, set to the database to read; actor, class, skill, item, weapon, armor, enemy, or state
+ * - FROM2: if TYPE is text ignore this
+ *  if TYPE is note, set this to the id from that database
  *
- * example:
+ * Example:
  * ~~~
  *  <import:text,text/file.txt>
  * ~~~
  * Will import the text from the file located in text/file.txt
+ *
  * ~~~
  *  <import:note,actor,2>
  * ~~~
@@ -59,47 +57,66 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
  * ~~~
  *  <importing>
  * ~~~
- * Marks that event as needs importing. Required if an <import> tags are used
+ * Marks that event as "needs importing". Required if an <import> tags is used
  * in that events pages.
  *
  * ~~~
- *  <import: type, from, from2>
+ *  <import: TYPE, FROM, FROM2>
  * ~~~
- *  - type: set to text, note or event
- *  - from: if type is text, set this to the path of the text file
- *          if type is note, set to the database to read;
- *          actor, class, skill, item, weapon, armor, enemy, or state
- *          if type is event, set to the mapId the event is located
- *  - from2: if type is text ignore this
- *           if type is note, set this to the id from that database
- *           if type is event, set to the event id
+ * - TYPE: set to text, note or event
+ * - FROM: if TYPE is text, set this to the path of the text file
+ *  if TYPE is note, set to the database to read; actor, class, skill, item, weapon, armor, enemy, or state
+ *  if TYPE is event, set to the mapId the event is located
+ * - FROM2: if TYPE is text ignore this
+ *  if TYPE is note, set this to the id from that database
+ *  if TYPE is event, set to the event id
  *
- * example:
+ * Examples:
  * ~~~
  *  <import:event,1,2>
  * ~~~
- * Will replace the event with that note with the event 2 from map 1
+ * Will replace the event with that note with event 2 from map 1
+ *
+ * ~~~
+ *  <import:text,text/file.txt>
+ * ~~~
+ * Will import the text from the file located in text/file.txt
  * ----------------------------------------------------------------------------
- * **Importing in event pages**
+ * **Importing inside event pages**
  * ----------------------------------------------------------------------------
- * To use <import> inside an event page, you need to use the <imnporting>
+ * To use <import> inside an event page, you need to use the <importing>
  * notetag first.
  *
- * Inside a "Show Text", "Comment" or "Script"
+ * There's two types of possible imports you can do inside an event page.
+ *
+ * 1. Import text into a "Show Text", "Comment" or "Script" event command.
  * ~~~
- *  <import:path>
+ *  <Import:PATH>
  * ~~~
- *  - path: Set this to the path of the text file to import into
+ * - PATH: the path of the text file to import
+ *
+ * 2. Import events into the map from other maps. Can only be used inside
+ * the "Comment" event command.
+ * ~~~
+ *  <Import:event,MAPID,EVENTID,X,Y>
+ * ~~~
+ * - MAPID: The mapId of the event you want to import
+ * - EVENTID: The event id of the event you want to import from MAPID
+ * - X: The x position to place this imported event
+ * - Y: The y position to place this imported event
  * ============================================================================
  * ## Links
  * ============================================================================
  * RPGMakerWebs:
+ *
  *  http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
  *
  * Terms of use:
+ *
  *  https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
  *
  * Like my plugins? Support me on Patreon!
+ *
  *  https://www.patreon.com/quxios
  *
  * @tags import, txt
