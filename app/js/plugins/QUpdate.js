@@ -245,7 +245,7 @@ function Window_QUpdate() {
       var div = document.createElement('div');
       div.style.cssText = 'position:absolute; top: 2px; right: 2px; z-index: 10; background-color: #ffffff; border-radius: 3px; padding: 5px;';
       div.id = 'hasQUpdates';
-      div.innerHTML = 'Updates avaliable for some QPlugins.';
+      div.innerHTML = 'Updates available for some QPlugins.';
       div.addEventListener('click', function() {
         SceneManager.push(Scene_QUpdate);
         document.body.removeChild(div);
