@@ -6,7 +6,8 @@
   Game_Event.prototype.setupPageSettings = function() {
     Alias_Game_Event_setupPageSettings.call(this);
     this.reloadColliders();
-    this._randomDir = null;
+    this._typeRandomDir = null;
+    this._typeTowardPlayer = null;
   };
 
   Game_Event.prototype.defaultColliderConfig = function() {
@@ -47,13 +48,37 @@
 
   // TODO stop random dir from reseting every frame if event can't move
   Game_Event.prototype.moveTypeRandom = function() {
-    if (this._freqCount === 0 || !this._randomDir) {
-      this._randomDir = 2 * (Math.randomInt(4) + 1);
+    if (this._freqCount === 0 || this._typeRandomDir === null) {
+      this._typeRandomDir = 2 * (Math.randomInt(4) + 1);
     }
-    if (!this.canPixelPass(this.px, this.py, this._randomDir)) {
-      this._randomDir = 2 * (Math.randomInt(4) + 1);
+    if (!this.canPixelPass(this._px, this._py, this._typeRandomDir)) {
+      this._typeRandomDir = 2 * (Math.randomInt(4) + 1);
     }
-    this.moveStraight(this._randomDir);
+    this.moveStraight(this._typeRandomDir);
+  };
+
+  Game_Event.prototype.moveTypeTowardPlayer = function() {
+    if (this.isNearThePlayer()) {
+      if (this._freqCount === 0 || this._typeTowardPlayer === null) {
+        this._typeTowardPlayer = Math.randomInt(6);
+      }
+      switch (this._typeTowardPlayer) {
+        case 0: case 1: case 2: case 3: {
+          this.moveTowardPlayer();
+          break;
+        }
+        case 4: {
+          this.moveTypeRandom();
+          break;
+        }
+        case 5: {
+          this.moveForward();
+          break;
+        }
+      }
+    } else {
+      this.moveTypeRandom();
+    }
   };
 
   Game_Event.prototype.checkEventTriggerTouch = function(x, y) {

@@ -181,8 +181,40 @@
 
   Game_Character.prototype.moveRandom = function() {
     var d = 2 + Math.randomInt(4) * 2;
-    if (this.canPixelPass(this.px, this.py, d)) {
+    if (this.canPixelPass(this._px, this._py, d)) {
       this.moveStraight(d);
+    }
+  };
+
+  var Alias_Game_Character_moveTowardCharacter = Game_Character.prototype.moveTowardCharacter;
+  Game_Character.prototype.moveTowardCharacter = function(character) {
+    if (QMovement.offGrid) {
+      var dx = character.cx() - this.cx();
+      var dy = character.cy() - this.cy();
+      var radian = Math.atan2(dy, dx);
+      if (radian < 0) radian += Math.PI * 2;
+      var oldSM = this._smartMove;
+      if (oldSM <= 1) this._smartMove = 2;
+      this.moveRadian(radian);
+      this._smartMove = oldSM;
+    } else {
+      Alias_Game_Character_moveTowardCharacter.call(this, character);
+    }
+  };
+
+  var Alias_Game_Character_moveAwayFromCharacter = Game_Character.prototype.moveAwayFromCharacter;
+  Game_Character.prototype.moveAwayFromCharacter = function(character) {
+    if (QMovement.offGrid) {
+      var dx = character.cx() - this.cx();
+      var dy = character.cy() - this.cy();
+      var radian = Math.atan2(-dy, -dx);
+      if (radian < 0) radian += Math.PI * 2;
+      var oldSM = this._smartMove;
+      if (oldSM <= 1) this._smartMove = 2;
+      this.moveRadian(radian);
+      this._smartMove = oldSM;
+    } else {
+      Alias_Game_Character_moveAwayFromCharacter.call(this, character);
     }
   };
 
@@ -221,12 +253,12 @@
   // Returns the px, py needed for this character to be center aligned
   // with the character passed in (align is based off collision collider)
   Game_Character.prototype.centerWith = function(character) {
-    var dx1 = this.cx() - this.px;
-    var dy1 = this.cy() - this.py;
-    var dx2 = character.cx() - character.px;
-    var dy2 = character.cy() - character.py;
+    var dx1 = this.cx() - this._px;
+    var dy1 = this.cy() - this._py;
+    var dx2 = character.cx() - character._px;
+    var dy2 = character.cy() - character._py;
     var dx = dx1 - dx2;
     var dy = dy1 - dy2;
-    return new Point(character.px + dx, character.py + dy);
+    return new Point(character._px + dx, character._py + dy);
   };
 })();

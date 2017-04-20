@@ -19,7 +19,7 @@
       "override - prototype - tileHeight - undefined",
       "prototype - flagAt - x, y",
       "alias - prototype - refreshIfNeeded - undefined",
-      "prototype - reloadColliders - undefined",
+      "prototype - reloadColliders - skipSetup",
       "prototype - clearColliders - undefined",
       "prototype - reloadTileMap - undefined",
       "prototype - setupMapColliders - undefined",
@@ -110,6 +110,8 @@
       "prototype - subQMove - settings",
       "prototype - subQMove2 - settings",
       "override - prototype - moveRandom - undefined",
+      "alias - prototype - moveTowardCharacter - character",
+      "alias - prototype - moveAwayFromCharacter - character",
       "override - prototype - turnTowardCharacter - character",
       "override - prototype - turnAwayFromCharacter - character",
       "prototype - deltaPXFrom - x",
@@ -120,7 +122,6 @@
     "Game_Player": [
       "alias - prototype - initMembers - undefined",
       "prototype - defaultColliderConfig - undefined",
-      "prototype - smartMove - undefined",
       "prototype - requestMouseMove - undefined",
       "prototype - moveByMouse - x, y",
       "prototype - clearMouseMove - undefined",
@@ -148,6 +149,7 @@
       "override - prototype - updateStop - undefined",
       "override - prototype - updateSelfMovement - undefined",
       "override - prototype - moveTypeRandom - undefined",
+      "override - prototype - moveTypeTowardPlayer - undefined",
       "override - prototype - checkEventTriggerTouch - x, y"
     ],
     "Game_Interpreter": [

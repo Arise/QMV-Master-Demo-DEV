@@ -63,7 +63,7 @@ function Sprite_Collider() {
   };
 
   Sprite_Collider.prototype.checkChanges = function() {
-    this.alpha = this._collider._isHidden ? 0 : 1;
+    this.visible = !this._collider._isHidden;
     this.x = this._collider.x + this._collider.ox;
     this.x -= $gameMap.displayX() * QMovement.tileSize;
     this.y = this._collider.y + this._collider.oy;
@@ -75,7 +75,7 @@ function Sprite_Collider() {
       this.drawCollider();
     }
     this._colliderSprite.z = this.z;
-    this._colliderSprite.alpha = this.alpha;
+    this._colliderSprite.visible = this.visible;
   };
 
   Sprite_Collider.prototype.updateDecay = function() {

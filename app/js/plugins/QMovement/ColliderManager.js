@@ -231,11 +231,11 @@ function ColliderManager() {
   };
 
   ColliderManager.show = function() {
-    this.container.alpha = 0.3;
+    this.container.visible = true;
   };
 
   ColliderManager.hide = function() {
-    this.container.alpha = 0;
+    this.container.visible = false;
   };
 
   ColliderManager.convertToCollider = function(arr) {

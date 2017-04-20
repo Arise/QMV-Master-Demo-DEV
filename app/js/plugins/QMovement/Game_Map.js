@@ -6,7 +6,7 @@
   Game_Map.prototype.setup = function(mapId) {
     Alias_Game_Map_setup.call(this, mapId);
     if (!$dataMap) return;
-    this.reloadColliders();
+    this.reloadColliders(true);
     ColliderManager._needsRefresh = false;
   };
 
@@ -66,8 +66,8 @@
     }
   };
 
-  Game_Map.prototype.reloadColliders = function() {
-    this.setupColliders();
+  Game_Map.prototype.reloadColliders = function(skipSetup) {
+    if (!skipSetup) this.setupColliders();
     this.reloadTileMap();
     var events = this.events();
     var i, j;
@@ -104,7 +104,8 @@
 
   Game_Map.prototype.reloadTileMap = function() {
     this.setupMapColliders();
-    // load collision maps here
+    // collider map is also loaded here
+    // collision map is also loaded here
   };
 
   Game_Map.prototype.setupMapColliders = function() {

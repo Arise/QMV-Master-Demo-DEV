@@ -8,14 +8,11 @@
     this._lastMouseRequested = 0;
     this._requestMouseMove = false;
     this._movingWithMouse = false;
+    this._smartMove = QMovement.smartMove;
   };
 
   Game_Player.prototype.defaultColliderConfig = function() {
     return QMovement.playerCollider;
-  };
-
-  Game_Player.prototype.smartMove = function() {
-    return QMovement.smartMove;
   };
 
   Game_Player.prototype.requestMouseMove = function() {

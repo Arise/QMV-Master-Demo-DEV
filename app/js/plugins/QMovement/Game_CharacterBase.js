@@ -27,6 +27,7 @@
     this._angularSpeed;
     this._passabilityLevel = 0; // todo
     this._isMoving = false;
+    this._smartMove = 0;
   };
 
   Game_CharacterBase.prototype.direction8 = function(horz, vert) {
@@ -185,8 +186,7 @@
     var collider = this.collider(type);
     var collided = false;
     ColliderManager.getCollidersNear(collider, (function(tile) {
-      if (!tile.isTile) return false;
-      if (this.passableColors().contains(tile.color)) {
+      if (tile.isTile && this.passableColors().contains(tile.color)) {
         return false;
       }
       collided = tile.intersects(collider);
@@ -491,20 +491,21 @@
   };
 
   Game_CharacterBase.prototype.moveRadian = function(radian, dist) {
+    dist = dist || this.moveTiles();
     this.fixedRadianMove(radian, dist);
+    // TODO make this better instead of using realDir
+    // try using different angles between +- 45 degrees
     if (!this.isMovementSucceeded() && this.smartMove() > 1) {
       var realDir = this.radianToDirection(radian, true);
       var xAxis = Math.cos(radian);
       var yAxis = Math.sin(radian);
-      var horzSteps = Math.abs(xAxis) * dist;
-      var vertSteps = Math.abs(yAxis) * dist;
       var horz = xAxis > 0 ? 6 : xAxis < 0 ? 4 : 0;
       var vert = yAxis > 0 ? 2 : yAxis < 0 ? 8 : 0;
       if ([1, 3, 7, 9].contains(realDir)) {
-        if (this.canPixelPass(this._px, this._py, horz, horzSteps)) {
-          this.moveStraight(horz, horzSteps);
-        } else if (this.canPixelPass(this._px, this._py, vert, vertSteps)) {
-          this.moveStraight(vert, vertSteps);
+        if (this.canPixelPass(this._px, this._py, horz, dist)) {
+          this.moveStraight(horz, dist);
+        } else if (this.canPixelPass(this._px, this._py, vert, dist)) {
+          this.moveStraight(vert, dist);
         }
       } else {
         var dir = this.radianToDirection(radian);
@@ -525,12 +526,7 @@
     var vert = yAxis > 0 ? 2 : yAxis < 0 ? 8 : 0;
     var x2 = $gameMap.roundPXWithDirection(this._px, horz, horzSteps);
     var y2 = $gameMap.roundPYWithDirection(this._py, vert, vertSteps);
-    this.setMovementSuccess(this.canPassToFrom(x2, y2, this.px, this.py, null, true));
-    if (this.isMovementSucceeded() && QMovement.midPass) {
-      var x3 = $gameMap.roundPXWithDirection(this._px, horz, horzSteps / 2);
-      var y3 = $gameMap.roundPYWithDirection(this._py, vert, vertSteps / 2);
-      this.setMovementSuccess(this.canPixelPass(x3, y3, null));
-    }
+    this.setMovementSuccess(this.canPassToFrom(x2, y2, this._px, this._py, null, true));
     this.setDirection(realDir);
     if (this.isMovementSucceeded()) {
       this._adjustFrameSpeed = true;
@@ -606,7 +602,7 @@
   };
 
   Game_CharacterBase.prototype.smartMove = function() {
-    return 0;
+    return this._smartMove;
   };
 
   Game_CharacterBase.prototype.smartMoveDir8 = function(dir) {
@@ -765,7 +761,6 @@
     var w = maxX - minX + 1;
     var h = maxY - minY + 1;
     this._colliders['bounds'] = new Box_Collider(w, h, minX, minY);
-    this._colliders['bounds'].isTile = false;
     this._colliders['bounds']._charaId = String(this.charaId());
     ColliderManager.addCharacter(this, 0);
   };
