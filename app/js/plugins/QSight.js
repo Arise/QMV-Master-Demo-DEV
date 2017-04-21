@@ -1,5 +1,5 @@
 //=============================================================================
-// QSight DEV
+// QSight
 //=============================================================================
 
 var Imported = Imported || {};
@@ -9,17 +9,15 @@ if (!Imported.QPlus) {
   alert('Error: QSight requires QPlus to work.');
   throw new Error('Error: QSight requires QPlus to work.');
 } if (Imported.QMovement && !QPlus.versionCheck(Imported.QMovement, '1.1.4')) {
-  alert('Error: QSight requires QMovement 1.1.4+ to work.');
-  throw new Error('Error: QSight requires QMovement 1.1.4+ to work.');
+  alert('Error: QSight requires QMovement 1.1.4 or newer to work.');
+  throw new Error('Error: QSight requires QMovement 1.1.4 or newer to work.');
 }
 
 //=============================================================================
  /*:
  * @plugindesc <QSight>
  * Real time line of sight
- * @author Quxios  | Version 1.0.0 DEV
- *
- * @development
+ * @author Quxios  | Version 1.0.0
  *
  * @requires QPlus
  *
@@ -161,9 +159,9 @@ function QSight() {
 }
 
 (function() {
-  var _params = QPlus.getParams('<QSight>');
-  var _seeThrough = _params['See Through Terrain'].split(',').map(Number);
-  var _show = _params['Show'] === 'true';
+  var _PARAMS = QPlus.getParams('<QSight>');
+  var _SEETHROUGH = _PARAMS['See Through Terrain'].split(',').map(Number);
+  var _SHOW = _PARAMS['Show'] === 'true';
 
   QSight._requestingUpdate = [];
 
@@ -383,7 +381,7 @@ function QSight() {
         this._sight.base.setRadian(rad);
       }
       if (options.base.intersects(target.collider('collision'))) {
-        if (_show) {
+        if (_SHOW) {
           ColliderManager.draw(options.base, 120);
         }
         return true;
@@ -403,7 +401,7 @@ function QSight() {
         if (tile.isLadder || tile.isBush || tile.isDamage) {
           return false;
         }
-        if (_seeThrough.contains(tile.terrain) || /<noshadow>/i.test(tile.note)) {
+        if (_SEETHROUGH.contains(tile.terrain) || /<noshadow>/i.test(tile.note)) {
           return false;
         }
         if (tile.intersects(options.base)) {
@@ -429,7 +427,7 @@ function QSight() {
           }
           if (shadow.containsPoint(target.cx(), target.cy())) {
             inside = true;
-            if (_show) {
+            if (_SHOW) {
               ColliderManager.draw(shadow, 120);
             }
             return 'break';
@@ -479,7 +477,7 @@ function QSight() {
           }
           if (shadow.containsPoint(target.cx(), target.cy())) {
             inside = true;
-            if (_show) {
+            if (_SHOW) {
               ColliderManager.draw(shadow, 120);
             }
             return 'break';

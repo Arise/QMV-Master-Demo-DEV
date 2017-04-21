@@ -25,8 +25,9 @@ var $plugins =
 {"name":"QYScale","status":true,"description":"<QYScale>\r\nChange characters scale based off their Y value","parameters":{}},
 {"name":"QMap","status":true,"description":"<QMap>\r\ndesc","parameters":{"":""}},
 {"name":"========================","status":false,"description":"","parameters":{}},
-{"name":"QImport","status":true,"description":"<QImport>\r\ndesc","parameters":{"":""}},
+{"name":"QImport","status":true,"description":"<QImport>\r\nLets you import text from other game objects or txt files","parameters":{}},
 {"name":"QPathfind","status":true,"description":"<QPathfind>\r\nA* Pathfinding algorithm","parameters":{"Diagonals":"true","Any Angle":"true","Intervals":"100","Smart Wait":"60","=============":"","Dash on Mouse":"true"}},
 {"name":"QSight","status":true,"description":"<QSight>\r\nReal time line of sight","parameters":{"See Through Terrain":"1","Show":"true"}},
-{"name":"Q_IsoCam","status":false,"description":"<Q_IsoCam>\r\ndesc","parameters":{}}
+{"name":"Q_IsoCam","status":false,"description":"<Q_IsoCam>\r\ndesc","parameters":{}},
+{"name":"Q_Culling","status":true,"description":"<QCulling>\r\ndesc","parameters":{}}
 ];
