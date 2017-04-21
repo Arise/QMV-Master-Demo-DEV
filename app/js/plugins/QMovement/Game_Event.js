@@ -6,8 +6,17 @@
   Game_Event.prototype.setupPageSettings = function() {
     Alias_Game_Event_setupPageSettings.call(this);
     this.reloadColliders();
+    this.initialPosition();
     this._typeRandomDir = null;
     this._typeTowardPlayer = null;
+  };
+
+  Game_Event.prototype.initialPosition = function() {
+    var ox = /<ox[=|:](-?[0-9]+)>/.exec(this.comments(true)) || 0;
+    var oy = /<oy[=|:](-?[0-9]+)>/.exec(this.comments(true)) || 0;
+    if (ox) ox = Number(ox[1]) || 0;
+    if (oy) oy = Number(oy[1]) || 0;
+    this.setPixelPosition(this.px + ox, this.py + oy);
   };
 
   Game_Event.prototype.defaultColliderConfig = function() {

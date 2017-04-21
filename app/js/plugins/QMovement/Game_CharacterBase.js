@@ -54,6 +54,10 @@
     return this._currentRad !== this._targetRad;
   };
 
+  Game_CharacterBase.prototype.setPixelPosition = function(x, y) {
+    this.setPosition(x / QMovement.tileSize, y / QMovement.tileSize);
+  };
+
   var Alias_Game_CharacterBase_setPosition = Game_CharacterBase.prototype.setPosition;
   Game_CharacterBase.prototype.setPosition = function(x, y) {
     Alias_Game_CharacterBase_setPosition.call(this, x, y);
@@ -186,7 +190,10 @@
     var collider = this.collider(type);
     var collided = false;
     ColliderManager.getCollidersNear(collider, (function(tile) {
-      if (tile.isTile && this.passableColors().contains(tile.color)) {
+      if (tile.color && this.passableColors().contains(tile.color)) {
+        return false;
+      }
+      if (tile.type && tile.type !== 'collision') {
         return false;
       }
       collided = tile.intersects(collider);

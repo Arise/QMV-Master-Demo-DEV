@@ -45,6 +45,7 @@
       "prototype - startedMoving - undefined",
       "prototype - isDiagonal - undefined",
       "prototype - isArcing - undefined",
+      "prototype - setPixelPosition - x, y",
       "alias - prototype - setPosition - x, y",
       "alias - prototype - copyPosition - character",
       "alias - prototype - setDirection - d",
@@ -145,6 +146,7 @@
     ],
     "Game_Event": [
       "alias - prototype - setupPageSettings - undefined",
+      "prototype - initialPosition - undefined",
       "prototype - defaultColliderConfig - undefined",
       "override - prototype - updateStop - undefined",
       "override - prototype - updateSelfMovement - undefined",
