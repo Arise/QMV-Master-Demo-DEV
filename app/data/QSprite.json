@@ -1,5 +1,6 @@
 {
   "test": {
+    "name": "test",
     "cols": 12,
     "rows": 8,
     "anchorX": 0.5,
@@ -7,6 +8,7 @@
     "sampleImg": "E:\\GitHub\\QMV-Master-Demo\\img\\characters\\%test-Actor1.png",
     "poses": {
       "move2": {
+        "name": "move2",
         "speed": 15,
         "adjust": true,
         "pattern": [
@@ -17,6 +19,7 @@
         ]
       },
       "move4": {
+        "name": "move4",
         "speed": 15,
         "adjust": true,
         "pattern": [
@@ -27,6 +30,7 @@
         ]
       },
       "move6": {
+        "name": "move6",
         "speed": 15,
         "adjust": true,
         "pattern": [
@@ -37,6 +41,7 @@
         ]
       },
       "move8": {
+        "name": "move8",
         "speed": 15,
         "adjust": true,
         "pattern": [
@@ -47,6 +52,7 @@
         ]
       },
       "idle2": {
+        "name": "idle2",
         "speed": 15,
         "adjust": true,
         "pattern": [
@@ -57,6 +63,7 @@
         ]
       },
       "idle4": {
+        "name": "idle4",
         "speed": 15,
         "adjust": true,
         "pattern": [
@@ -67,6 +74,7 @@
         ]
       },
       "idle6": {
+        "name": "idle6",
         "speed": 15,
         "adjust": true,
         "pattern": [
@@ -77,6 +85,7 @@
         ]
       },
       "idle8": {
+        "name": "idle8",
         "speed": 15,
         "adjust": true,
         "pattern": [
@@ -87,6 +96,7 @@
         ]
       },
       "idleA2": {
+        "name": "idleA2",
         "speed": 15,
         "adjust": false,
         "pattern": [
@@ -96,6 +106,7 @@
         ]
       },
       "idleA4": {
+        "name": "idleA4",
         "speed": 15,
         "adjust": false,
         "pattern": [
@@ -105,6 +116,7 @@
         ]
       },
       "idleA6": {
+        "name": "idleA6",
         "speed": 15,
         "adjust": false,
         "pattern": [
@@ -114,6 +126,7 @@
         ]
       },
       "idleA8": {
+        "name": "idleA8",
         "speed": 15,
         "adjust": false,
         "pattern": [
@@ -123,6 +136,7 @@
         ]
       },
       "idleB4x4": {
+        "name": "idleB4x4",
         "speed": 15,
         "adjust": false,
         "pattern": [
@@ -132,6 +146,7 @@
         ]
       },
       "idleB4x2": {
+        "name": "idleB4x2",
         "speed": 15,
         "adjust": false,
         "pattern": [
@@ -141,6 +156,7 @@
         ]
       },
       "idleB4x6": {
+        "name": "idleB4x6",
         "speed": 15,
         "adjust": false,
         "pattern": [
@@ -150,6 +166,7 @@
         ]
       },
       "idleB4x8": {
+        "name": "idleB4x8",
         "speed": 15,
         "adjust": false,
         "pattern": [
@@ -159,6 +176,7 @@
         ]
       },
       "test2": {
+        "name": "test2",
         "speed": 10,
         "adjust": false,
         "pattern": [
@@ -171,6 +189,7 @@
         ]
       },
       "test4": {
+        "name": "test4",
         "speed": 10,
         "adjust": false,
         "pattern": [
@@ -183,6 +202,7 @@
         ]
       },
       "test6": {
+        "name": "test6",
         "speed": 10,
         "adjust": false,
         "pattern": [
@@ -195,6 +215,7 @@
         ]
       },
       "test8": {
+        "name": "test8",
         "speed": 10,
         "adjust": false,
         "pattern": [
