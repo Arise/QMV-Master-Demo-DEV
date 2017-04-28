@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.2.1';
+Imported.QMovement = '1.2.2';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
   alert('Error: QMovement requires QPlus 1.1.3 or newer to work.');
@@ -14,7 +14,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.2.1
+ * @author Quxios  | Version 1.2.2
  *
  * @repo https://github.com/quxios/QMovement
  *
@@ -369,7 +369,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  * ## Videos
  * ============================================================================
  * Great example of using the collision map addon:
- * 
+ *
  * https://www.youtube.com/watch?v=-BN4Pyr5IBo
  *
  * If you have a video you'd like to have listed here, feel free to send me a

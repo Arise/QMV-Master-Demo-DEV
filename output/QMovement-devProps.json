@@ -233,7 +233,6 @@
     ],
     "Sprite_Collider": [
       "prototype - initialize - collider, duration",
-      "prototype - _setupCollider - collider",
       "prototype - setupCollider - collider",
       "prototype - drawCollider - undefined",
       "prototype - update - undefined",
