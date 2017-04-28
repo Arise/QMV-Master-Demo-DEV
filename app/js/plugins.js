@@ -29,5 +29,6 @@ var $plugins =
 {"name":"QPathfind","status":true,"description":"<QPathfind>\r\nA* Pathfinding algorithm","parameters":{"Diagonals":"true","Any Angle":"true","Intervals":"100","Smart Wait":"60","=============":"","Dash on Mouse":"true"}},
 {"name":"QSight","status":true,"description":"<QSight>\r\nReal time line of sight","parameters":{"See Through Terrain":"1","Show":"true"}},
 {"name":"Q_IsoCam","status":false,"description":"<Q_IsoCam>\r\ndesc","parameters":{}},
-{"name":"Q_Culling","status":true,"description":"<QCulling>\r\ndesc","parameters":{}}
+{"name":"Q_Culling","status":false,"description":"<QCulling>\r\ndesc","parameters":{}},
+{"name":"QPopup","status":true,"description":"<QPopup>\r\ndesc","parameters":{"":"","===========":""}}
 ];
