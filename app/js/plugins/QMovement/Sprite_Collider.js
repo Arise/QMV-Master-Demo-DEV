@@ -18,12 +18,6 @@ function Sprite_Collider() {
     this.checkChanges();
   };
 
-  Sprite_Collider.prototype._setupCollider = function(collider) {
-    this._collider = collider;
-    this.bitmap = new Bitmap(collider.width, collider.height);
-    this.drawCollider();
-  };
-
   Sprite_Collider.prototype.setupCollider = function(collider) {
     this._collider = collider;
     var isNew = false;
@@ -68,6 +62,11 @@ function Sprite_Collider() {
     this.x -= $gameMap.displayX() * QMovement.tileSize;
     this.y = this._collider.y + this._collider.oy;
     this.y -= $gameMap.displayY() * QMovement.tileSize;
+    if (this.x < -this._collider.width || this.x > Graphics.width) {
+      if (this.y < -this._collider.height || this.y > Graphics.height) {
+        this.visible = false;
+      }
+    }
     if (this._cachedw !== this._collider.width ||
         this._cachedh !== this._collider.height) {
       this._cachedw = this._collider.width;

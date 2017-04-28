@@ -118,7 +118,15 @@
         for (var i = tiles.length - 1; i >= 0; i--) {
           var flag = flags[tiles[i]];
           if (flag === 16) continue;
-          this.getMapCollider(x, y, flag);
+          var data = this.getMapCollider(x, y, flag);
+          if (!data) continue;
+          if (data[0].constructor === Array) {
+            for (var j = 0; j < data.length; j++) {
+              this.makeTileCollider(x, y, flag, data[j], j);
+            }
+          } else {
+            this.makeTileCollider(x, y, flag, data, 0);
+          }
         }
       }
     }
@@ -153,17 +161,10 @@
       if (flag & 0x20 || flag & 0x40 || flag & 0x80 || flag & 0x100) {
         boxData = [this.tileWidth(), this.tileHeight(), 0, 0];
       } else {
-        return;
+        return null;
       }
     }
-    if (boxData[0].constructor === Array) {
-      var i = 0;
-      for (var i = 0; i < boxData.length; i++) {
-        this.makeTileCollider(x, y, realFlag, boxData[i], i);
-      }
-    } else {
-      this.makeTileCollider(x, y, realFlag, boxData, 0);
-    }
+    return boxData;
   };
 
   Game_Map.prototype.makeTileCollider = function(x, y, flag, boxData, index) {
@@ -209,6 +210,7 @@
       newBox.color = QMovement.collision.toLowerCase();
     }
     ColliderManager.addCollider(newBox, -1);
+    return newBox;
   };
 
   Game_Map.prototype.adjustPX = function(x) {

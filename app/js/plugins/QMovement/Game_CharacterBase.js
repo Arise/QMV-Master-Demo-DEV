@@ -193,7 +193,7 @@
       if (tile.color && this.passableColors().contains(tile.color)) {
         return false;
       }
-      if (tile.type && tile.type !== 'collision') {
+      if (tile.type && (tile.type !== 'collision' || tile.type !== 'default')) {
         return false;
       }
       collided = tile.intersects(collider);
