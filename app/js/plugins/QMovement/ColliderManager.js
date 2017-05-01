@@ -10,7 +10,7 @@ function ColliderManager() {
   ColliderManager._colliderGrid = [];
   ColliderManager._characterGrid = [];
   ColliderManager._sectorSize = QMovement.tileSize;
-  ColliderManager._needsRefresh = true;
+  ColliderManager._needsRefresh = false;
   ColliderManager.container = new Sprite();
   ColliderManager.container.alpha = 0.3;
   ColliderManager.visible = QMovement.showColliders;
@@ -20,12 +20,25 @@ function ColliderManager() {
     this._colliderGrid = [];
     this._characterGrid = [];
     this.container.removeChildren();
-    this._needsRefresh = true;
   };
 
   ColliderManager.refresh = function() {
     this.clear();
-    // rest of refresh is done inside Game_Map
+    this._colliderGrid = new Array(this._mapWidth);
+    for (var x = 0; x < this._colliderGrid.length; x++) {
+      this._colliderGrid[x] = [];
+      for (var y = 0; y < this._mapHeight; y++) {
+        this._colliderGrid[x].push([]);
+      }
+    }
+    this._characterGrid = new Array(this._mapWidth);
+    for (var x = 0; x < this._characterGrid.length; x++) {
+      this._characterGrid[x] = [];
+      for (var y = 0; y < this._mapHeight; y++) {
+        this._characterGrid[x].push([]);
+      }
+    }
+    this._needsRefresh = false;
   };
 
   ColliderManager.addCollider = function(collider, duration, ignoreGrid) {
@@ -195,11 +208,11 @@ function ColliderManager() {
   };
 
   ColliderManager.sectorCols = function() {
-    return Math.floor($gameMap.width() * QMovement.tileSize / this._sectorSize);
+    return Math.floor(this._mapWidth * QMovement.tileSize / this._sectorSize);
   };
 
   ColliderManager.sectorRows = function() {
-    return Math.floor($gameMap.height() * QMovement.tileSize / this._sectorSize);
+    return Math.floor(this._mapHeight * QMovement.tileSize / this._sectorSize);
   };
 
   ColliderManager.draw = function(collider, duration) {

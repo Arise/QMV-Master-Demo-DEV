@@ -21,6 +21,8 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
  *
  * @requires QMovement
  *
+ * @development
+ *
  * @help
  * ============================================================================
  * ## About
@@ -38,7 +40,91 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
  * ----------------------------------------------------------------------------
  * **Setting up**
  * ----------------------------------------------------------------------------
+ * The json format is an array of maps, the first index of the array should be
+ * null since MV map id's start on 1 not 0. Each array element is an array of
+ * objects containning collider info.
  *
+ * Quick example:
+ * ~~~
+ * [
+ *   null,
+ *   [
+ *     {}
+ *   ]
+ * ]
+ * ~~~
+ * ----------------------------------------------------------------------------
+ * **Collider object**
+ * ----------------------------------------------------------------------------
+ * The collider object has the following properties:
+ * - type[STRING]: box, circle or polygon
+ * - x[INT]: x position of the collider (optional, default: 0)
+ * - y[INT]: y position of the collider (optional, default: 0)
+ * - ox[INT]: x offset of the collider. Not used for poly type (optional, default: 0)
+ * - oy[INT]: y offset of the collider. Not used for poly type (optional, default: 0)
+ * - width[INT]: The width of the box/circle. Not used for poly type.
+ * - height[INT]: The height of the box/circle. Not used for poly type.
+ * - points[ARRAY]: For poly type only. An array of points, needs 3 or more points.
+ *  Points are object with x and y properties.
+ *
+ * Optional extra properties:
+ * - note[STRING]: To add notetags
+ * - isTile[BOOL]: set to true or false
+ *
+ * If isTile, these can also be used
+ * - terrain[int]: set to terrain id
+ * - color[STRING]: color of the collider
+ * - isWater1[BOOL]: set to true or false
+ * - isWater2[BOOL]: set to true or false
+ * - isLadder[BOOL]: set to true or false
+ * - isCounter[BOOL]: set to true or false
+ * - isBush[BOOL]: set to true or false
+ * - isDamage[BOOL]: set to true or false
+ * ----------------------------------------------------------------------------
+ * **Example**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ * [
+ *   null,
+ *   [
+ *     {
+ *       "type": "poly",
+ *       "points": [{"x": 0,"y": 0}, {"x": 48,"y": 48}, {"x": 0,"y": 96}, {"x": -48,"y": 48}],
+ *       "x": 48,
+ *       "y": 0
+ *     }
+ *   ]
+ * ]
+ * ~~~
+ * Creates a diamond polygon on map 1 at 48,0.
+ *
+ * ~~~
+ * [
+ *   null,
+ *   [
+ *     {
+ *       "type": "poly",
+ *       "points": [{"x": 0,"y": 0}, {"x": 48,"y": 48}, {"x": 0,"y": 96}, {"x": -48,"y": 48}],
+ *       "x": 48,
+ *       "y": 0
+ *     },
+ *     {
+ *       "type": "box",
+ *       "width": 480,
+ *       "height": 24,
+ *       "x": 0,
+ *       "y": 240
+ *     },
+ *     {
+ *       "type": "circle",
+ *       "width": 48,
+ *       "height": 48,
+ *       "x": 96,
+ *       "y": 48
+ *     }
+ *   ]
+ * ]
+ * ~~~
  * ============================================================================
  * ## Links
  * ============================================================================
@@ -112,7 +198,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
         }
         collider.moveTo(x, y);
       } else if (type === 'poly') {
-        if (points === undefined) continue;
+        if (points === undefined || points.length < 3) continue;
         collider = new Polygon_Collider(points, x, y);
       } else {
         continue;

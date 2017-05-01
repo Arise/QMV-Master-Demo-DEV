@@ -4,34 +4,13 @@
 (function() {
   var Alias_Game_Map_setup = Game_Map.prototype.setup;
   Game_Map.prototype.setup = function(mapId) {
+    if ($dataMap) {
+      ColliderManager._mapWidth = this.width();
+      ColliderManager._mapHeight = this.height();
+      ColliderManager.refresh();
+    }
     Alias_Game_Map_setup.call(this, mapId);
-    if (!$dataMap) return;
-    this.reloadColliders(true);
-    ColliderManager._needsRefresh = false;
-  };
-
-  var Alias_Game_Map_setupEvents = Game_Map.prototype.setupEvents;
-  Game_Map.prototype.setupEvents = function() {
-    ColliderManager.clear();
-    this.setupColliders();
-    Alias_Game_Map_setupEvents.call(this);
-  };
-
-  Game_Map.prototype.setupColliders = function() {
-    ColliderManager._colliderGrid = new Array(this.width());
-    for (var x = 0; x < ColliderManager._colliderGrid.length; x++) {
-      ColliderManager._colliderGrid[x] = [];
-      for (var y = 0; y < this.height(); y++) {
-        ColliderManager._colliderGrid[x].push([]);
-      }
-    }
-    ColliderManager._characterGrid = new Array(this.width());
-    for (var x = 0; x < ColliderManager._characterGrid.length; x++) {
-      ColliderManager._characterGrid[x] = [];
-      for (var y = 0; y < this.height(); y++) {
-        ColliderManager._characterGrid[x].push([]);
-      }
-    }
+    this.reloadTileMap();
   };
 
   Game_Map.prototype.tileWidth = function() {
@@ -61,13 +40,12 @@
   Game_Map.prototype.refreshIfNeeded = function() {
     Alias_Game_Map_refreshIfNeeded.call(this);
     if (ColliderManager._needsRefresh) {
+      ColliderManager.refresh();
       this.reloadColliders();
-      ColliderManager._needsRefresh = false;
     }
   };
 
-  Game_Map.prototype.reloadColliders = function(skipSetup) {
-    if (!skipSetup) this.setupColliders();
+  Game_Map.prototype.reloadColliders = function() {
     this.reloadTileMap();
     var events = this.events();
     var i, j;

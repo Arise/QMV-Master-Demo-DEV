@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QSprite = '2.1.2';
+Imported.QSprite = '2.1.3';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.0')) {
   alert('Error: QSprite requires QPlus 1.2.0 or newer to work.');
@@ -14,7 +14,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.0')) {
  /*:
  * @plugindesc <QSprite>
  * Lets you configure Spritesheets
- * @author Quxios  | Version 2.1.2
+ * @author Quxios  | Version 2.1.3
  *
  * @requires QPlus
  *
@@ -505,9 +505,6 @@ QSprite.json = null;
 
   var Alias_Game_CharacterBase_updatePattern = Game_CharacterBase.prototype.updatePattern;
   Game_CharacterBase.prototype.updatePattern = function() {
-    if (this.qSprite()) {
-      //console.log('next pattern');
-    }
     if (this._isIdle || this._posePlaying || this.qSprite()) {
       this._pattern++;
       if (this._pattern >= this.maxPattern()) {
@@ -798,9 +795,7 @@ QSprite.json = null;
 
   Sprite_Actor.prototype.isQCharacter = function() {
     if (this._isQChara === undefined) {
-      var string = _IDENTIFIER.replace('{config}', '(.+?)');
-      var regex  = new RegExp(string);
-      this._isQChara = this._battlerName.match(regex);
+      this._isQChara = this._battlerName.match(_IDENTIFIER);
     }
     return this._isQChara ? this._isQChara[1] : false;
   };

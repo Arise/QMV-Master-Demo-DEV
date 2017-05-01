@@ -698,12 +698,12 @@
     for (var collider in this._colliders) {
       if (!this._colliders.hasOwnProperty(collider)) continue;
       ColliderManager.remove(this._colliders[collider]);
-      this._colliders[collider] = null;
+      this._colliders[collider] = null
     }
+    this._colliders = null;
   };
 
   Game_CharacterBase.prototype.collider = function(type) {
-    if (!$dataMap || !$gameMap) return;
     if (!this._colliders) this.setupColliders();
     return this._colliders[type] || this._colliders['default'];
   };
@@ -773,7 +773,6 @@
   };
 
   Game_CharacterBase.prototype.moveColliders = function(x, y) {
-    if (!$dataMap || !$gameMap) return;
     x = typeof x === 'number' ? x : this.px;
     y = typeof y === 'number' ? y : this.py;
     var prev = this._colliders['bounds'].sectorEdge();

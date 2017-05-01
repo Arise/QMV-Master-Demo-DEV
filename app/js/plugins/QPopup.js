@@ -16,9 +16,9 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
  * desc
  * @author Quxios  | Version 1.0.0
  *
- * @requires
+ * @requires QPlus
  *
- * @video
+ * @development
  *
  * @param
  * @desc
@@ -92,18 +92,16 @@ function Sprite_QPopup() {
     isNotification: false
   }
   QPopup._defaultSettings = {
+    bindTo: null,
     duration: 120,
-    window: false,
-    bindTo: null
+    transitions: []
   }
   QPopup._defaultStyle = {
-    fontFamily: 'GameFont',
-    fontSize: '28px',
-    fontStyle: 'normal',
-    fill: '#ffffff',
-    stroke: 'rgba(0, 0, 0, 0.5)',
-    strokeThickness: 4,
-    align: 'left'
+    fontFace: 'GameFont',
+    fontSize: 28,
+    color: '#ffffff',
+    padding: 18,
+    window: false
   }
 
   QPopup.start = function(options) {
@@ -205,7 +203,6 @@ function Sprite_QPopup() {
   Sprite_QPopup.prototype.initialize = function(options) {
     Sprite.prototype.initialize.call(this);
     this.bitmap = new Bitmap(0, 0);
-    this.window = null;
     this.realX = this.x = options.x - options.ox;
     this.realY = this.y = options.y - options.oy;
     this.id = options.id;
@@ -244,78 +241,38 @@ function Sprite_QPopup() {
   });
 
   Sprite_QPopup.prototype.formatString = function(string) {
-    var style = this._style;
-    var lines = string.split(/\r?\n/);
-    var currentY = 0;
+    this._base = new Window_Base(-18, -18, 0, 0);
+    this._base.normalColor = function() {
+      return this._style.color;
+    }.bind(this)
+    this._base.standardFontFace = function() {
+      return this._style.fontFace
+    }.bind(this)
+    this._base.standardFontSize = function() {
+      return this._style.fontSize
+    }.bind(this)
+    this._base.standardPadding = function() {
+      return this._style.padding;
+    }.bind(this)
+    this._base.resetFontSettings();
+    this._base.updatePadding();
+    if (!this._style.window) {
+      this._base.opacity = 0;
+    }
+    var lines = string.split(/\n|\r/);
     var largestW = 0;
     for (var i = 0; i < lines.length; i++) {
-      var lineContainer = new Sprite();
-      var currentX = 0;
-      var bold = false;
-      var italic = false;
-      var string = lines[i];
-      var regex = /(.*?)<\/?(b|i|icon:(\d+))>/;
-      var match = regex.exec(string);
-      var originalStyle = style.fontStyle;
-      var ran = 0;
-      var icon = 0;
-      while (match) {
-        style.fontStyle = bold ? 'bold ' : style.fontStyle;
-        style.fontStyle = italic ? 'italic ' : style.fontStyle;
-        string = string.slice(match[0].length, string.length);
-        if (match[3] === undefined) {
-          var preLine = new PIXI.Text(match[1] || '', style);
-        } else {
-          var iconIndex = Number(match[3]) || 0;
-          var preLine = new Sprite();
-          preLine.y -= 16;
-          preLine.bitmap = ImageManager.loadSystem('IconSet');
-          var sx = iconIndex % 16 * 32;
-          var sy = Math.floor(iconIndex / 16) * 32;
-          preLine.setFrame(sx, sy, 32, 32);
-          icon = 32;
-        }
-        preLine.x = currentX;
-        currentX += preLine.width;
-        lineContainer.addChild(preLine);
-        bold = /<b>/.test(match[0]) || bold;
-        italic = /<i>/.test(match[0]) || italic;
-        if (/<\/b>/.test(match[0])) bold = false;
-        if (/<\/i>/.test(match[0])) italic = false;
-        match = regex.exec(string);
-      }
-      style.fontStyle = originalStyle;
-      var line = new PIXI.Text(string, style);
-      line.x = currentX;
-      lineContainer.addChild(line);
-      currentX += line.width;
-      currentY += Math.max(line.height, icon);
-      largestW = currentX > largestW ? currentX : largestW;
-      lineContainer.width = currentX;
-      lineContainer.y = currentY;
-      this.addChild(lineContainer);
+      var w = this._base.contents.measureTextWidth(lines[i]);
+      if (w > largestW) largestW = w;
     }
-    var wx = 0;
-    var wy = 0;
-    for (var i = 0; i < this.children.length; i++) {
-      var container = this.children[i];
-      var ow = 0;
-      if (this._style.align === 'center') {
-        ow = largestW / 2 - container.width / 2;
-        container.x = ow;
-      } else if (this._style.align === 'right') {
-        ow = largestW  - container.width;
-        container.x = ow;
-      }
-      wx = wx > container.x ? container.x : wx;
-      wy = wy > container.y ? container.y : wy;
-    }
-    this.width = largestW;
-    this.height = currentY;
-    if (this._settings.window === true) {
-      var windowBg = new Window_Base(wx - 18, wy - 18, this.width + 36, this.height + 36);
-      this.addChildAt(windowBg, 0);
-    }
+    this._base.width = largestW + this._base.standardPadding() * 2;
+    this._base.height = this._base.calcTextHeight({
+      text: string,
+      index: 0
+    }, true) + this._base.standardPadding() * 2;
+    this._base.createContents();
+    this._base.drawTextEx(string, 0, 0);
+    this.addChild(this._base);
   };
 
   Sprite_QPopup.prototype.formatTransitions = function() {

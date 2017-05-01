@@ -17,7 +17,7 @@
   Scene_Map.prototype.processMapTouch = function() {
     if (TouchInput.isTriggered() || this._touchCount > 0) {
       if (TouchInput.isPressed()) {
-        if (this._touchCount === 0 || this._touchCount >= 15) {
+        if (this._touchCount === 0 || this._touchCount >= 20) {
           var x = $gameMap.canvasToMapPX(TouchInput.x);
           var y = $gameMap.canvasToMapPY(TouchInput.y);
           if (!QMovement.offGrid) {
