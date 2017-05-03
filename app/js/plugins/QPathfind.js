@@ -355,11 +355,9 @@ function QPathfind() {
   };
 
   QPathfind.prototype.update = function() {
-    if (!this._ii) this._ii = 0;
     if (this._completed && this.options.smart > 1) {
       this.updateSmart();
     } else if (!this._completed) {
-      this._ii++;
       var stepsPerFrame = this._intervals;
       if (this.options.towards) {
         stepsPerFrame = Math.min(stepsPerFrame, 100);

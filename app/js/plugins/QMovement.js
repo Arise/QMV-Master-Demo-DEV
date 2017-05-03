@@ -2336,7 +2336,7 @@ function ColliderManager() {
     for (var collider in this._colliders) {
       if (!this._colliders.hasOwnProperty(collider)) continue;
       ColliderManager.remove(this._colliders[collider]);
-      this._colliders[collider] = null
+      this._colliders[collider] = null;
     }
     this._colliders = null;
   };
