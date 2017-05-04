@@ -10,7 +10,7 @@ function ColliderManager() {
   ColliderManager._colliderGrid = [];
   ColliderManager._characterGrid = [];
   ColliderManager._sectorSize = QMovement.tileSize;
-  ColliderManager._needsRefresh = false;
+  ColliderManager._needsRefresh = true;
   ColliderManager.container = new Sprite();
   ColliderManager.container.alpha = 0.3;
   ColliderManager.visible = QMovement.showColliders;
@@ -80,6 +80,7 @@ function ColliderManager() {
   };
 
   ColliderManager.updateGrid = function(collider, prevGrid) {
+    if (this._needsRefresh) return;
     var maxWidth  = this.sectorCols();
     var maxHeight = this.sectorRows();
     var currGrid;

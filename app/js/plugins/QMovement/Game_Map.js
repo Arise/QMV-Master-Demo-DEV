@@ -10,7 +10,7 @@
       ColliderManager.refresh();
     }
     Alias_Game_Map_setup.call(this, mapId);
-    this.reloadTileMap();
+    this.reloadColliders();
   };
 
   Game_Map.prototype.tileWidth = function() {
@@ -40,6 +40,8 @@
   Game_Map.prototype.refreshIfNeeded = function() {
     Alias_Game_Map_refreshIfNeeded.call(this);
     if (ColliderManager._needsRefresh) {
+      ColliderManager._mapWidth = this.width();
+      ColliderManager._mapHeight = this.height();
       ColliderManager.refresh();
       this.reloadColliders();
     }
