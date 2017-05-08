@@ -718,14 +718,13 @@
     var notes = this.notes(true);
     var configs = {};
     var multi = /<colliders>([\s\S]*)<\/colliders>/i.exec(notes);
-    var single = /<collider[=|:]([0-9a-z,-\s]*?)>/i.exec(notes);
+    var single = /<collider[:|=](.*?)>/i.exec(notes);
     if (multi) {
       configs = QPlus.stringToObj(multi[1]);
     }
     if (single) {
       configs.default = QPlus.stringToAry(single[1]);
-    }
-    if (!configs.default) {
+    } else if (!configs.default) {
       configs.default = QPlus.stringToAry(defaultCollider);
     }
     for (var collider in configs) {
@@ -737,8 +736,9 @@
   };
 
   Game_CharacterBase.prototype.makeCollider = function(name, settings) {
-    settings[4] = settings[4] || 0;
-    settings[4] -= this.shiftY();
+    if (settings[0] === 'box' || settings[0] === 'circle') {
+      settings[4] = (settings[4] || 0) - this.shiftY();
+    }
     this._colliders[name] = ColliderManager.convertToCollider(settings);
     this._colliders[name]._charaId = this.charaId();
     ColliderManager.addCollider(this._colliders[name], -1, true);

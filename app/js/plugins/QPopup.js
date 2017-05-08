@@ -195,6 +195,71 @@ function Window_QPopup() {
   };
 
   //-----------------------------------------------------------------------------
+  // Game_Event
+
+  var Alias_Game_Event_setupPage = Game_Event.prototype.setupPage;
+  Game_Event.prototype.setupPage = function() {
+    this._qPopups = null;
+    Alias_Game_Event_setupPage.call(this);
+  };
+
+  var Alias_Game_Event_setupPageSettings = Game_Event.prototype.setupPageSettings;
+  Game_Event.prototype.setupPageSettings = function() {
+    Alias_Game_Event_setupPageSettings.call(this);
+    this.setupQPopups();
+  };
+
+  Game_Event.prototype.setupQPopups = function() {
+    var notes = this.notes(true);
+    var settings = /<popupSettings>([\s\S]*)<\/popupSettings>/i.exec(notes);
+    if (!settings) return;
+    var style = /<popupStyle>([\s\S]*)<\/popupStyle>/i.exec(notes);
+    var transition = /<popupTransition>([\s\S]*)<\/popupTransition>/i.exec(notes);
+    var popupsRegex = /<qPopup>([\s\S]*?)<\/qPopup>/ig;
+    var popups = [];
+    while (true) {
+      var match = popupsRegex.exec(notes);
+      if (match) {
+        popups.push(match[1].trim());
+      } else {
+        break;
+      }
+    }
+    settings = QPlus.stringToObj(settings[1]);
+    style = style ? QPlus.stringToObj(style[1]) : null;
+    settings.bindTo = this.charaId();
+    settings.transitions = transition || [];
+    this._qPopups = {
+      settings: settings,
+      style: style,
+      popups: popups,
+      ticker: 0
+    }
+  };
+
+  var Alias_Game_Event_update = Game_Event.prototype.update;
+  Game_Event.prototype.update = function() {
+    Alias_Game_Event_update.call(this);
+    if (this._qPopups && !this._locked) {
+      this.updateQPopups();
+    }
+  };
+
+  Game_Event.prototype.updateQPopups = function() {
+    if (this._qPopups.ticker >= this._qPopups.settings.interval) {
+      var i = Math.randomInt(this._qPopups.popups.length);
+      QPopup.start({
+        settings: this._qPopups.settings,
+        style: this._qPopups.style,
+        string: this._qPopups.popups[i]
+      })
+      this._qPopups.ticker = 0;
+    } else {
+      this._qPopups.ticker++;
+    }
+  };
+
+  //-----------------------------------------------------------------------------
   // Window_QPopup
 
   Window_QPopup.prototype = Object.create(Window_Base.prototype);

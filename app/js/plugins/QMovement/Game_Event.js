@@ -12,8 +12,8 @@
   };
 
   Game_Event.prototype.initialPosition = function() {
-    var ox = /<ox[=|:](-?[0-9]+)>/.exec(this.comments(true)) || 0;
-    var oy = /<oy[=|:](-?[0-9]+)>/.exec(this.comments(true)) || 0;
+    var ox = /<ox[=|:](-?[0-9]+)>/i.exec(this.comments(true)) || 0;
+    var oy = /<oy[=|:](-?[0-9]+)>/i.exec(this.comments(true)) || 0;
     if (ox) ox = Number(ox[1]) || 0;
     if (oy) oy = Number(oy[1]) || 0;
     this.setPixelPosition(this.px + ox, this.py + oy);

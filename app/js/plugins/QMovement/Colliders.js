@@ -185,9 +185,9 @@ function Polygon_Collider() {
 
   Polygon_Collider.prototype.edge = function() {
     var x1 = this._xMin + this.x + this.ox;
-    var x2 = this._xMax + this.x + this.ox;
+    var x2 = this._xMax + this.x + this.ox - 1;
     var y1 = this._yMin + this.y + this.oy;
-    var y2 = this._yMax + this.y + this.oy;
+    var y2 = this._yMax + this.y + this.oy - 1;
     return {
       x1: x1, x2: x2,
       y1: y1, y2: y2

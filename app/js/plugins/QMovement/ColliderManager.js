@@ -258,10 +258,17 @@ function ColliderManager() {
     var h = arr[2] || 0;
     var ox = arr[3] || 0;
     var oy = arr[4] || 0;
-    if (type === 'box') {
-      var collider = new Box_Collider(w, h, ox, oy);
-    } else if (type === 'circle') {
-      var collider = new Circle_Collider(w, h, ox, oy);
+    var collider;
+    if (type === 'circle' || type === 'box') {
+      if (type === 'circle') {
+        collider = new Circle_Collider(w, h, ox, oy);
+      } else {
+        collider = new Box_Collider(w, h, ox, oy);
+      }
+    } else if (type === 'poly') {
+      collider = new Polygon_Collider(arr.slice(1));
+    } else {
+      return null;
     }
     return collider;
   };

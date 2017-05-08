@@ -3,18 +3,18 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.2.4';
+Imported.QMovement = '1.3.0';
 
-if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
-  alert('Error: QMovement requires QPlus 1.1.3 or newer to work.');
-  throw new Error('Error: QMovement requires QPlus 1.1.3 or newer to work.');
+if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.3')) {
+  alert('Error: QMovement requires QPlus 1.2.3 or newer to work.');
+  throw new Error('Error: QMovement requires QPlus 1.2.3 or newer to work.');
 }
 
 //=============================================================================
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.2.4
+ * @author Quxios  | Version 1.3.0
  *
  * @repo https://github.com/quxios/QMovement
  *
@@ -164,11 +164,12 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  *  <collider: shape, width, height, ox, oy>
  * ~~~
  * This notetag sets all collider types to these values.
- * - Shape: Set to box or circle
- * - Width: The width of the collider
- * - Height: The height of the collider
- * - OX: The x offset value of the collider
- * - OY: The y offset value of the collider
+ * - SHAPE: Set to box, circle or poly
+ *   - If poly read next section on poly shape
+ * - WIDTH: The width of the collider, in pixels
+ * - HEIGHT: The height of the collider, in pixels
+ * - OX: The X Offset of the collider, in pixels
+ * - OY: The Y Offset of the collider, in pixels
  * ----------------------------------------------------------------------------
  * **Colliders Notetag**
  * ----------------------------------------------------------------------------
@@ -178,12 +179,13 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  *  </colliders>
  * ~~~
  * This notetag sets all collider types to these values.
- * - Type: The type of collider, set to default, collision or interaction
- * - Shape: Set to box or circle
- * - Width: The width of the collider
- * - Height: The height of the collider
- * - OX: The x offset value of the collider
- * - OY: The y offset value of the collider
+ * - TYPE: The type of collider, set to default, collision or interaction
+ * - SHAPE: Set to box, circle or poly
+ *   - If poly read next section on poly shape
+ * - WIDTH: The width of the collider, in pixels
+ * - HEIGHT: The height of the collider, in pixels
+ * - OX: The X Offset of the collider, in pixels
+ * - OY: The Y Offset of the collider, in pixels
  *
  * To add another type, just add `type: shape, width, height, ox, oy` on
  * another line.
@@ -195,6 +197,21 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  *  collision: circle, 24, 24, 12, 12
  *  interaction: box: 32, 32, 8, 8
  *  </colliders>
+ * ~~~
+ * ----------------------------------------------------------------------------
+ * **Poly Colliders**
+ * ----------------------------------------------------------------------------
+ * To create a polygon collider, set the shape to poly. After that the rest
+ * of the line should be a list of points separated with a comma. Points are
+ * written as "(X,Y)". An example polygon would be:
+ * ~~~
+ *  poly,(24,0),(48,24),(24,48),(0,24)
+ * ~~~
+ * Would create a diamond shaped polygon.
+ *
+ * Example of using it inside a collider tag
+ * ~~~
+ *  <collider:poly,(24,0),(48,24),(24,48),(0,24)>
  * ~~~
  * ============================================================================
  * ## Move Routes
@@ -246,6 +263,17 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.3')) {
  * ~~~
  * Will make the character do a full 360 arc clockwise around the point 480, 480
  * and it'll take 60 frames.
+ * ============================================================================
+ * ## Notetags
+ * ============================================================================
+ * To shift an events initial starting position, you can use the following
+ * note tags:
+ * ~~~
+ *  <ox:X>
+ *  or
+ *  <oy:X>
+ * ~~~
+ * Where X is the number of pixels to shift the event. Can be negative.
  * ============================================================================
  * ## Plugin Commands
  * ============================================================================
