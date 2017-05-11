@@ -13,34 +13,156 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
 //=============================================================================
  /*:
  * @plugindesc <QPopup>
- * desc
+ * Lets you create popups in the map or on screen
  * @author Quxios  | Version 1.0.0
  *
  * @requires QPlus
  *
  * @development
  *
- * @param
- * @desc
- * @default
- *
- * @param ===========
- * @desc spacer
- * @default
- *
  * @help
  * ============================================================================
  * ## About
  * ============================================================================
- *
+ * This plugin lets you play a random popups at a set interval over an event.
+ * It also lets you create your own popups that you can place where you want.
  * ============================================================================
- * ## How to use
+ * ## Event Popups
  * ============================================================================
+ * This feature will create popup(s) at an event every X frames.
  *
- * ----------------------------------------------------------------------------
- * **Sub section**
- * ----------------------------------------------------------------------------
+ * To use this, you need configure these into the event's page as a comment:
  *
+ * **<qPopupSettings> and <qPopup> are required!**
+ *
+ * ~~~
+ *  <qPopupSettings>
+ *  OPTIONS
+ *  </qPopupSettings>
+ * ~~~
+ * *Every option should be on a different line*
+ * - Possible Options:
+ *  - "interval: X": Set X to the number of frames between popups
+ *  - "preset: X": Set X to the preset to use. Presets are creating with plugin
+ *  commands. **Preset needs to be configured before this events page starts, or
+ *  it won't be applied**
+ *  - "ox: X": Set X to the offset x position of this popup. Can be negative
+ *  - "oy: Y": Set Y to the offset y position of this popup. Can be negative
+ *  - "duration: X": Set X to the duration of the popup
+ *
+ * **Example**
+ * ~~~
+ *  <qPopupSettings>
+ *  interval: 120
+ *  duration: 60
+ *  oy: -48
+ *  </qPopupSettings>
+ * ~~~
+ *
+ * ~~~
+ *  <qPopupStyle>
+ *  OPTIONS
+ *  </qPopupStyle>
+ * ~~~
+ * *Every option should be on a different line **OPTIONAL***
+ * - Possible Options:
+ *  - "fontFace: X": Set X to the name of the font to use
+ *  - "fontSize: X": Set X to size of the font
+ *  - "color: X": Set X to the hex color to use
+ *  - "padding: X": Set X to the padding in pixels
+ *  - "windowed: X": Set X to true or false
+ *
+ * **Example**
+ * ~~~
+ *  <qPopupStyle>
+ *  fontSize: 18
+ *  windowed: true
+ *  color: #FF0000
+ *  </qPopupStyle>
+ * ~~~
+ *
+ * ~~~
+ *  <qPopupTransitions>
+ *  TRANSITIONS
+ *  </qPopupTransitions>
+ * ~~~
+ * *Every transition should be on a different line **OPTIONAL***
+ * - See transition section for details.
+ *
+ * ~~~
+ * <qPopup>
+ * STRING
+ * </qPopup>
+ * ~~~
+ * - STRING: The text to use in the popup. You can use some escape codes
+ * from message box
+ *
+ * You can add as many <qPopups></qPopups> as you would like. A random one will
+ * be choosen at every interval.
+ * ----------------------------------------------------------------------------
+ * ## Transitions
+ * ----------------------------------------------------------------------------
+ * Transition format:
+ * ~~~
+ *  STARTFRAME DURATION TYPE PARAM1
+ * ~~~
+ * - STARTFRAME: The frame to start this transition. In frames
+ * - DURATION: The length of this transition. In frames
+ * - TYPE: The type of transition, can be: slideUp, slideDown, fadeIn, fadeOut
+ * - PARAM1: If type is slideUp or slideDown, this is the distance in pixels
+ * to slide.
+ * ============================================================================
+ * ## Plugin Commands
+ * ============================================================================
+ * **Start**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ *  qPopup start "STRING" [OPTIONS]
+ * ~~~
+ * - STRING: What you want the popup to say. You can use some escape codes
+ * from message box. To add a new line, use \n
+ * - List of Options:
+ *   - idX: Set X to the id for this popup
+ *   - presetX: Set X to which styling preset id to use. Presets are configured
+ *   with other plugin commands
+ *   - xX: Set X to the x position of this popup. This is ignored if bindToX is
+ *   used
+ *   - yX: Set X to the y position of this popup. This is ignored if bindToX is
+ *   used
+ *   - oxX: Set X to the offset x position of this popup. Can be negative
+ *   - oyY: Set X to the offset x position of this popup. Can be negative
+ *   - bindToX: Set X to the charaId to bind to. When bind, the popup will follow
+ *   that character.
+ *   - durationX: Set X to the duration of the popup
+ * ----------------------------------------------------------------------------
+ * **configStyle**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ *  qPopup configStyle ID [OPTIONS]
+ * ~~~
+ * - ID: The preset ID to apply this to. This is used for the presetX option
+ * in the start command.
+ * - List of Options:
+ *   - fontX: Set X to the name of the font to use. If font name has spaces
+ *   wrap the option in "". Ex "fontThis is the fontname"
+ *   - sizeX: Set X to the size of the font
+ *   - colorX: Set X to the hex color to use. Ex color#FF0000 is red font color.
+ *   - paddingX: Set X to the padding
+ *   - windowed: Include this and the popup will use the windowskin
+ *
+ * *Note: If the ID was previously setup, it will be replaced with the new config*
+ * ----------------------------------------------------------------------------
+ * **configTransition**
+ * ----------------------------------------------------------------------------
+ * ~~~
+ *  qPopup configTransition ID [TRANSITION]
+ * ~~~
+ * - ID: The preset ID to apply this to. This is used for the presetX option
+ * in the start command.
+ * - TRANSITION: A transition to add to this preset. See transition section
+ * for info.
+ *
+ * *Note: If the ID was previously setup the transition will be added to it*
  * ============================================================================
  * ## Links
  * ============================================================================
@@ -56,7 +178,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
  *
  *  https://www.patreon.com/quxios
  *
- * @tags
+ * @tags map, popup
  */
 //=============================================================================
 
@@ -87,52 +209,50 @@ function Window_QPopup() {
   QPopup._mapId = -1;
   QPopup._defaultOptions = {
     id: '*',
-    x: 0, y: 0, ox: 0, oy: 0,
     string: '',
-    isNotification: false
-  }
-  QPopup._defaultSettings = {
+    x: 0, y: 0, ox: 0, oy: 0,
     bindTo: null,
     duration: 120,
-    transitions: []
+    isNotification: false
   }
+  QPopup._defaultTransitions = [];
   QPopup._defaultStyle = {
     fontFace: 'GameFont',
     fontSize: 28,
     color: '#ffffff',
     padding: 18,
-    window: false
+    windowed: false
   }
 
   QPopup.start = function(options) {
     options = Object.assign({}, this._defaultOptions, options);
-    options.settings = Object.assign({}, this._defaultSettings, options.settings);
+    options.transitions = options.transitions || QPopup._defaultTransitions;
     options.style = Object.assign({}, this._defaultStyle, options.style);
     if (options.id === '*') {
       options.id = this.getUniqueQPopupId();
     }
     var popup = new Window_QPopup(options);
     this.add(popup);
+    return popup;
   };
 
   QPopup.getUniqueQPopupId = function() {
     var id = '*0';
     var counter = 0;
     var newId = false;
-    while(!newId) {
-      if (this._popups.length === 0) {
-        newId = true;
-        break;
-      }
-      counter++;
+    // TODO for better performance maybe create a pool
+    // of 'open' ids
+    while (!newId) {
       id = '*' + counter;
-      var j = 0;
-      for (var i = 0; i < this._popups.length; i++) {
-        if (this._popups[i].id !== id) {
-          j++;
+      var newId = true;
+      for (var ids in this._popups) {
+        if (!this._popups.hasOwnProperty(ids)) continue;
+        if (ids === id) {
+          newId = false;
+          break;
         }
       }
-      newId = j === i;
+      counter++;
     }
     return id;
   };
@@ -165,21 +285,82 @@ function Window_QPopup() {
   };
 
   //-----------------------------------------------------------------------------
+  // Game_System
+
+  var Alias_Game_System_initialize = Game_System.prototype.initialize;
+  Game_System.prototype.initialize = function() {
+    Alias_Game_System_initialize.call(this);
+    this._qPopupPresets = {};
+  };
+
+  Game_System.prototype.qPopupPreset = function(id) {
+    if (!this._qPopupPresets[id]) {
+      this._qPopupPresets[id] = {
+        style: Object.assign({}, QPopup._defaultStyle),
+        transitions: []
+      }
+    }
+    return this._qPopupPresets[id];
+  };
+
+  //-----------------------------------------------------------------------------
   // Game_Interpreter
 
   var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
-    if (command.toLowerCase() === 'qplugin') {
-      this.qPluginCommand(args);
-      return;
+    if (command.toLowerCase() === 'qpopup') {
+      return this.qPopupCommand(args);
     }
     Alias_Game_Interpreter_pluginCommand.call(this, command, args);
   };
 
-  Game_Interpreter.prototype.qPluginCommand = function(args) {
-    //var args2 = args.slice(2);
-    //QPlus.getCharacter(args[0]);
-    //QPlus.getArg(args2, /lock/i)
+  Game_Interpreter.prototype.qPopupCommand = function(args) {
+    args = QPlus.makeArgs(args.join(' '));
+    var cmd = args.shift().toLowerCase();
+    switch (cmd) {
+      case 'configstyle': {
+        var id = args.shift();
+        var fontFace = QPlus.getArg(args, /^font(.+)/i);
+        var fontSize = Number(QPlus.getArg(args, /^size(\d+)/i));
+        var color = QPlus.getArg(args, /^color(.+)/i);
+        var padding = QPlus.getArg(args, /^padding(\d+)/i);
+        var windowed = !!QPlus.getArg(args, /^windowed$/i);
+        var style = {};
+        if (fontFace) style.fontFace = fontFace;
+        if (fontSize) style.fontSize = fontSize;
+        if (color) style.color = color;
+        if (padding) style.padding = Number(padding);
+        style.windowed = windowed;
+        $gameSystem.qPopupPreset(id).style = Object.assign({}, QPopup._defaultStyle, style);
+        break;
+      }
+      case 'configtransition': {
+        var id = args.shift();
+        $gameSystem.qPopupPreset(id).transitions.push(args.join(' '));
+      }
+      case 'start': {
+        var str = args.shift();
+        var id = QPlus.getArg(args, /^id(.+)/i);
+        var preset = QPlus.getArg(args, /^preset(.+)/i);
+        var x = QPlus.getArg(args, /^x(-?\d+)/i);
+        var y = QPlus.getArg(args, /^y(-?\d+)/i);
+        var ox = QPlus.getArg(args, /^ox(-?\d+)/i);
+        var oy = QPlus.getArg(args, /^oy(-?\d+)/i);
+        var bindTo = QPlus.getArg(args, /^bindTo(.+)/i);
+        var duration = QPlus.getArg(args, /^duration(\d+)/i);
+        if (preset) preset = $gameSystem.qPopupPreset(preset);
+        var options = Object.assign({}, preset);
+        if (id !== null) options.id = id;
+        if (x !== null) options.x = Number(x);
+        if (y !== null) options.y = Number(y);
+        if (ox !== null) options.ox = Number(ox);
+        if (oy !== null) options.oy = Number(oy);
+        if (bindTo !== null) options.bindTo = bindTo;
+        if (duration !== null) options.duration = Number(duration);
+        options.string = str.replace(/\\n/g, '\n');
+        QPopup.start(options);
+      }
+    }
   };
 
   //-----------------------------------------------------------------------------
@@ -211,10 +392,10 @@ function Window_QPopup() {
 
   Game_Event.prototype.setupQPopups = function() {
     var notes = this.notes(true);
-    var settings = /<popupSettings>([\s\S]*)<\/popupSettings>/i.exec(notes);
+    var settings = /<qPopupSettings>([\s\S]*)<\/qPopupSettings>/i.exec(notes);
     if (!settings) return;
-    var style = /<popupStyle>([\s\S]*)<\/popupStyle>/i.exec(notes);
-    var transition = /<popupTransition>([\s\S]*)<\/popupTransition>/i.exec(notes);
+    var style = /<qPopupStyle>([\s\S]*)<\/qPopupStyle>/i.exec(notes);
+    var transitions = /<qPopupTransitions>([\s\S]*)<\/qPopupTransitions>/i.exec(notes);
     var popupsRegex = /<qPopup>([\s\S]*?)<\/qPopup>/ig;
     var popups = [];
     while (true) {
@@ -226,14 +407,20 @@ function Window_QPopup() {
       }
     }
     settings = QPlus.stringToObj(settings[1]);
-    style = style ? QPlus.stringToObj(style[1]) : null;
     settings.bindTo = this.charaId();
-    settings.transitions = transition || [];
+    style = style ? QPlus.stringToObj(style[1]) : null;
+    transitions = transitions ? transitions.split('\n') : null;
+    if (settings.preset) {
+      var preset = $gameSystem.qPopupPreset(settings.preset);
+      style = Object.assign(style || {}, preset);
+      transitions = (transitions || []).concat(preset.transitions);
+    }
     this._qPopups = {
       settings: settings,
+      transitions: transitions,
       style: style,
       popups: popups,
-      ticker: 0
+      ticker: Math.randomIntBetween(0, settings.interval)
     }
   };
 
@@ -248,12 +435,15 @@ function Window_QPopup() {
   Game_Event.prototype.updateQPopups = function() {
     if (this._qPopups.ticker >= this._qPopups.settings.interval) {
       var i = Math.randomInt(this._qPopups.popups.length);
-      QPopup.start({
-        settings: this._qPopups.settings,
-        style: this._qPopups.style,
-        string: this._qPopups.popups[i]
-      })
-      this._qPopups.ticker = 0;
+      var popup = QPopup.start(Object.assign({},
+        this._qPopups.settings,
+        {
+          string: this._qPopups.popups[i],
+          style: this._qPopups.style,
+          transitions: this._qPopups.transitions
+        }
+      ))
+      this._qPopups.ticker = -popup._duration || 0;
     } else {
       this._qPopups.ticker++;
     }
@@ -268,16 +458,20 @@ function Window_QPopup() {
   Window_QPopup.prototype.initialize = function(options) {
     this.id = options.id;
     this._style = options.style;
-    this._settings = options.settings;
+    this._transitions = options.transitions;
     Window_Base.prototype.initialize.call(this, 0, 0, 0, 0);
-    this.realX = this.x = options.x - options.ox;
-    this.realY = this.y = options.y - options.oy;
+    this.realX = options.x;
+    this.realY = options.y;
     this.z = 9;
-    this._ox = 0;
-    this._oy = 0;
-    this.duration = 0;
+    this._ox = options.ox;
+    this._oy = options.oy;
     this._timeline = {};
+    this._bindTo = options.bindTo;
+    this._duration = options.duration;
+    this._tick = 0;
     this._isNotification = options.isNotification;
+    this.x = this.realX;
+    this.y = this.realY;
     this.formatString(options.string);
     this.formatTransitions();
   };
@@ -321,7 +515,7 @@ function Window_QPopup() {
   Window_QPopup.prototype.formatString = function(string) {
     this.resetFontSettings();
     this.updatePadding();
-    if (!this._style.window) {
+    if (!this._style.windowed) {
       this.opacity = 0;
     }
     var lines = string.split(/\n|\r/);
@@ -342,7 +536,7 @@ function Window_QPopup() {
   };
 
   Window_QPopup.prototype.formatTransitions = function() {
-    var transitions = this._settings.transitions;
+    var transitions = this._transitions;
     for (var i = 0; i < transitions.length; i++) {
       var params = transitions[i].split(' ');
       var transition = params[2] + ' ' + params[1] +  ' ';
@@ -366,9 +560,8 @@ function Window_QPopup() {
 
   Window_QPopup.prototype.update = function() {
     Window_Base.prototype.update.call(this);
-    if (!this._settings) return;
-    if (this._settings.bindTo !== null) {
-      var chara = QPlus.getCharacter(this._settings.bindTo);
+    if (this._bindTo !== null) {
+      var chara = QPlus.getCharacter(this._bindTo);
       if (chara) {
         if (Imported.QMovement) {
           var x = chara.cx();
@@ -389,14 +582,14 @@ function Window_QPopup() {
     }
     this.updateTransition();
     if (this.isPlaying()) {
-      this.duration++;
+      this._tick++;
     } else {
       QPopup.remove(this);
     }
   };
 
   Window_QPopup.prototype.updateTransition = function() {
-    var currentFrame = this._timeline[this.duration];
+    var currentFrame = this._timeline[this._tick];
     if (currentFrame) {
       for (var i = 0; i < currentFrame.length; i++) {
         this.processAction(currentFrame[i].split(' '));
@@ -425,34 +618,34 @@ function Window_QPopup() {
     var duration = Number(action[1]);
     var distance = Number(action[2]);
     var speed = distance / duration;
-    this._oy -= speed;
+    this.pivot.y += speed;
   };
 
   Window_QPopup.prototype.slidedown = function(action) {
     var duration = Number(action[1]);
     var distance = Number(action[2]);
     var speed = distance / duration;
-    this._oy += speed;
+    this.pivot.y -= speed;
   };
 
   Window_QPopup.prototype.fadeout = function(action) {
     var duration = Number(action[1]);
-    var speed = 255 / duration;
-    if (this.opacity > 0) {
-      this.opacity -= speed;
+    var speed = 1 / duration;
+    if (this.alpha > 0) {
+      this.alpha -= speed;
     }
   };
 
   Window_QPopup.prototype.fadein = function(action) {
     var duration = Number(action[1]);
-    var speed = 255 / duration;
-    if (this.opacity < 255) {
-      this.opacity += speed;
+    var speed = 1 / duration;
+    if (this.alpha < 1) {
+      this.alpha += speed;
     }
   };
 
   Window_QPopup.prototype.isPlaying = function() {
-    if (this._settings.duration === -1) return true;
-    return this.duration < this._settings.duration;
+    if (this._duration === -1) return true;
+    return this._tick < this._duration;
   };
 })()
