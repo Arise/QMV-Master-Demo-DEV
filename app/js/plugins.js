@@ -31,5 +31,6 @@ var $plugins =
 {"name":"Q_IsoCam","status":false,"description":"<Q_IsoCam>\r\ndesc","parameters":{}},
 {"name":"Q_Culling","status":false,"description":"<QCulling>\r\ndesc","parameters":{}},
 {"name":"QPopup","status":true,"description":"<QPopup>\r\ndesc","parameters":{"":"","===========":""}},
-{"name":"QM+Followers","status":true,"description":"<QMFollowers>\r\ndesc","parameters":{}}
+{"name":"QM+Followers","status":true,"description":"<QMFollowers>\r\ndesc","parameters":{}},
+{"name":"QM+SetAngles","status":true,"description":"<QMSetAngles>\r\ndesc","parameters":{"Angle 1":"2.670","Angle 3":"0.471","Angle 7":"3.613","Angle 9":"5.812"}}
 ];
