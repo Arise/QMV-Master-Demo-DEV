@@ -6,6 +6,7 @@
     "anchorX": 0.5,
     "anchorY": 1,
     "sampleImg": "E:\\GitHub\\QMV-Master-Demo\\img\\characters\\%test-Actor1.png",
+    "packJSON": null,
     "poses": {
       "move2": {
         "name": "move2",
@@ -225,6 +226,105 @@
           87,
           88,
           89
+        ]
+      }
+    }
+  },
+  "test2": {
+    "name": "test2",
+    "cols": 12,
+    "rows": 8,
+    "anchorX": 0.5,
+    "anchorY": 1,
+    "sampleImg": "E:\\GitHub\\QMV-Master-Demo\\img\\characters\\%test-Actor1.png",
+    "packJSON": null,
+    "poses": {
+      "move2": {
+        "name": "move2",
+        "speed": 15,
+        "adjust": true,
+        "pattern": [
+          1,
+          0,
+          1,
+          2
+        ]
+      },
+      "move4": {
+        "name": "move4",
+        "speed": 15,
+        "adjust": true,
+        "pattern": [
+          13,
+          12,
+          13,
+          14
+        ]
+      },
+      "move6": {
+        "name": "move6",
+        "speed": 15,
+        "adjust": true,
+        "pattern": [
+          25,
+          24,
+          25,
+          26
+        ]
+      },
+      "move8": {
+        "name": "move8",
+        "speed": 15,
+        "adjust": true,
+        "pattern": [
+          37,
+          36,
+          37,
+          38
+        ]
+      },
+      "move1": {
+        "name": "move1",
+        "speed": 10,
+        "adjust": false,
+        "pattern": [
+          4,
+          3,
+          4,
+          5
+        ]
+      },
+      "move3": {
+        "name": "move3",
+        "speed": 10,
+        "adjust": false,
+        "pattern": [
+          28,
+          27,
+          28,
+          29
+        ]
+      },
+      "move7": {
+        "name": "move7",
+        "speed": 10,
+        "adjust": false,
+        "pattern": [
+          16,
+          15,
+          16,
+          17
+        ]
+      },
+      "move9": {
+        "name": "move9",
+        "speed": 10,
+        "adjust": false,
+        "pattern": [
+          40,
+          39,
+          40,
+          41
         ]
       }
     }

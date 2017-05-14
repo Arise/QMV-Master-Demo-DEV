@@ -189,9 +189,9 @@
   var Alias_Game_Character_moveTowardCharacter = Game_Character.prototype.moveTowardCharacter;
   Game_Character.prototype.moveTowardCharacter = function(character) {
     if (QMovement.offGrid) {
-      var dx = character.cx() - this.cx();
-      var dy = character.cy() - this.cy();
-      var radian = Math.atan2(dy, dx);
+      var dx = this.deltaPXFrom(character.cx());
+      var dy = this.deltaPYFrom(character.cy());
+      var radian = Math.atan2(-dy, -dx);
       if (radian < 0) radian += Math.PI * 2;
       var oldSM = this._smartMove;
       if (oldSM <= 1) this._smartMove = 2;
@@ -205,9 +205,9 @@
   var Alias_Game_Character_moveAwayFromCharacter = Game_Character.prototype.moveAwayFromCharacter;
   Game_Character.prototype.moveAwayFromCharacter = function(character) {
     if (QMovement.offGrid) {
-      var dx = character.cx() - this.cx();
-      var dy = character.cy() - this.cy();
-      var radian = Math.atan2(-dy, -dx);
+      var dx = this.deltaPXFrom(character.cx());
+      var dy = this.deltaPYFrom(character.cy());
+      var radian = Math.atan2(dy, dx);
       if (radian < 0) radian += Math.PI * 2;
       var oldSM = this._smartMove;
       if (oldSM <= 1) this._smartMove = 2;
@@ -219,23 +219,17 @@
   };
 
   Game_Character.prototype.turnTowardCharacter = function(character) {
-    var sx = this.deltaPXFrom(character.cx());
-    var sy = this.deltaPYFrom(character.cy());
-    if (Math.abs(sx) > Math.abs(sy)) {
-      this.setDirection(sx > 0 ? 4 : 6);
-    } else if (sy !== 0) {
-      this.setDirection(sy > 0 ? 8 : 2);
-    }
+    var dx = this.deltaPXFrom(character.cx());
+    var dy = this.deltaPYFrom(character.cy());
+    var radian = Math.atan2(-dy, -dx);
+    this.setDirection(this.radianToDirection(radian, QMovement.diagonal));
   };
 
   Game_Character.prototype.turnAwayFromCharacter = function(character) {
-    var sx = this.deltaPXFrom(character.cx());
-    var sy = this.deltaPYFrom(character.cy());
-    if (Math.abs(sx) > Math.abs(sy)) {
-      this.setDirection(sx > 0 ? 6 : 4);
-    } else if (sy !== 0) {
-      this.setDirection(sy > 0 ? 2 : 8);
-    }
+    var dx = this.deltaPXFrom(character.cx());
+    var dy = this.deltaPYFrom(character.cy());
+    var radian = Math.atan2(dy, dx);
+    this.setDirection(this.radianToDirection(radian, QMovement.diagonal));
   };
 
   Game_Character.prototype.deltaPXFrom = function(x) {

@@ -540,9 +540,15 @@ QSprite.json = null;
 
   var Alias_Game_CharacterBase_straighten = Game_CharacterBase.prototype.straighten;
   Game_CharacterBase.prototype.straighten = function() {
+    var oldAnimCount = this._animationCount;
+    var oldPattern = this._pattern;
     Alias_Game_CharacterBase_straighten.call(this);
     if (this.qSprite() && (this.hasWalkAnime() || this.hasStepAnime())) {
       this._pattern = 0;
+    }
+    if (this.qSprite() && this._posePlaying) {
+      this._animationCount = oldAnimCount;
+      this._pattern = oldPattern;
     }
   };
 
@@ -555,11 +561,15 @@ QSprite.json = null;
 
   var Alias_Game_CharacterBase_setImage = Game_CharacterBase.prototype.setImage;
   Game_CharacterBase.prototype.setImage = function(characterName, characterIndex) {
+    var wasPosePlaying = this._posePlaying;
     Alias_Game_CharacterBase_setImage.call(this, characterName, characterIndex);
     this._isQChara = undefined;
     this._isIdle = null;
     this._posePlaying = null;
     this.getAvailableIdlePoses();
+    if (this.isQCharacter()) {
+      this._posePlaying = wasPosePlaying;
+    }
   };
 
   Game_CharacterBase.prototype.getAvailableIdlePoses = function() {

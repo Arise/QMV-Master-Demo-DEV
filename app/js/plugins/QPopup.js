@@ -32,9 +32,10 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
  * This feature will create popup(s) at an event every X frames.
  *
  * To use this, you need configure these into the event's page as a comment:
- *
- * **<qPopupSettings> and <qPopup> are required!**
- *
+ * ----------------------------------------------------------------------------
+ * **qPopupSettings**
+ * ----------------------------------------------------------------------------
+ * REQUIRED
  * ~~~
  *  <qPopupSettings>
  *  OPTIONS
@@ -44,13 +45,13 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
  * - Possible Options:
  *  - "interval: X": Set X to the number of frames between popups
  *  - "preset: X": Set X to the preset to use. Presets are creating with plugin
- *  commands. **Preset needs to be configured before this events page starts, or
- *  it won't be applied**
+ *  commands. *Preset needs to be configured before this events page starts, or
+ *  it won't be applied*
  *  - "ox: X": Set X to the offset x position of this popup. Can be negative
  *  - "oy: Y": Set Y to the offset y position of this popup. Can be negative
  *  - "duration: X": Set X to the duration of the popup
  *
- * **Example**
+ * qPopupSettings Example
  * ~~~
  *  <qPopupSettings>
  *  interval: 120
@@ -58,13 +59,16 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
  *  oy: -48
  *  </qPopupSettings>
  * ~~~
- *
+  * ----------------------------------------------------------------------------
+ * **qPopupStyle**
+  * ----------------------------------------------------------------------------
+ * OPTIONAL
  * ~~~
  *  <qPopupStyle>
  *  OPTIONS
  *  </qPopupStyle>
  * ~~~
- * *Every option should be on a different line **OPTIONAL***
+ * *Every option should be on a different line*
  * - Possible Options:
  *  - "fontFace: X": Set X to the name of the font to use
  *  - "fontSize: X": Set X to size of the font
@@ -72,7 +76,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
  *  - "padding: X": Set X to the padding in pixels
  *  - "windowed: X": Set X to true or false
  *
- * **Example**
+ * qPopupStyle Example
  * ~~~
  *  <qPopupStyle>
  *  fontSize: 18
@@ -80,15 +84,21 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
  *  color: #FF0000
  *  </qPopupStyle>
  * ~~~
- *
+ * ----------------------------------------------------------------------------
+ * **qPopupTransitions**
+ * ----------------------------------------------------------------------------
+ * OPTIONAL
  * ~~~
  *  <qPopupTransitions>
  *  TRANSITIONS
  *  </qPopupTransitions>
  * ~~~
- * *Every transition should be on a different line **OPTIONAL***
+ * *Every transition should be on a different line*
  * - See transition section for details.
- *
+ * ----------------------------------------------------------------------------
+ * **qPopup**
+ * ----------------------------------------------------------------------------
+ * REQUIRED
  * ~~~
  * <qPopup>
  * STRING
@@ -97,11 +107,11 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
  * - STRING: The text to use in the popup. You can use some escape codes
  * from message box
  *
- * You can add as many <qPopups></qPopups> as you would like. A random one will
+ * You can add as many `<qPopups></qPopups>` as you would like. A random one will
  * be choosen at every interval.
- * ----------------------------------------------------------------------------
+ * ============================================================================
  * ## Transitions
- * ----------------------------------------------------------------------------
+ * ============================================================================
  * Transition format:
  * ~~~
  *  STARTFRAME DURATION TYPE PARAM1

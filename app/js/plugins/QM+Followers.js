@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMFollowers = '0.1.0';
+Imported.QMFollowers = '1.0.0';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
   alert('Error: QM+RegionColliders requires QPlus 1.1.5 or newer to work.');
@@ -16,8 +16,8 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
 //=============================================================================
  /*:
  * @plugindesc <QMFollowers>
- * desc
- * @author Quxios  | Version 0.1.0
+ * QMovement Addon: Adds follower support
+ * @author Quxios  | Version 1.0.0
  *
  * @requires QMovement
  *
@@ -43,7 +43,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
  *
  *  https://www.patreon.com/quxios
  *
- * @tags followers
+ * @tags QM-Addon, followers
  */
 //=============================================================================
 
