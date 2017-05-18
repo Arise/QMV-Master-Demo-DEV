@@ -3,21 +3,21 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMFollowers = '1.0.0';
+Imported.QMFollowers = '1.0.1';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
-  alert('Error: QM+RegionColliders requires QPlus 1.1.5 or newer to work.');
-  throw new Error('Error: QM+RegionColliders requires QPlus 1.1.5 or newer to work.');
+  alert('Error: QM+Followers requires QPlus 1.1.5 or newer to work.');
+  throw new Error('Error: QM+Followers requires QPlus 1.1.5 or newer to work.');
 } else if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.2.2')) {
-  alert('Error: QM+RegionColliders requires QMovement 1.2.2 or newer to work.');
-  throw new Error('Error: QM+RegionColliders requires QMovement 1.2.2 or newer to work.');
+  alert('Error: QM+Followers requires QMovement 1.2.2 or newer to work.');
+  throw new Error('Error: QM+Followers requires QMovement 1.2.2 or newer to work.');
 }
 
 //=============================================================================
  /*:
  * @plugindesc <QMFollowers>
  * QMovement Addon: Adds follower support
- * @author Quxios  | Version 1.0.0
+ * @author Quxios  | Version 1.0.1
  *
  * @requires QMovement
  *
@@ -56,8 +56,9 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
   //-----------------------------------------------------------------------------
   // Game_Player
 
+  var Alias_Game_Player_onPositionChange = Game_Player.prototype.onPositionChange;
   Game_Player.prototype.onPositionChange = function() {
-    Game_CharacterBase.prototype.onPositionChange.call(this);
+    Alias_Game_Player_onPositionChange.call(this);
     this._followers.addMove(this._px, this._py, this.realMoveSpeed(), this._direction);
   };
 
