@@ -160,14 +160,17 @@ function ColliderManager() {
           if (arr.contains(charas[i])) {
             continue;
           }
+          arr.push(charas[i]);
           if (only) {
-            if (only(charas[i]) === 'break') {
+            var value = only(charas[i])
+            if (value === 'break') {
               isBreaking = true;
               break;
+            } else if (value === false) {
+              arr.pop();
+              continue;
             }
-            if (!only(charas[i])) continue;
           }
-          arr.push(charas[i]);
         }
         if (isBreaking) break;
       }
@@ -191,14 +194,17 @@ function ColliderManager() {
           if (arr.contains(colliders[i])) {
             continue;
           }
+          arr.push(colliders[i]);
           if (only) {
-            if (only(colliders[i]) === 'break') {
+            var value = only(colliders[i]);
+            if (value === 'break') {
               isBreaking = true;
               break;
+            } else if (value === false) {
+              arr.pop();
+              continue;
             }
-            if (!only(colliders[i])) continue;
           }
-          arr.push(colliders[i]);
         }
         if (isBreaking) break;
       }

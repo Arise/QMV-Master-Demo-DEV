@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QPopup = '1.0.0';
+Imported.QPopup = '1.0.1';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
   alert('Error: QPopup requires QPlus 1.2.2 or newer to work.');
@@ -14,11 +14,9 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.2')) {
  /*:
  * @plugindesc <QPopup>
  * Lets you create popups in the map or on screen
- * @author Quxios  | Version 1.0.0
+ * @author Quxios  | Version 1.0.1
  *
  * @requires QPlus
- *
- * @development
  *
  * @help
  * ============================================================================
@@ -307,7 +305,7 @@ function Window_QPopup() {
     if (!this._qPopupPresets[id]) {
       this._qPopupPresets[id] = {
         style: Object.assign({}, QPopup._defaultStyle),
-        transitions: []
+        transitions: null
       }
     }
     return this._qPopupPresets[id];
@@ -341,11 +339,15 @@ function Window_QPopup() {
         if (color) style.color = color;
         if (padding) style.padding = Number(padding);
         style.windowed = windowed;
-        $gameSystem.qPopupPreset(id).style = Object.assign({}, QPopup._defaultStyle, style);
+        var presetStyle = $gameSystem.qPopupPreset(id).style;
+        Object.assign(presetStyle, style);
         break;
       }
       case 'configtransition': {
         var id = args.shift();
+        if (!$gameSystem.qPopupPreset(id).transitions) {
+          $gameSystem.qPopupPreset(id).transitions = [];
+        }
         $gameSystem.qPopupPreset(id).transitions.push(args.join(' '));
       }
       case 'start': {
@@ -422,8 +424,8 @@ function Window_QPopup() {
     transitions = transitions ? transitions.split('\n') : null;
     if (settings.preset) {
       var preset = $gameSystem.qPopupPreset(settings.preset);
-      style = Object.assign(style || {}, preset);
-      transitions = (transitions || []).concat(preset.transitions);
+      style = Object.assign(style || {}, preset.style);
+      transitions = (transitions || []).concat(preset.transitions || []);
     }
     this._qPopups = {
       settings: settings,

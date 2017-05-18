@@ -13,9 +13,23 @@ function Sprite_Collider() {
     Sprite.prototype.initialize.call(this);
     this.z = 7;
     this._duration = duration || 0;
-    this._color = collider.color || '#ff0000';
+    this._cache = {};
     this.setupCollider(collider);
     this.checkChanges();
+  };
+
+  Sprite_Collider.prototype.setCache = function() {
+    this._cache = {
+      color: this._collider.color,
+      width: this._collider.width,
+      height: this._collider.height
+    }
+  };
+
+  Sprite_Collider.prototype.needsRedraw = function() {
+    return this._cache.width !== this._collider.width ||
+      this._cache.height !== this._collider.height ||
+      this._cache.color !== this._collider.color
   };
 
   Sprite_Collider.prototype.setupCollider = function(collider) {
@@ -34,7 +48,7 @@ function Sprite_Collider() {
   Sprite_Collider.prototype.drawCollider = function() {
     var collider = this._collider;
     this._colliderSprite.clear();
-    var color = this._color.replace('#', '');
+    var color = (collider.color || '#ff0000').replace('#', '');
     color = parseInt(color, 16);
     this._colliderSprite.beginFill(color);
     if (collider.isCircle()) {
@@ -51,7 +65,7 @@ function Sprite_Collider() {
   Sprite_Collider.prototype.update = function() {
     Sprite.prototype.update.call(this);
     this.checkChanges();
-    if (this._duration > 0 || this._collider.kill) {
+    if (this._duration >= 0 || this._collider.kill) {
       this.updateDecay();
     }
   };
@@ -67,14 +81,12 @@ function Sprite_Collider() {
         this.visible = false;
       }
     }
-    if (this._cachedw !== this._collider.width ||
-        this._cachedh !== this._collider.height) {
-      this._cachedw = this._collider.width;
-      this._cachedh = this._collider.height;
-      this.drawCollider();
-    }
     this._colliderSprite.z = this.z;
     this._colliderSprite.visible = this.visible;
+    if (this.needsRedraw()) {
+      this.drawCollider();
+      this.setCache();
+    }
   };
 
   Sprite_Collider.prototype.updateDecay = function() {

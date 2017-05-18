@@ -14,7 +14,7 @@
     this._py = 0;
     this._realPX = 0;
     this._realPY = 0;
-    this._radian = 0;
+    this._radian = this.directionToRadian(this._direction);
     this._adjustFrameSpeed = false;
     this._freqCount = 0;
     this._diagonal = false;
@@ -170,8 +170,8 @@
     if (QMovement.midPass && dir !== 5) {
       if (!this.middlePass(x, y, dir, dist, type)) return false;
     }
-    if (this.collideWithTile(type)) return false;
-    if (this.collideWithCharacter(type)) return false;
+    if (this.collidesWithAnyTile(type)) return false;
+    if (this.collidesWithAnyCharacter(type)) return false;
     return true;
   };
 
@@ -180,49 +180,56 @@
     var x2 = $gameMap.roundPXWithDirection(x, this.reverseDir(dir), dist);
     var y2 = $gameMap.roundPYWithDirection(y, this.reverseDir(dir), dist);
     this.collider(type).moveTo(x2, y2);
-    if (this.collideWithTile(type)) return false;
-    if (this.collideWithCharacter(type)) return false;
+    if (this.collidesWithAnyTile(type)) return false;
+    if (this.collidesWithAnyCharacter(type)) return false;
     this.collider(type).moveTo(x, y);
     return true;
   };
 
-  Game_CharacterBase.prototype.collideWithTile = function(type) {
+  Game_CharacterBase.prototype.collidesWithAnyTile = function(type) {
     var collider = this.collider(type);
     var collided = false;
-    ColliderManager.getCollidersNear(collider, (function(tile) {
-      if (tile.color && this.passableColors().contains(tile.color)) {
-        return false;
-      }
-      if (tile.type && (tile.type !== 'collision' || tile.type !== 'default')) {
-        return false;
-      }
-      collided = tile.intersects(collider);
+    ColliderManager.getCollidersNear(collider, (function(collider) {
+      collided = this.collidedWithTile(type, collider);
       if (collided) return 'break';
     }).bind(this));
     return collided;
   };
 
-  Game_CharacterBase.prototype.collideWithCharacter = function(type) {
+  Game_CharacterBase.prototype.collidedWithTile = function(type, collider) {
+    if (collider.color && this.passableColors().contains(collider.color)) {
+      return false;
+    }
+    if (collider.type && (collider.type !== 'collision' || collider.type !== 'default')) {
+      return false;
+    }
+    return collider.intersects(this.collider(type));
+  };
+
+  Game_CharacterBase.prototype.collidesWithAnyCharacter = function(type) {
     var collider = this.collider(type);
     var collided = false;
-    ColliderManager.getCharactersNear(collider, (function(chara) {
-      if (chara.isThrough() || chara === this || !chara.isNormalPriority()) {
-        return false;
-      }
-      if (this.ignoreCharacters(type).contains(chara.charaId())) {
-        return false;
-      }
-      collided = chara.collider('collision').intersects(collider);
+    ColliderManager.getCharactersNear(collider, function(chara) {
+      collided = this.collidedWithCharacter(type, chara);
       if (collided) return 'break';
-    }).bind(this));
+    }.bind(this));
     return collided;
+  };
+
+  Game_CharacterBase.prototype.collidedWithCharacter = function(type, chara) {
+    if (chara.isThrough() || chara === this || !chara.isNormalPriority()) {
+      return false;
+    }
+    if (this.ignoreCharacters(type).contains(chara.charaId())) {
+      return false;
+    }
+    return chara.collider('collision').intersects(this.collider(type));
   };
 
   Game_CharacterBase.prototype.ignoreCharacters = function(type) {
-    var ignore = {
-      default: []
-    }
-    return ignore[type] || ignore.default;
+    // This function is to be aliased by plugins to return a list
+    // of charaId's this character can pass through
+    return [];
   };
 
   Game_CharacterBase.prototype.valid = function(type) {
