@@ -11,6 +11,7 @@ function QABS() {
   QABS.quickTarget = _PARAMS['Quick Target'] === 'true';
   QABS.lockTargeting = _PARAMS['Lock when Targeting'] === 'true';
   QABS.towardsMouse = _PARAMS['Attack Towards Mouse'] === 'true';
+  QABS.radianAtks = QMovement.offGrid;
 
   QABS.lootDecay = Number(_PARAMS['Loot Decay']) || 1;
   QABS.aoeLoot = _PARAMS['AoE Loot'] === 'true';

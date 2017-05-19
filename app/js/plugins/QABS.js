@@ -298,6 +298,52 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  * ----------------------------------------------------------------------------
  *
  * ============================================================================
+ * ## Skill Sequences
+ * ============================================================================
+ * user ---
+ * user casting [true|false]
+ * user lock
+ * user unlock
+ * user speed [inc|dec] [amt]
+ * user move [forward|backward] [dist] [wait? true|false]
+ * user jump [forward|backward] [dist] [wait? true|false]
+ * user jumpHere [wait? true|false]
+ * user slide
+ * user teleport
+ * user setDirection [dir]
+ * user directionFix [true|false]
+ * user pose [pose] [wait? true|false]
+ * user forceSkill [skillId] [angleOffset in degrees]
+ * user animation [animationId]
+ * store
+ * clearstore
+ * moveToStored [wait? true|false]
+ * move [forward|backward] [dist] [duration] [wait? true|false]
+ * wave [forward|backward] [amplitude] [harm] [dist] [duration] [wait? true|false]
+ * trigger
+ * wait [duration]
+ * picture [fileName] [rotatable? true|false] [base direction]
+ * trail [fileName] [rotatable? true|false] [base direction]
+ * collider
+ * animation [animationId]
+ * se [name] [volume] [pitch] [pan]
+ * qaudio TODO
+ * globalLock
+ * globalUnlock
+ *
+ * ============================================================================
+ * ## Skill OnDamage
+ * ============================================================================
+ * target ---
+ * target move [towards|away] [dist]
+ * target jump [towards|away] [dist]
+ * target pose [pose]
+ * target cancel
+ * user
+ * user forceSkill
+ * animationTarget
+ *
+ * ============================================================================
  * ## Links
  * ============================================================================
  * RPGMakerWebs:
@@ -324,6 +370,7 @@ function QABS() {
   QABS.quickTarget = _PARAMS['Quick Target'] === 'true';
   QABS.lockTargeting = _PARAMS['Lock when Targeting'] === 'true';
   QABS.towardsMouse = _PARAMS['Attack Towards Mouse'] === 'true';
+  QABS.radianAtks = QMovement.offGrid;
 
   QABS.lootDecay = Number(_PARAMS['Loot Decay']) || 1;
   QABS.aoeLoot = _PARAMS['AoE Loot'] === 'true';
@@ -587,10 +634,17 @@ function QABSManager() {
 
   QABSManager.startPopup = function(type, options) {
     if (!Imported.QPopup) return;
+    var preset = $gameSystem.qPopupPreset(type);
+    Object.assign(options, {
+      duration: 80,
+      style: preset.style,
+      transitions: preset.transitions
+    })
     if (!options.transitions) {
-      var start = options.duration ? options.duration - 30 : 90;
+      var start = options.duration - 30;
+      var end = start + 30;
       var fadeout = start + ' 30 fadeout';
-      var slideup = '0 120 slideup 48';
+      var slideup = '0 ' + end + ' slideup 24';
       options.transitions = [fadeout, slideup];
     }
     QPopup.start(options);
@@ -645,6 +699,49 @@ function QABSManager() {
     var loot = new Game_Loot(x, y);
     loot.setGold(value);
     return loot;
+  };
+
+  QABSManager._freeEventIds = [];
+  QABSManager.addEvent = function(event) {
+    var id = this._freeEventIds.unshift() || 0;
+    if (!id || $gameMap._events[id]) {
+      id = $gameMap._events.length;
+    }
+    event._eventId = id;
+    $gameMap._events[id] = event;
+    if (!event._noSprite) {
+      var scene = SceneManager._scene;
+      if (scene === Scene_Map) {
+        var spriteset = scene._spriteset;
+        var sprite = new Sprite_Character(event);
+        spriteset._characterSprites.push(sprite);
+        spriteset._tilemap.addChild(sprite);
+      }
+    }
+  };
+
+  QABSManager.removeEvent = function(event) {
+    var id = event._eventId;
+    if (!id) return;
+    ColliderManager.remove(event);
+    event.removeColliders();
+    if (!event._noSprite) {
+      var scene = SceneManager._scene;
+      if (scene === Scene_Map) {
+        var spriteset = scene._spriteset;
+        var spriteCharas = spriteset._characterSprites;
+        for (var i = 0; i < spriteCharas.length; i++) {
+          if (spriteCharas[i] && spriteCharas[i]._character === event) {
+            spriteset._tilemap.removeChild(spriteCharas[i]);
+            spriteCharas.splice(i, 1);
+            break;
+          }
+        }
+      }
+    }
+    $gameMap._events[id].clearABS();
+    $gameMap._events[id] = null;
+    this._freeEventIds.push(id);
   };
 })();
 
@@ -792,15 +889,15 @@ function Skill_Sequencer() {
     }
   };
 
-  Skill_Sequencer.prototype.startDamageAction = function(action, targets) {
+  Skill_Sequencer.prototype.startOnDamageAction = function(action, targets) {
     var cmd = action.shift().toLowerCase();
     switch (cmd) {
       case 'target': {
-        this.startDamageTargetAction(action, targets);
+        this.startOnDamageTargetAction(action, targets);
         break;
       }
       case 'user': {
-        this.startDamageUserAction(action, targets);
+        this.startOnDamageUserAction(action, targets);
         break;
       }
       case 'animationtarget': {
@@ -810,7 +907,7 @@ function Skill_Sequencer() {
     }
   };
 
-  Skill_Sequencer.prototype.startDamageTargetAction = function(action, targets) {
+  Skill_Sequencer.prototype.startOnDamageTargetAction = function(action, targets) {
     var cmd = action.shift().toLowerCase();
     switch (cmd) {
       case 'move': {
@@ -860,11 +957,11 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userSpeed = function(action) {
-    var amt = Number(action[3]) || 1;
+    var amt = Number(action[1]) || 1;
     var spd = this._character.moveSpeed();
-    if (action[2] === 'inc') {
+    if (action[0] === 'inc') {
       this._character.setMoveSpeed(spd + amt);
-    } else if (action[2] === 'dec')  {
+    } else if (action[0] === 'dec')  {
       this._character.setMoveSpeed(spd - amt);
     }
   };
@@ -913,6 +1010,7 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userSlide = function(action) {
+    // TODO change this to userMoveHere
     var x1 = this._character._px;
     var y1 = this._character._py;
     var x2 = this._skill.collider.center.x;
@@ -975,7 +1073,7 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.targetMove = function(action, targets) {
     var dist = Number(action[1]) || this._character.moveTiles();
     for (var i = 0; i < targets.length; i++) {
-      var dist2 = dist - dist * eval('targets[i].battler().' + QuasiABS.mrst);
+      var dist2 = dist - dist * eval('targets[i].battler().' + QABS.mrst);
       if (dist2 <= 0) return;
       var dx = targets[i]._px - this._character._px;
       var dy = targets[i]._py - this._character._py;
@@ -984,6 +1082,7 @@ function Skill_Sequencer() {
       var dir = this._character.radianToDirection(radian);
       if (action[0] === 'towards') {
         dir = this.this._character.reverseDir(dir);
+        radian += Math.PI;
       }
       var route = {
         list: [],
@@ -992,13 +1091,18 @@ function Skill_Sequencer() {
         wait: false
       }
       route.list.push({ code: 35 });
-      route.list.push({
-        code: Game_Character.ROUTE_SCRIPT,
-        parameters: ['qmove(' + dir + ',' + dist + ')']
-      })
-      if (targets[i].isDirectionFixed()) {
-        route.list.push({ code: 35 });
+      if (QMovement.offGrid) {
+        route.list.push({
+          code: Game_Character.ROUTE_SCRIPT,
+          parameters: ['qmove2(' + radian + ',' + dist + ')']
+        })
       } else {
+        route.list.push({
+          code: Game_Character.ROUTE_SCRIPT,
+          parameters: ['qmove(' + dir + ',' + dist + ')']
+        })
+      }
+      if (!targets[i].isDirectionFixed()) {
         route.list.push({ code: 36 });
       }
       route.list.push({
@@ -1022,7 +1126,11 @@ function Skill_Sequencer() {
       if (action[0] === 'towards') {
         dir = this.this._character.reverseDir(dir);
       }
-      targets[i].pixelJumpFixed(dir, dist);
+      if (QMovement.offGrid) {
+        targets[i].pixelJump(dx, dy);
+      } else {
+        targets[i].pixelJumpFixed(dir, dist);
+      }
     }
   };
 
@@ -1058,7 +1166,7 @@ function Skill_Sequencer() {
       var dist = Math.sqrt(dx * dx + dy * dy);
       this._skill.radian = Math.atan2(y2 - y1, x2 - x1);
       this._skill.radian += this._skill.radian < 0 ? Math.PI * 2 : 0;
-      this.actionMove(['forward', dist, action[0], action[1]]);
+      this.actionMove(['forward', dist, action[0]]);
     }
   };
 
@@ -1085,7 +1193,7 @@ function Skill_Sequencer() {
     radian = radian === 'backward' ? this.this._character.reverseRadian(this._skill.radian) : radian;
     this.setSkillRadian(Number(radian));
     this.actionWaveSkill(amp, harm, distance, duration);
-    this._waitForMove = action[6] === "true";
+    this._waitForMove = action[5] === "true";
   };
 
   Skill_Sequencer.prototype.actionTrigger = function() {
@@ -1101,7 +1209,7 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.actionPicture = function(action) {
     var animated = /%\[(.*)\]/i.exec(action[0]);
     if (animated) {
-      var settings = animated[1].split("-");
+      var settings = animated[1].split('-');
       this._skill.picture = new AnimatedSprite();
       this._skill.picture.bitmap = ImageManager.loadPicture(action[0]);
       this._skill.picture._frames = Number(settings[0]) || 1;
@@ -1160,6 +1268,10 @@ function Skill_Sequencer() {
     se.pitch = Number(action[2]) || 100;
     se.pan = Number(action[3]) || 0;
     AudioManager.playSe(se);
+  };
+
+  Skill_Sequencer.prototype.actionQAudio = function(action) {
+    // TODO
   };
 
   Skill_Sequencer.prototype.actionMoveSkill = function(distance, duration) {
@@ -1345,7 +1457,7 @@ function Skill_Sequencer() {
     var targets = this._skill.targets;
     for (var i = 0; i < this._skill.ondmg.length; i++) {
       var action = this._skill.ondmg[i].split(' ');
-      this.startDamageAction(action, targets);
+      this.startOnDamageAction(action, targets);
     }
     QABSManager.startAction(this._character, targets, this._skill);
   };
@@ -2736,7 +2848,171 @@ function Game_Loot() {
 }
 
 (function() {
+  Game_Loot.prototype = Object.create(Game_Event.prototype);
+  Game_Loot.prototype.constructor = Game_Event; // still needs to act like an Event
 
+  Game_Loot.prototype.initialize = function(x, y) {
+    Game_Character.prototype.initialize.call(this);
+    this._decay = QABS.lootDecay;
+    this._eventId = -1;
+    this._gold = null;
+    this._loot = null;
+    this._noSprite = true;
+    this.locate(x, y);
+    QABSManager.addEvent(this);
+    this.refresh();
+  };
+
+  Game_Loot.prototype.event = function() {
+    return {
+      note: ''
+    }
+  };
+
+  Game_Loot.prototype.shiftY = function() {
+    return 0;
+  };
+
+  Game_Loot.prototype.setGold = function(value) {
+    this._gold = value;
+    this.setIcon(QABS.goldIcon);
+  };
+
+  Game_Loot.prototype.setItem = function(item) {
+    this._loot = item;
+    this.setIcon(item.iconIndex);
+  };
+
+  Game_Loot.prototype.setIcon = function(iconIndex) {
+    this._iconIndex = iconIndex;
+    this._itemIcon = new Sprite_Icon(iconIndex);
+    this._itemIcon.move(this._px, this._py);
+    this._itemIcon.z = 1;
+    QABSManager.addPicture(this._itemIcon);
+  };
+
+  Game_Loot.prototype.page = function() {
+    if (!this._lootPage) {
+      this._lootPage = {
+        conditions: {
+          actorId: 1, actorValid: false,
+          itemId: 1,  itemValid: false,
+          selfSwitchCh: 'A', selfSwitchValid: false,
+          switch1Id: 1,   switch1Valid: false,
+          switch2Id: 1,   switch2Valid: false,
+          variable1Id: 1, variable1Valid: false, variableValue: 0
+        },
+        image: {
+          characterIndex: 0, characterName: '',
+          direction: 2, pattern: 1, tileId: 0
+        },
+        moveRoute: {
+          list: [{code: 0, parameters: []}],
+          repeat: false, skippable: false, wait: false
+        },
+        list: [],
+        directionFix: false,
+        moveFrequency: 4,
+        moveSpeed: 3,
+        moveType: 0,
+        priorityType: 0,
+        stepAnime: false,
+        through: true,
+        trigger: QABS.lootTrigger,
+        walkAnime: true
+      };
+      this._lootPage.list = [];
+      this._lootPage.list.push({
+        code: 355,
+        indent: 0,
+        parameters: ['this.character().collectDrops();']
+      });
+      this._lootPage.list.push({
+        code: 0,
+        indent: 0,
+        parameters: [0]
+      });
+    }
+    return this._lootPage;
+  };
+
+  Game_Loot.prototype.findProperPageIndex = function() {
+    return 0;
+  };
+
+  Game_Loot.prototype.collectDrops = function() {
+    if (QABS.aoeLoot) {
+      return this.aoeCollect();
+    }
+    if (this._loot) $gameParty.gainItem(this._loot, 1);
+    if (this._gold) $gameParty.gainGold(this._gold);
+    var string = this._gold ? String(this._gold) : this._loot.name;
+    console.log(string.length);
+    if (this._iconIndex) {
+      string = '\\I[' + this._iconIndex + ']' + string;
+    }
+    QABSManager.startPopup('QABS-ITEM', {
+      x: this.cx(), y: this.cy(),
+      string: string
+    })
+    this.erase();
+    QABSManager.removeEvent(this);
+    QABSManager.removePicture(this._itemIcon);
+  };
+
+  Game_Loot.prototype.aoeCollect = function() {
+    return; // TODO
+    var events = $gameMap.getCharactersAt(this.collider(), function(e) {
+      return (e.constructor !== Game_Loot || e._erased);
+    });
+    var totalLoot = [];
+    var totalGold = 0;
+    for (var event of events){
+      if (event._loot) totalLoot.push(event._loot);
+      if (event._gold) totalGold += event._gold;
+      var neighborLoot = $gameMap.getCharactersAt(event.collider(), function(e) {
+        return (e.constructor !== Game_Loot || e._erased || events.contains(e));
+      });
+      events.push.apply(events, neighborLoot);
+      event.erase();
+      QuasiABS.Manager.removeEvent(event);
+      QuasiABS.Manager.removePicture(event._itemIcon);
+    };
+    var display = {};
+    for (var item of totalLoot) {
+      $gameParty.gainItem(item, 1);
+      display[item.name] = display[item.name] || {};
+      display[item.name].iconIndex = item.iconIndex;
+      display[item.name].total = display[item.name].total + 1 || 1;
+    }
+    var y = this.cy();
+    for (var name in display) {
+      if (!display.hasOwnProperty(name)) continue;
+      var string = "x" + display[name].total + " " + name;
+      var iconIndex = display[name].iconIndex;
+      QuasiABS.Manager.startPopup("item", this.cx(), y, string, iconIndex);
+      y += 22;
+    }
+    if (totalGold > 0) {
+      $gameParty.gainGold(totalGold);
+      var string = String(totalGold);
+      QuasiABS.Manager.startPopup("item", this.cx(), y, string, QuasiABS.goldIcon);
+    }
+  };
+
+  Game_Loot.prototype.update = function() {
+    if (this._decay <= 0) {
+      this.erase();
+      QABSManager.removeEvent(this);
+      QABSManager.removePicture(this._itemIcon);
+      return;
+    }
+    this._decay--;
+  };
+
+  Game_Loot.prototype.defaultColliderConfig = function() {
+    return 'box,32,32,0,0';
+  };
 })();
 
 //-----------------------------------------------------------------------------
@@ -2753,46 +3029,6 @@ function Game_Loot() {
   Scene_Map.prototype.isMenuCalled = function() {
     if ($gameSystem.anyAbsMouse2()) return Input.isTriggered('menu');
     return Alias_Scene_Map_isMenuCalled(this);
-  };
-})();
-
-//-----------------------------------------------------------------------------
-// Sprite_SkillCollider
-
-function Sprite_SkillCollider() {
-  this.initialize.apply(this, arguments);
-}
-
-(function() {
-  Sprite_SkillCollider.prototype = Object.create(Sprite_Collider.prototype);
-  Sprite_SkillCollider.prototype.constructor = Sprite_SkillCollider;
-
-  Sprite_SkillCollider.prototype.initialize = function(collider) {
-    Sprite_Collider.prototype.initialize.call(this, collider, -1);
-    this.z = 2;
-    this.alpha = 0.4;
-    this.anchor.x = 0.5;
-    this.anchor.y = 0.5;
-    this._frameCount = 0;
-  };
-
-  Sprite_SkillCollider.prototype.update = function() {
-    Sprite_Collider.prototype.update.call(this);
-    this.updateAnimation();
-  };
-
-  Sprite_SkillCollider.prototype.updateAnimation = function() {
-    this._frameCount++;
-    if (this._frameCount > 30) {
-      this.alpha += 0.2 / 30;
-      this.scale.x += 0.1 / 30;
-      this.scale.y = this.scale.x;
-      if (this._frameCount === 60) this._frameCount = 0;
-    } else {
-      this.alpha -= 0.2 / 30;
-      this.scale.x -= 0.1 / 30;
-      this.scale.y = this.scale.x;
-    }
   };
 })();
 
@@ -2867,7 +3103,7 @@ function Sprite_SkillCollider() {
       if (!string && string !== '0') return;
       var iconIndex = result.damageIcon;
       if (iconIndex) {
-        string = '\I[' + iconIndex + ']' + string;
+        string = '\\I[' + iconIndex + ']' + string;
       }
       if (result.critical) fill = '#FF8C00';
       var fadeout = '50 30 fadeout';
@@ -2887,6 +3123,76 @@ function Sprite_SkillCollider() {
       this._damages.push(sprite);
       this._battler.clearDamagePopup();
       this._battler.clearResult();
+    }
+  };
+})();
+
+//-----------------------------------------------------------------------------
+// Sprite_Icon
+
+function Sprite_Icon() {
+  this.initialize.apply(this, arguments);
+}
+
+(function() {
+  Sprite_Icon.prototype = Object.create(Sprite.prototype);
+  Sprite_Icon.prototype.constructor = Sprite_Icon;
+
+  Sprite_Icon.prototype.initialize = function(index, sheet, w, h) {
+    Sprite.prototype.initialize.call(this);
+    this._iconIndex = index;
+    this._iconSheet = sheet || 'IconSet';
+    this._iconW = w || 32;
+    this._iconH = h || 32;
+    this.setBitmap();
+  };
+
+  Sprite_Icon.prototype.setBitmap = function() {
+    this.bitmap = ImageManager.loadSystem(this._iconSheet);
+    var pw = this._iconW;
+    var ph = this._iconH;
+    var sx = this._iconIndex % 16 * pw;
+    var sy = Math.floor(this._iconIndex / 16) * ph;
+    this.setFrame(sx, sy, pw, ph);
+  };
+})();
+
+//-----------------------------------------------------------------------------
+// Sprite_SkillCollider
+
+function Sprite_SkillCollider() {
+  this.initialize.apply(this, arguments);
+}
+
+(function() {
+  Sprite_SkillCollider.prototype = Object.create(Sprite_Collider.prototype);
+  Sprite_SkillCollider.prototype.constructor = Sprite_SkillCollider;
+
+  Sprite_SkillCollider.prototype.initialize = function(collider) {
+    Sprite_Collider.prototype.initialize.call(this, collider, -1);
+    this.z = 2;
+    this.alpha = 0.4;
+    this.anchor.x = 0.5;
+    this.anchor.y = 0.5;
+    this._frameCount = 0;
+  };
+
+  Sprite_SkillCollider.prototype.update = function() {
+    Sprite_Collider.prototype.update.call(this);
+    this.updateAnimation();
+  };
+
+  Sprite_SkillCollider.prototype.updateAnimation = function() {
+    this._frameCount++;
+    if (this._frameCount > 30) {
+      this.alpha += 0.2 / 30;
+      this.scale.x += 0.1 / 30;
+      this.scale.y = this.scale.x;
+      if (this._frameCount === 60) this._frameCount = 0;
+    } else {
+      this.alpha -= 0.2 / 30;
+      this.scale.x -= 0.1 / 30;
+      this.scale.y = this.scale.x;
     }
   };
 })();

@@ -95,10 +95,17 @@ function QABSManager() {
 
   QABSManager.startPopup = function(type, options) {
     if (!Imported.QPopup) return;
+    var preset = $gameSystem.qPopupPreset(type);
+    Object.assign(options, {
+      duration: 80,
+      style: preset.style,
+      transitions: preset.transitions
+    })
     if (!options.transitions) {
-      var start = options.duration ? options.duration - 30 : 90;
+      var start = options.duration - 30;
+      var end = start + 30;
       var fadeout = start + ' 30 fadeout';
-      var slideup = '0 120 slideup 48';
+      var slideup = '0 ' + end + ' slideup 24';
       options.transitions = [fadeout, slideup];
     }
     QPopup.start(options);
@@ -153,5 +160,48 @@ function QABSManager() {
     var loot = new Game_Loot(x, y);
     loot.setGold(value);
     return loot;
+  };
+
+  QABSManager._freeEventIds = [];
+  QABSManager.addEvent = function(event) {
+    var id = this._freeEventIds.unshift() || 0;
+    if (!id || $gameMap._events[id]) {
+      id = $gameMap._events.length;
+    }
+    event._eventId = id;
+    $gameMap._events[id] = event;
+    if (!event._noSprite) {
+      var scene = SceneManager._scene;
+      if (scene === Scene_Map) {
+        var spriteset = scene._spriteset;
+        var sprite = new Sprite_Character(event);
+        spriteset._characterSprites.push(sprite);
+        spriteset._tilemap.addChild(sprite);
+      }
+    }
+  };
+
+  QABSManager.removeEvent = function(event) {
+    var id = event._eventId;
+    if (!id) return;
+    ColliderManager.remove(event);
+    event.removeColliders();
+    if (!event._noSprite) {
+      var scene = SceneManager._scene;
+      if (scene === Scene_Map) {
+        var spriteset = scene._spriteset;
+        var spriteCharas = spriteset._characterSprites;
+        for (var i = 0; i < spriteCharas.length; i++) {
+          if (spriteCharas[i] && spriteCharas[i]._character === event) {
+            spriteset._tilemap.removeChild(spriteCharas[i]);
+            spriteCharas.splice(i, 1);
+            break;
+          }
+        }
+      }
+    }
+    $gameMap._events[id].clearABS();
+    $gameMap._events[id] = null;
+    this._freeEventIds.push(id);
   };
 })();

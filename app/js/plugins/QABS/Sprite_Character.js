@@ -69,7 +69,7 @@
       if (!string && string !== '0') return;
       var iconIndex = result.damageIcon;
       if (iconIndex) {
-        string = '\I[' + iconIndex + ']' + string;
+        string = '\\I[' + iconIndex + ']' + string;
       }
       if (result.critical) fill = '#FF8C00';
       var fadeout = '50 30 fadeout';

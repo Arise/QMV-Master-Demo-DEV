@@ -191,14 +191,16 @@
       "static - addPicture - sprite",
       "static - removePicture - sprite",
       "static - createItem - x, y, itemId, type",
-      "static - createGold - x, y, value"
+      "static - createGold - x, y, value",
+      "static - addEvent - event",
+      "static - removeEvent - event"
     ],
     "Skill_Sequencer": [
       "prototype - initialize - character, skill",
       "prototype - startAction - action",
       "prototype - startUserAction - action",
-      "prototype - startDamageAction - action, targets",
-      "prototype - startDamageTargetAction - action, targets",
+      "prototype - startOnDamageAction - action, targets",
+      "prototype - startOnDamageTargetAction - action, targets",
       "prototype - startDamageUserAction - action, targets",
       "prototype - userCasting - action",
       "prototype - userLock - undefined",
@@ -229,6 +231,7 @@
       "prototype - actionCollider - action",
       "prototype - actionAnimation - action",
       "prototype - actionSE - action",
+      "prototype - actionQAudio - action",
       "prototype - actionMoveSkill - distance, duration",
       "prototype - actionWaveSkill - amp, harmonics, distance, duration",
       "prototype - setSkillRadian - radian",
@@ -245,6 +248,24 @@
       "prototype - updateSkillPosition - undefined",
       "prototype - updateSkillWavePosition - undefined",
       "prototype - adjustPosition - xi, yi, xf, yf"
+    ],
+    "Game_Loot": [
+      "prototype - initialize - x, y",
+      "prototype - event - undefined",
+      "prototype - shiftY - undefined",
+      "prototype - setGold - value",
+      "prototype - setItem - item",
+      "prototype - setIcon - iconIndex",
+      "prototype - page - undefined",
+      "prototype - findProperPageIndex - undefined",
+      "prototype - collectDrops - undefined",
+      "prototype - aoeCollect - undefined",
+      "prototype - update - undefined",
+      "prototype - defaultColliderConfig - undefined"
+    ],
+    "Sprite_Icon": [
+      "prototype - initialize - index, sheet, w, h",
+      "prototype - setBitmap - undefined"
     ],
     "Sprite_SkillCollider": [
       "prototype - initialize - collider",

@@ -298,6 +298,52 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  * ----------------------------------------------------------------------------
  *
  * ============================================================================
+ * ## Skill Sequences
+ * ============================================================================
+ * user ---
+ * user casting [true|false]
+ * user lock
+ * user unlock
+ * user speed [inc|dec] [amt]
+ * user move [forward|backward] [dist] [wait? true|false]
+ * user jump [forward|backward] [dist] [wait? true|false]
+ * user jumpHere [wait? true|false]
+ * user slide
+ * user teleport
+ * user setDirection [dir]
+ * user directionFix [true|false]
+ * user pose [pose] [wait? true|false]
+ * user forceSkill [skillId] [angleOffset in degrees]
+ * user animation [animationId]
+ * store
+ * clearstore
+ * moveToStored [wait? true|false]
+ * move [forward|backward] [dist] [duration] [wait? true|false]
+ * wave [forward|backward] [amplitude] [harm] [dist] [duration] [wait? true|false]
+ * trigger
+ * wait [duration]
+ * picture [fileName] [rotatable? true|false] [base direction]
+ * trail [fileName] [rotatable? true|false] [base direction]
+ * collider
+ * animation [animationId]
+ * se [name] [volume] [pitch] [pan]
+ * qaudio TODO
+ * globalLock
+ * globalUnlock
+ *
+ * ============================================================================
+ * ## Skill OnDamage
+ * ============================================================================
+ * target ---
+ * target move [towards|away] [dist]
+ * target jump [towards|away] [dist]
+ * target pose [pose]
+ * target cancel
+ * user
+ * user forceSkill
+ * animationTarget
+ *
+ * ============================================================================
  * ## Links
  * ============================================================================
  * RPGMakerWebs:

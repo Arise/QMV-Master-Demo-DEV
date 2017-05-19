@@ -142,15 +142,15 @@ function Skill_Sequencer() {
     }
   };
 
-  Skill_Sequencer.prototype.startDamageAction = function(action, targets) {
+  Skill_Sequencer.prototype.startOnDamageAction = function(action, targets) {
     var cmd = action.shift().toLowerCase();
     switch (cmd) {
       case 'target': {
-        this.startDamageTargetAction(action, targets);
+        this.startOnDamageTargetAction(action, targets);
         break;
       }
       case 'user': {
-        this.startDamageUserAction(action, targets);
+        this.startOnDamageUserAction(action, targets);
         break;
       }
       case 'animationtarget': {
@@ -160,7 +160,7 @@ function Skill_Sequencer() {
     }
   };
 
-  Skill_Sequencer.prototype.startDamageTargetAction = function(action, targets) {
+  Skill_Sequencer.prototype.startOnDamageTargetAction = function(action, targets) {
     var cmd = action.shift().toLowerCase();
     switch (cmd) {
       case 'move': {
@@ -210,11 +210,11 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userSpeed = function(action) {
-    var amt = Number(action[3]) || 1;
+    var amt = Number(action[1]) || 1;
     var spd = this._character.moveSpeed();
-    if (action[2] === 'inc') {
+    if (action[0] === 'inc') {
       this._character.setMoveSpeed(spd + amt);
-    } else if (action[2] === 'dec')  {
+    } else if (action[0] === 'dec')  {
       this._character.setMoveSpeed(spd - amt);
     }
   };
@@ -263,6 +263,7 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userSlide = function(action) {
+    // TODO change this to userMoveHere
     var x1 = this._character._px;
     var y1 = this._character._py;
     var x2 = this._skill.collider.center.x;
@@ -325,7 +326,7 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.targetMove = function(action, targets) {
     var dist = Number(action[1]) || this._character.moveTiles();
     for (var i = 0; i < targets.length; i++) {
-      var dist2 = dist - dist * eval('targets[i].battler().' + QuasiABS.mrst);
+      var dist2 = dist - dist * eval('targets[i].battler().' + QABS.mrst);
       if (dist2 <= 0) return;
       var dx = targets[i]._px - this._character._px;
       var dy = targets[i]._py - this._character._py;
@@ -334,6 +335,7 @@ function Skill_Sequencer() {
       var dir = this._character.radianToDirection(radian);
       if (action[0] === 'towards') {
         dir = this.this._character.reverseDir(dir);
+        radian += Math.PI;
       }
       var route = {
         list: [],
@@ -342,13 +344,18 @@ function Skill_Sequencer() {
         wait: false
       }
       route.list.push({ code: 35 });
-      route.list.push({
-        code: Game_Character.ROUTE_SCRIPT,
-        parameters: ['qmove(' + dir + ',' + dist + ')']
-      })
-      if (targets[i].isDirectionFixed()) {
-        route.list.push({ code: 35 });
+      if (QMovement.offGrid) {
+        route.list.push({
+          code: Game_Character.ROUTE_SCRIPT,
+          parameters: ['qmove2(' + radian + ',' + dist + ')']
+        })
       } else {
+        route.list.push({
+          code: Game_Character.ROUTE_SCRIPT,
+          parameters: ['qmove(' + dir + ',' + dist + ')']
+        })
+      }
+      if (!targets[i].isDirectionFixed()) {
         route.list.push({ code: 36 });
       }
       route.list.push({
@@ -372,7 +379,11 @@ function Skill_Sequencer() {
       if (action[0] === 'towards') {
         dir = this.this._character.reverseDir(dir);
       }
-      targets[i].pixelJumpFixed(dir, dist);
+      if (QMovement.offGrid) {
+        targets[i].pixelJump(dx, dy);
+      } else {
+        targets[i].pixelJumpFixed(dir, dist);
+      }
     }
   };
 
@@ -408,7 +419,7 @@ function Skill_Sequencer() {
       var dist = Math.sqrt(dx * dx + dy * dy);
       this._skill.radian = Math.atan2(y2 - y1, x2 - x1);
       this._skill.radian += this._skill.radian < 0 ? Math.PI * 2 : 0;
-      this.actionMove(['forward', dist, action[0], action[1]]);
+      this.actionMove(['forward', dist, action[0]]);
     }
   };
 
@@ -435,7 +446,7 @@ function Skill_Sequencer() {
     radian = radian === 'backward' ? this.this._character.reverseRadian(this._skill.radian) : radian;
     this.setSkillRadian(Number(radian));
     this.actionWaveSkill(amp, harm, distance, duration);
-    this._waitForMove = action[6] === "true";
+    this._waitForMove = action[5] === "true";
   };
 
   Skill_Sequencer.prototype.actionTrigger = function() {
@@ -451,7 +462,7 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.actionPicture = function(action) {
     var animated = /%\[(.*)\]/i.exec(action[0]);
     if (animated) {
-      var settings = animated[1].split("-");
+      var settings = animated[1].split('-');
       this._skill.picture = new AnimatedSprite();
       this._skill.picture.bitmap = ImageManager.loadPicture(action[0]);
       this._skill.picture._frames = Number(settings[0]) || 1;
@@ -510,6 +521,10 @@ function Skill_Sequencer() {
     se.pitch = Number(action[2]) || 100;
     se.pan = Number(action[3]) || 0;
     AudioManager.playSe(se);
+  };
+
+  Skill_Sequencer.prototype.actionQAudio = function(action) {
+    // TODO
   };
 
   Skill_Sequencer.prototype.actionMoveSkill = function(distance, duration) {
@@ -695,7 +710,7 @@ function Skill_Sequencer() {
     var targets = this._skill.targets;
     for (var i = 0; i < this._skill.ondmg.length; i++) {
       var action = this._skill.ondmg[i].split(' ');
-      this.startDamageAction(action, targets);
+      this.startOnDamageAction(action, targets);
     }
     QABSManager.startAction(this._character, targets, this._skill);
   };

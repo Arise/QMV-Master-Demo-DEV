@@ -750,6 +750,7 @@
   };
 
   Game_CharacterBase.prototype.removeColliders = function() {
+    ColliderManager.remove(this);
     for (var collider in this._colliders) {
       if (!this._colliders.hasOwnProperty(collider)) continue;
       ColliderManager.remove(this._colliders[collider]);
