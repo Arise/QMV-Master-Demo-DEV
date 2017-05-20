@@ -306,9 +306,9 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  * user unlock
  * user speed [inc|dec] [amt]
  * user move [forward|backward] [dist] [wait? true|false]
+ * user moveHere [wait? true|false]
  * user jump [forward|backward] [dist] [wait? true|false]
  * user jumpHere [wait? true|false]
- * user slide
  * user teleport
  * user setDirection [dir]
  * user directionFix [true|false]
@@ -316,10 +316,10 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  * user forceSkill [skillId] [angleOffset in degrees]
  * user animation [animationId]
  * store
- * clearstore
- * moveToStored [wait? true|false]
  * move [forward|backward] [dist] [duration] [wait? true|false]
+ * moveToStored [duration] [wait? true|false]
  * wave [forward|backward] [amplitude] [harm] [dist] [duration] [wait? true|false]
+ * waveToStored [amplitude] [harm] [duration] [wait? true|false]
  * trigger
  * wait [duration]
  * picture [fileName] [rotatable? true|false] [base direction]
@@ -761,6 +761,7 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.startAction = function(action) {
+    console.log(action);
     var cmd = action.shift().toLowerCase();
     switch (cmd) {
       case 'user': {
@@ -771,20 +772,20 @@ function Skill_Sequencer() {
         this.actionStore();
         break;
       }
-      case 'clearstore': {
-        this._stored = null;
+      case 'move': {
+        this.actionMove(action);
         break;
       }
       case 'movetostored': {
         this.actionMoveToStored(action);
         break;
       }
-      case 'move': {
-        this.actionMove(action);
-        break;
-      }
       case 'wave': {
         this.actionWave(action);
+        break;
+      }
+      case 'wavetostored': {
+        this.actionWaveToStored(action);
         break;
       }
       case 'damage':
@@ -850,16 +851,16 @@ function Skill_Sequencer() {
         this.userMove(action);
         break;
       }
+      case 'movehere': {
+        this.userMoveHere(action);
+        break;
+      }
       case 'jump': {
         this.userJump(action);
         break;
       }
       case 'jumphere': {
         this.userJumpHere(action);
-        break;
-      }
-      case 'slide': {
-        this.userSlide(action);
         break;
       }
       case 'teleport': {
@@ -967,6 +968,7 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userMove = function(action) {
+    // TODO add false offgrid support
     var dist = Number(action[1]) || this._character.moveTiles();
     var route = {
       list: [],
@@ -978,16 +980,47 @@ function Skill_Sequencer() {
     route.list.push({
       code: Game_Character.ROUTE_SCRIPT,
       parameters: ['qmove(' + dir + ',' + dist + ')']
-    })
+    });
     route.list.push({
       code: 0
-    })
+    });
     this._character.forceMoveRoute(route);
     this._character.updateRoutineMove();
     this._waitForUserMove = action[2] ? action[2] === 'true' : false;
   };
 
+  Skill_Sequencer.prototype.userMoveHere = function(action) {
+    console.log(action);
+    // TODO add false offgrid support
+    var x1 = this._character.cx();
+    var y1 = this._character.cy();
+    var x2 = this._skill.collider.center.x;
+    var y2 = this._skill.collider.center.y;
+    var final = this.adjustPosition(x1, y1, x2, y2);
+    var dx = final.x - x1;
+    var dy = final.y - y1;
+    var radian = Math.atan2(dy, dx);
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    var route = {
+      list: [],
+      repeat: false,
+      skippable: true,
+      wait: false
+    }
+    route.list.push({
+      code: Game_Character.ROUTE_SCRIPT,
+      parameters: ['qmove2(' + radian + ',' + dist + ')']
+    });
+    route.list.push({
+      code: 0
+    });
+    this._character.forceMoveRoute(route);
+    this._character.updateRoutineMove();
+    this._waitForUserMove = action[0] ? action[0] === 'true' : false;
+  };
+
   Skill_Sequencer.prototype.userJump = function(action) {
+    // TODO add false offgrid support
     var dist = Number(action[1]) || 0;
     if (action[0] === 'backward') {
       this._character.pixelJumpBackward(dist);
@@ -998,6 +1031,8 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userJumpHere = function(action) {
+    // TODO add false offgrid support
+    /*
     var x1 = this._character.cx();
     var y1 = this._character.cy();
     var x2 = this._skill.collider.center.x;
@@ -1005,19 +1040,16 @@ function Skill_Sequencer() {
     var dx = x2 - x1;
     var dy = y2 - y1;
     var final = this.adjustPosition(this._character._px, this._character._py, this._character._px + dx, this._character._py + dy);
-    this._character.pixelJump(final.x - this._character._px, final.y - this._character._py);
-    this._waitForUserJump = action[0] ? action[0] === 'true' : false;
-  };
-
-  Skill_Sequencer.prototype.userSlide = function(action) {
-    // TODO change this to userMoveHere
-    var x1 = this._character._px;
-    var y1 = this._character._py;
+    */
+    var x1 = this._character.cx();
+    var y1 = this._character.cy();
     var x2 = this._skill.collider.center.x;
     var y2 = this._skill.collider.center.y;
     var final = this.adjustPosition(x1, y1, x2, y2);
-    this._character.slideTo(final.x, final.y);
-    this._waitForUserMove = action[0] ? action[0] === 'true' : false;
+    var dx = final.x - x1;
+    var dy = final.y - y1;
+    this._character.pixelJump(dx, dy);
+    this._waitForUserJump = action[0] ? action[0] === 'true' : false;
   };
 
   Skill_Sequencer.prototype.userTeleport = function() {
@@ -1038,16 +1070,13 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userDirectionFix = function(action) {
-    var fix = action[0] === 'true';
-    this._character.setDirectionFix(fix);
+    this._character.setDirectionFix(action[0] === 'true');
   };
 
   Skill_Sequencer.prototype.userPose = function(action) {
-    var pose = action[0];
-    var wait = action[1] === 'true';
     if (Imported.QSprite) {
-      this._character.playPose(pose);
-      this._waitForPose = wait;
+      this._character.playPose(action[0]);
+      this._waitForPose = action[1] === 'true';
     }
   };
 
@@ -1075,8 +1104,8 @@ function Skill_Sequencer() {
     for (var i = 0; i < targets.length; i++) {
       var dist2 = dist - dist * eval('targets[i].battler().' + QABS.mrst);
       if (dist2 <= 0) return;
-      var dx = targets[i]._px - this._character._px;
-      var dy = targets[i]._py - this._character._py;
+      var dx = targets[i].cx() - this._character.cx();
+      var dy = targets[i].cy() - this._character.cy();
       var radian = Math.atan2(dy, dx);
       radian += radian < 0 ? Math.PI * 2 : 0;
       var dir = this._character.radianToDirection(radian);
@@ -1118,8 +1147,8 @@ function Skill_Sequencer() {
     for (var i = 0; i < targets.length; i++) {
       var dist2 = dist - dist * eval('targets[i].battler().' + QABS.mrst);
       if (dist2 <= 0) return;
-      var dx = targets[i]._px - this._character._px;
-      var dy = targets[i]._py - this._character._py;
+      var dx = targets[i].cx() - this._character.cx();
+      var dy = targets[i].cy() - this._character.cy();
       var radian = Math.atan2(dy, dx);
       radian += radian < 0 ? Math.PI * 2 : 0;
       var dir = this._character.radianToDirection(radian);
@@ -1155,6 +1184,18 @@ function Skill_Sequencer() {
     this._stored = new Point(this._skill.collider.x, this._skill.collider.y);
   };
 
+  Skill_Sequencer.prototype.actionMove = function(action) {
+    var dir = action[0];
+    var distance = Number(action[1]);
+    var duration = Number(action[2]);
+    ColliderManager.draw(this._skill.collider, duration);
+    var radian = dir === 'forward' ? this._skill.radian : dir;
+    radian = radian === 'backward' ? this.this._character.reverseRadian(this._skill.radian) : radian;
+    this.setSkillRadian(Number(radian));
+    this.actionMoveSkill(distance, duration);
+    this._waitForMove = action[3] === 'true';
+  };
+
   Skill_Sequencer.prototype.actionMoveToStored = function(action) {
     if (this._stored) {
       var x1 = this._skill.collider.x;
@@ -1166,20 +1207,8 @@ function Skill_Sequencer() {
       var dist = Math.sqrt(dx * dx + dy * dy);
       this._skill.radian = Math.atan2(y2 - y1, x2 - x1);
       this._skill.radian += this._skill.radian < 0 ? Math.PI * 2 : 0;
-      this.actionMove(['forward', dist, action[0]]);
+      this.actionMove(['forward', dist, action[0], action[1]]);
     }
-  };
-
-  Skill_Sequencer.prototype.actionMove = function(action) {
-    var dir = action[0];
-    var distance = Number(action[1]);
-    var duration = Number(action[2]);
-    ColliderManager.draw(this._skill.collider, duration);
-    var radian = dir === 'forward' ? this._skill.radian : dir;
-    radian = radian === 'backward' ? this.this._character.reverseRadian(this._skill.radian) : radian;
-    this.setSkillRadian(Number(radian));
-    this.actionMoveSkill(distance, duration);
-    this._waitForMove = action[3] === 'true';
   };
 
   Skill_Sequencer.prototype.actionWave = function(action) {
@@ -1194,6 +1223,21 @@ function Skill_Sequencer() {
     this.setSkillRadian(Number(radian));
     this.actionWaveSkill(amp, harm, distance, duration);
     this._waitForMove = action[5] === "true";
+  };
+
+  Skill_Sequencer.prototype.actionWaveToStored = function(action) {
+    if (this._stored) {
+      var x1 = this._skill.collider.x;
+      var y1 = this._skill.collider.y;
+      var x2 = this._stored.x;
+      var y2 = this._stored.y;
+      var dx = x2 - x1;
+      var dy = y2 - y1;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      this._skill.radian = Math.atan2(y2 - y1, x2 - x1);
+      this._skill.radian += this._skill.radian < 0 ? Math.PI * 2 : 0;
+      this.actionWave(['forward', action[0], action[1], dist, action[2], action[3]]);
+    }
   };
 
   Skill_Sequencer.prototype.actionTrigger = function() {
@@ -1333,7 +1377,8 @@ function Skill_Sequencer() {
         this.updateSkillDamage();
       }
     }
-    if (this._skill.settings.through === 2 || this._skill.settings.through === 3) {
+    // TODO check if out of bounds
+    if (!collided && (this._skill.settings.through === 2 || this._skill.settings.through === 3)) {
       ColliderManager.getCollidersNear(this._skill.collider, function(collider) {
         if (this._skill.settings.overwater && (collider.isWater1 || collider.isWater2)) {
           return false;
@@ -1351,47 +1396,6 @@ function Skill_Sequencer() {
       return false;
     }
     return true;
-  };
-
-  Skill_Sequencer.prototype.didSkillHit = function() {
-    var collided = false;
-    var targets = QABSManager.getTargets(this._skill, this._character);
-    if (targets.length > 0) {
-      // remove targets that have already been hit
-      for (var i = targets.length - 1; i >= 0; i--) {
-        if (!this._skill.targetsHit.contains(targets[i].battler()._charaId)) {
-          this._skill.targetsHit.push(targets[i].battler()._charaId);
-        } else {
-          targets.splice(i, 1);
-        }
-      }
-      if (targets.length > 0) {
-        this._skill.targets = targets;
-        if (this._skill.settings.through === 1 || this._skill.settings.through === 3) {
-          collided = true;
-          this._skill.targets = [targets[0]];
-        }
-        this.updateSkillDamage();
-      }
-    }
-    if (!collided && (this._skill.settings.through === 2 || this._skill.settings.through === 3)) {
-      ColliderManager.getCollidersNear(this._skill.collider, function(collider) {
-        if (this._skill.settings.overwater && (collider.isWater1 || collider.isWater2)) {
-          return false;
-        }
-        if (this._skill.collider.intersects(collider)) {
-          collided = true;
-          return 'break';
-        }
-      }.bind(this));
-    }
-    if (collided) {
-      this._skill.targetsHit = [];
-      this._skill.moving = false;
-      this._waitForMove = false;
-      return true;
-    }
-    return false;
   };
 
   Skill_Sequencer.prototype.isWaitingForCharacter = function() {
@@ -1499,7 +1503,7 @@ function Skill_Sequencer() {
       y4 += dist * -Math.sin(radian) + oy;
       this._skill.trail.move(x4, y4, dist, h);
     }
-    if (this.didSkillHit()) return;
+    if (this.canSkillMove()) return;
     if (x1 === x2 && y1 === y2) {
       this._skill.targetsHit = [];
       this._skill.moving = false;
@@ -1534,7 +1538,7 @@ function Skill_Sequencer() {
       this._waitForMove = false;
     }
     this._skill.theta += this._skill.waveSpeed;
-    if (this.didSkillHit()) {
+    if (this.canSkillMove()) {
       this._skill.waving = false;
     }
   };
@@ -1544,14 +1548,13 @@ function Skill_Sequencer() {
     var dx = xf - xi;
     var dy = yf - yi;
     var radian = Math.atan2(dy, dx);
-    radian += radian < 0 ? Math.PI * 2 : 0;
     var vx = Math.cos(radian) * this._character.moveTiles();
     var vy = Math.sin(radian) * this._character.moveTiles();
-    while (!this._character.canPixelPass(final.x, final.y, 5)) {
+    while (!this._character.canPixelPass(final.x, final.y, 5, 'collision')) {
       final.x -= vx;
       final.y -= vy;
     }
-    this._character.collider('collider').moveTo(xi, yi);
+    this._character.collider('collision').moveTo(xi, yi);
     return final;
   };
 

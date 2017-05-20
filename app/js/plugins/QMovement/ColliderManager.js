@@ -81,8 +81,6 @@ function ColliderManager() {
 
   ColliderManager.updateGrid = function(collider, prevGrid) {
     if (this._needsRefresh) return;
-    var maxWidth  = this.sectorCols();
-    var maxHeight = this.sectorRows();
     var currGrid;
     var grid;
     if (collider._colliders) {
@@ -101,9 +99,7 @@ function ColliderManager() {
       }
       for (x = prevGrid.x1; x <= prevGrid.x2; x++) {
         for (y = prevGrid.y1; y <= prevGrid.y2; y++) {
-          if ((x < 0 || x >= maxWidth) || (y < 0 || y >= maxHeight) ) {
-            continue;
-          }
+          if (!grid[x] || !grid[x][y]) continue;
           var i = grid[x][y].indexOf(collider);
           if (i !== -1) {
             grid[x][y].splice(i, 1);
@@ -113,11 +109,7 @@ function ColliderManager() {
     }
     for (x = currGrid.x1; x <= currGrid.x2; x++) {
       for (y = currGrid.y1; y <= currGrid.y2; y++) {
-        if (x < 0 || x >= maxWidth) {
-          continue;
-        } else if (y < 0 || y >= maxHeight) {
-          continue;
-        }
+        if (!grid[x] || !grid[x][y]) continue;
         grid[x][y].push(collider);
       }
     }
@@ -135,6 +127,7 @@ function ColliderManager() {
     }
     for (var x = edge.x1; x <= edge.x2; x++) {
       for (var y = edge.y1; y <= edge.y2; y++) {
+        if (!grid[x] || !grid[x][y]) continue;
         var i = grid[x][y].indexOf(collider);
         if (i !== -1) {
           grid[x][y].splice(i, 1);

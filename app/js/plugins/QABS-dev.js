@@ -329,9 +329,9 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  * user unlock
  * user speed [inc|dec] [amt]
  * user move [forward|backward] [dist] [wait? true|false]
+ * user moveHere [wait? true|false]
  * user jump [forward|backward] [dist] [wait? true|false]
  * user jumpHere [wait? true|false]
- * user slide
  * user teleport
  * user setDirection [dir]
  * user directionFix [true|false]
@@ -339,10 +339,10 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  * user forceSkill [skillId] [angleOffset in degrees]
  * user animation [animationId]
  * store
- * clearstore
- * moveToStored [wait? true|false]
  * move [forward|backward] [dist] [duration] [wait? true|false]
+ * moveToStored [duration] [wait? true|false]
  * wave [forward|backward] [amplitude] [harm] [dist] [duration] [wait? true|false]
+ * waveToStored [amplitude] [harm] [duration] [wait? true|false]
  * trigger
  * wait [duration]
  * picture [fileName] [rotatable? true|false] [base direction]
