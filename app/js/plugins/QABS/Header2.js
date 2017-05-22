@@ -18,6 +18,7 @@ function QABS() {
   QABS.lootTrigger = _PARAMS['Loot Touch Trigger'] === 'true' ? 2 : 0;
   QABS.goldIcon = Number(_PARAMS['Gold Icon']) || 314;
   QABS.levelAni = Number(_PARAMS['Level Animation']) || 0;
+  QABS.showDmg = _PARAMS['Show Damage'] === 'true';
 
   QABS.mrst = _PARAMS['Move Resistance Rate Stat'];
 
@@ -38,7 +39,6 @@ function QABS() {
       }
     }
   }
-  // TODO parameters
 
   QABS.stringToSkillKeyObj = function(string) {
     var obj = QPlus.stringToObj(string);

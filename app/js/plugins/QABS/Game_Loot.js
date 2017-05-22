@@ -7,10 +7,11 @@ function Game_Loot() {
 
 (function() {
   Game_Loot.prototype = Object.create(Game_Event.prototype);
-  Game_Loot.prototype.constructor = Game_Event; // still needs to act like an Event
+  Game_Loot.prototype.constructor = Game_Loot;
 
   Game_Loot.prototype.initialize = function(x, y) {
     Game_Character.prototype.initialize.call(this);
+    this.isLoot = true;
     this._decay = QABS.lootDecay;
     this._eventId = -1;
     this._gold = null;
@@ -105,7 +106,6 @@ function Game_Loot() {
     if (this._loot) $gameParty.gainItem(this._loot, 1);
     if (this._gold) $gameParty.gainGold(this._gold);
     var string = this._gold ? String(this._gold) : this._loot.name;
-    console.log(string.length);
     if (this._iconIndex) {
       string = '\\I[' + this._iconIndex + ']' + string;
     }
@@ -119,42 +119,51 @@ function Game_Loot() {
   };
 
   Game_Loot.prototype.aoeCollect = function() {
-    return; // TODO
-    var events = $gameMap.getCharactersAt(this.collider(), function(e) {
-      return (e.constructor !== Game_Loot || e._erased);
-    });
+    // TODO add aoe collider
+    var loot = ColliderManager.getCharactersNear(this.collider('aoe'), function(chara) {
+      return chara.constructor === Game_Loot && chara.collider().intersects(this.collider('aoe'));
+    }.bind(this));
+    var x = this.cx();
+    var y = this.cy();
     var totalLoot = [];
     var totalGold = 0;
-    for (var event of events){
-      if (event._loot) totalLoot.push(event._loot);
-      if (event._gold) totalGold += event._gold;
-      var neighborLoot = $gameMap.getCharactersAt(event.collider(), function(e) {
-        return (e.constructor !== Game_Loot || e._erased || events.contains(e));
-      });
-      events.push.apply(events, neighborLoot);
-      event.erase();
-      QuasiABS.Manager.removeEvent(event);
-      QuasiABS.Manager.removePicture(event._itemIcon);
-    };
+    var i;
+    for (i = 0; i < loot.length; i++) {
+      if (loot[i]._loot) totalLoot.push(loot[i]._loot);
+      if (loot[i]._gold) totalGold += loot[i]._gold;
+      QABSManager.removeEvent(loot[i]);
+      QABSManager.removePicture(loot[i]._itemIcon);
+    }
     var display = {};
-    for (var item of totalLoot) {
+    for (i = 0; i < totalLoot.length; i++) {
+      var item = totalLoot[i];
       $gameParty.gainItem(item, 1);
       display[item.name] = display[item.name] || {};
       display[item.name].iconIndex = item.iconIndex;
       display[item.name].total = display[item.name].total + 1 || 1;
     }
-    var y = this.cy();
     for (var name in display) {
-      if (!display.hasOwnProperty(name)) continue;
-      var string = "x" + display[name].total + " " + name;
       var iconIndex = display[name].iconIndex;
-      QuasiABS.Manager.startPopup("item", this.cx(), y, string, iconIndex);
+      var string = 'x' + display[name].total + ' ' + name;
+      if (iconIndex) {
+        string = '\\I[' + iconIndex + ']' + string;
+      }
+      QABSManager.startPopup('QABS-ITEM', {
+        x: x, y: y,
+        string: string
+      });
       y += 22;
     }
     if (totalGold > 0) {
       $gameParty.gainGold(totalGold);
       var string = String(totalGold);
-      QuasiABS.Manager.startPopup("item", this.cx(), y, string, QuasiABS.goldIcon);
+      if (QABS.goldIcon) {
+        string = '\\I[' + QABS.goldIcon + ']' + string;
+      }
+      QABSManager.startPopup('QABS-ITEM', {
+        x: x, y: y,
+        string: string
+      });
     }
   };
 

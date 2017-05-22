@@ -377,6 +377,7 @@ function QABS() {
   QABS.lootTrigger = _PARAMS['Loot Touch Trigger'] === 'true' ? 2 : 0;
   QABS.goldIcon = Number(_PARAMS['Gold Icon']) || 314;
   QABS.levelAni = Number(_PARAMS['Level Animation']) || 0;
+  QABS.showDmg = _PARAMS['Show Damage'] === 'true';
 
   QABS.mrst = _PARAMS['Move Resistance Rate Stat'];
 
@@ -397,7 +398,6 @@ function QABS() {
       }
     }
   }
-  // TODO parameters
 
   QABS.stringToSkillKeyObj = function(string) {
     var obj = QPlus.stringToObj(string);
@@ -722,8 +722,7 @@ function QABSManager() {
 
   QABSManager.removeEvent = function(event) {
     var id = event._eventId;
-    if (!id) return;
-    ColliderManager.remove(event);
+    if (!id || !$gameMap._events[id]) return;
     event.removeColliders();
     if (!event._noSprite) {
       var scene = SceneManager._scene;
@@ -761,7 +760,6 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.startAction = function(action) {
-    console.log(action);
     var cmd = action.shift().toLowerCase();
     switch (cmd) {
       case 'user': {
@@ -968,7 +966,6 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userMove = function(action) {
-    // TODO add false offgrid support
     var dist = Number(action[1]) || this._character.moveTiles();
     var route = {
       list: [],
@@ -990,8 +987,6 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userMoveHere = function(action) {
-    console.log(action);
-    // TODO add false offgrid support
     var x1 = this._character.cx();
     var y1 = this._character.cy();
     var x2 = this._skill.collider.center.x;
@@ -1020,7 +1015,6 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userJump = function(action) {
-    // TODO add false offgrid support
     var dist = Number(action[1]) || 0;
     if (action[0] === 'backward') {
       this._character.pixelJumpBackward(dist);
@@ -1031,16 +1025,6 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userJumpHere = function(action) {
-    // TODO add false offgrid support
-    /*
-    var x1 = this._character.cx();
-    var y1 = this._character.cy();
-    var x2 = this._skill.collider.center.x;
-    var y2 = this._skill.collider.center.y;
-    var dx = x2 - x1;
-    var dy = y2 - y1;
-    var final = this.adjustPosition(this._character._px, this._character._py, this._character._px + dx, this._character._py + dy);
-    */
     var x1 = this._character.cx();
     var y1 = this._character.cy();
     var x2 = this._skill.collider.center.x;
@@ -1189,8 +1173,11 @@ function Skill_Sequencer() {
     var distance = Number(action[1]);
     var duration = Number(action[2]);
     ColliderManager.draw(this._skill.collider, duration);
-    var radian = dir === 'forward' ? this._skill.radian : dir;
-    radian = radian === 'backward' ? this.this._character.reverseRadian(this._skill.radian) : radian;
+    var radian = this._skill.radian;
+    if (dir === 'backward') {
+      radian -= Math.PI / 2;
+    }
+    radian += radian < 0 ? Math.PI * 2 : 0;
     this.setSkillRadian(Number(radian));
     this.actionMoveSkill(distance, duration);
     this._waitForMove = action[3] === 'true';
@@ -1218,8 +1205,11 @@ function Skill_Sequencer() {
     var distance = Number(action[3]);
     var duration = Number(action[4]);
     ColliderManager.draw(this._skill.collider, duration);
-    var radian = dir === 'forward' ? this._skill.radian : dir;
-    radian = radian === 'backward' ? this.this._character.reverseRadian(this._skill.radian) : radian;
+    var radian = this._skill.radian;
+    if (dir === 'backward') {
+      radian -= Math.PI / 2;
+    }
+    radian += radian < 0 ? Math.PI * 2 : 0;
     this.setSkillRadian(Number(radian));
     this.actionWaveSkill(amp, harm, distance, duration);
     this._waitForMove = action[5] === "true";
@@ -1295,7 +1285,17 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.actionCollider = function(action) {
-    // TODO
+    var display = action[0];
+    if (display === 'show') {
+      this._skill.pictureCollider = new Sprite_SkillCollider(this._skill.collider);
+      var x = this._skill.collider.center.x;
+      var y = this._skill.collider.center.y;
+      this._skill.pictureCollider.move(x, y);
+      QABSManager.addPicture(this._skill.pictureCollider);
+    } else if (display === 'hide' && this._skill.pictureCollider) {
+      QABSManager.removePicture(this._skill.pictureCollider);
+      this._skill.pictureCollider = null;
+    }
   };
 
   Skill_Sequencer.prototype.actionAnimation = function(action) {
@@ -1746,14 +1746,12 @@ function Skill_Sequencer() {
         this.events()[i]._respawn = oldRespawn;
       }
       if (this.events()[i].constructor === Game_Loot) {
-        // TODO kill on spot instead
-        QABS.Manager.removePicture(this.events()[i]._itemIcon);
-        this.events()[i]._itemIcon = null;
-        this.events()[i]._decay = 0;
+        QABSManager.removePicture(this.events()[i]._itemIcon);
+        QABSManager.removeEvent(this.events()[i]);
       }
     }
     $gamePlayer.clearABS();
-    QABS.Manager.clear();
+    QABSManager.clear();
   };
 
   Game_Map.prototype.uncompressBattlers = function() {
@@ -1812,8 +1810,6 @@ function Skill_Sequencer() {
     this._isAbs = false;
   };
 
-  // needed?
-
   var Alias_Game_ActionResult_clear = Game_ActionResult.prototype.clear;
   Game_ActionResult.prototype.clear = function() {
     Alias_Game_ActionResult_clear.call(this);
@@ -1857,7 +1853,7 @@ function Skill_Sequencer() {
 
   var Alias_Game_Battler_startDamagePopup = Game_Battler.prototype.startDamagePopup;
   Game_Battler.prototype.startDamagePopup = function() {
-    //if (!QABS.showDmg) return;
+    if (!QABS.showDmg) return;
     var result = Object.assign({}, this._result);
     this._damageQueue.push(result);
     Alias_Game_Battler_startDamagePopup.call(this);
@@ -1982,7 +1978,6 @@ function Skill_Sequencer() {
   };
 
   Game_Actor.prototype.displayLevelUp = function(newSkills) {
-    // TODO add levelup styling
     QABSManager.startPopup('level', {
       x: $gamePlayer.cx(),
       y: $gamePlayer.cy(),
@@ -2025,11 +2020,11 @@ function Skill_Sequencer() {
   var Alias_Game_Enemy_setup = Game_Enemy.prototype.setup;
   Game_Enemy.prototype.setup = function(enemyId, x, y) {
     Alias_Game_Enemy_setup.call(this, enemyId, x, y);
-    var meta = Object.assign({}, this.enemy().meta, this.enemy().qmeta);
+    var meta = this.enemy().qmeta;
     this._noAI = meta.noAI;
     this._aiRange = Number(meta.range) || 0;
     this._noPopup = !!meta.noPopup;
-    this._onDeath = meta.onDeath || "";
+    this._onDeath = meta.onDeath || '';
     this._dontErase = !!meta.dontErase;
     this._team  = Number(meta.team) || 2;
   };
@@ -2110,7 +2105,7 @@ function Skill_Sequencer() {
   };
 
   Game_CharacterBase.prototype.canInputSkill = function() {
-    // check if locked
+    if (this._globalLocked > 0) return false;
     if ($gameMap.isEventRunning()) return false;
     if (!$gameSystem._absEnabled) return false;
     if (!this.battler()) return false;
@@ -2273,7 +2268,7 @@ function Skill_Sequencer() {
   };
 
   Game_CharacterBase.prototype.beforeSkill = function(skillId) {
-    var meta = Object.assign({}, $dataSkills[skillId].meta, $dataSkills[skillId].qmeta);
+    var meta = $dataSkills[skillId].qmeta;
     var before = meta.beforeSkill || '';
     if (before !== '') {
       eval(before[1]);
@@ -2445,6 +2440,14 @@ function Skill_Sequencer() {
       this._groundTargeting = null;
       this._selectTargeting = null;
     }
+  };
+
+  var Alias_Game_Player_collidesWithEvent = Game_Player.prototype.collidesWithEvent;
+  Game_Player.prototype.collidesWithEvent = function(event, type) {
+    if (event.constructor === Game_Loot) {
+      return event.collider('interaction').intersects(this.collider(type));
+    }
+    return Alias_Game_Player_collidesWithEvent.call(this, event, type);
   };
 
   Game_Player.prototype.updateABS = function() {
@@ -2660,6 +2663,7 @@ function Skill_Sequencer() {
   };
 
   Game_Event.prototype.updateAI = function() {
+    // TODO split up into 2-3 functions
     var bestTarget = this.bestTarget() || $gamePlayer;
     if (!bestTarget) return;
     var targetId = bestTarget.charaId();
@@ -2668,8 +2672,24 @@ function Skill_Sequencer() {
         this._aiWait = QABS.aiWait;
         this.addAgro(targetId);
       }
+      if (this._endWait) {
+        QPlus.removeWaitListener(this._endWait);
+        this._endWait = null;
+      }
     } else {
-      return this.endCombat();
+      if (!this._endWait && this.inCombat()) {
+        bestTarget.removeAgro(this.charaId());
+        if (this._aiPathfind) {
+          this.clearPathfind();
+        }
+        // TODO maybe move randomly to search for
+        // target again before ending its combat
+        this._endWait = QPlus.wait(120).then(function() {
+          this._endWait = null;
+          this.endCombat();
+        }.bind(this))
+      }
+      return;
     }
     var bestAction = null;
     var x1 = bestTarget.cx();
@@ -2687,7 +2707,7 @@ function Skill_Sequencer() {
       this._aiWait++;
     }
     if (bestAction) {
-      //this.useSkill(bestAction);
+      this.useSkill(bestAction);
     } else if (this.canMove()) {
       // TODO add a how far away to stay away from target property
       if (this._freqCount < this.freqThreshold()) {
@@ -2757,7 +2777,6 @@ function Skill_Sequencer() {
     }
     this._inCombat = false;
     this.clearAgro();
-    /*
     if (this._aiPathfind) {
       var x = this.event().x * QMovement.tileSize;
       var y = this.event().y * QMovement.tileSize;
@@ -2767,7 +2786,6 @@ function Skill_Sequencer() {
     } else {
       this.findRespawnLocation();
     }
-    */
     this.refresh();
   };
 
@@ -2775,10 +2793,9 @@ function Skill_Sequencer() {
     var x = this.event().x * QMovement.tileSize;
     var y = this.event().y * QMovement.tileSize;
     var dist = this.moveTiles();
-    this._through = false;
     while (true) {
       var stop;
-      for (var i = 4; i < 5; i++) {
+      for (var i = 1; i < 5; i++) {
         var dir = i * 2;
         var x2 = $gameMap.roundPXWithDirection(x, dir, dist);
         var y2 = $gameMap.roundPYWithDirection(y, dir, dist);
@@ -2802,7 +2819,10 @@ function Skill_Sequencer() {
       var exp = this.battler().exp();
       $gamePlayer.battler().gainExp(exp);
       if (exp > 0) {
-        //QABSManager.startPopup("exp", $gamePlayer.cx(), $gamePlayer.cy(), "Exp: " + exp);
+        QABSManager.startPopup('exp', {
+          x: $gamePlayer.cx(), y: $gamePlayer.cy(),
+          string: 'Exp: ' + exp
+        });
       }
       this.setupLoot();
     }
@@ -2813,7 +2833,6 @@ function Skill_Sequencer() {
   };
 
   Game_Event.prototype.setupLoot = function() {
-    return; // TODO
     var x, y;
     this.battler().makeDropItems().forEach(function(item) {
       x = this.x + (Math.random() / 2) - (Math.random() / 2);
@@ -2821,12 +2840,12 @@ function Skill_Sequencer() {
       var type = 0;
       if (DataManager.isWeapon(item)) type = 1;
       if (DataManager.isArmor(item))  type = 2;
-      QuasiABS.Manager.createItem(x, y, item.id, type);
-    }, this);
+      QABSManager.createItem(x, y, item.id, type);
+    }.bind(this));
     if (this.battler().gold() > 0) {
       x = this.x + (Math.random() / 2) - (Math.random() / 2);
       y = this.y + (Math.random() / 2) - (Math.random() / 2);
-      QuasiABS.Manager.createGold(x, y, this.battler().gold());
+      QABSManager.createGold(x, y, this.battler().gold());
     }
   };
 
@@ -2852,10 +2871,11 @@ function Game_Loot() {
 
 (function() {
   Game_Loot.prototype = Object.create(Game_Event.prototype);
-  Game_Loot.prototype.constructor = Game_Event; // still needs to act like an Event
+  Game_Loot.prototype.constructor = Game_Loot;
 
   Game_Loot.prototype.initialize = function(x, y) {
     Game_Character.prototype.initialize.call(this);
+    this.isLoot = true;
     this._decay = QABS.lootDecay;
     this._eventId = -1;
     this._gold = null;
@@ -2950,7 +2970,6 @@ function Game_Loot() {
     if (this._loot) $gameParty.gainItem(this._loot, 1);
     if (this._gold) $gameParty.gainGold(this._gold);
     var string = this._gold ? String(this._gold) : this._loot.name;
-    console.log(string.length);
     if (this._iconIndex) {
       string = '\\I[' + this._iconIndex + ']' + string;
     }
@@ -2964,42 +2983,51 @@ function Game_Loot() {
   };
 
   Game_Loot.prototype.aoeCollect = function() {
-    return; // TODO
-    var events = $gameMap.getCharactersAt(this.collider(), function(e) {
-      return (e.constructor !== Game_Loot || e._erased);
-    });
+    // TODO add aoe collider
+    var loot = ColliderManager.getCharactersNear(this.collider('aoe'), function(chara) {
+      return chara.constructor === Game_Loot && chara.collider().intersects(this.collider('aoe'));
+    }.bind(this));
+    var x = this.cx();
+    var y = this.cy();
     var totalLoot = [];
     var totalGold = 0;
-    for (var event of events){
-      if (event._loot) totalLoot.push(event._loot);
-      if (event._gold) totalGold += event._gold;
-      var neighborLoot = $gameMap.getCharactersAt(event.collider(), function(e) {
-        return (e.constructor !== Game_Loot || e._erased || events.contains(e));
-      });
-      events.push.apply(events, neighborLoot);
-      event.erase();
-      QuasiABS.Manager.removeEvent(event);
-      QuasiABS.Manager.removePicture(event._itemIcon);
-    };
+    var i;
+    for (i = 0; i < loot.length; i++) {
+      if (loot[i]._loot) totalLoot.push(loot[i]._loot);
+      if (loot[i]._gold) totalGold += loot[i]._gold;
+      QABSManager.removeEvent(loot[i]);
+      QABSManager.removePicture(loot[i]._itemIcon);
+    }
     var display = {};
-    for (var item of totalLoot) {
+    for (i = 0; i < totalLoot.length; i++) {
+      var item = totalLoot[i];
       $gameParty.gainItem(item, 1);
       display[item.name] = display[item.name] || {};
       display[item.name].iconIndex = item.iconIndex;
       display[item.name].total = display[item.name].total + 1 || 1;
     }
-    var y = this.cy();
     for (var name in display) {
-      if (!display.hasOwnProperty(name)) continue;
-      var string = "x" + display[name].total + " " + name;
       var iconIndex = display[name].iconIndex;
-      QuasiABS.Manager.startPopup("item", this.cx(), y, string, iconIndex);
+      var string = 'x' + display[name].total + ' ' + name;
+      if (iconIndex) {
+        string = '\\I[' + iconIndex + ']' + string;
+      }
+      QABSManager.startPopup('QABS-ITEM', {
+        x: x, y: y,
+        string: string
+      });
       y += 22;
     }
     if (totalGold > 0) {
       $gameParty.gainGold(totalGold);
       var string = String(totalGold);
-      QuasiABS.Manager.startPopup("item", this.cx(), y, string, QuasiABS.goldIcon);
+      if (QABS.goldIcon) {
+        string = '\\I[' + QABS.goldIcon + ']' + string;
+      }
+      QABSManager.startPopup('QABS-ITEM', {
+        x: x, y: y,
+        string: string
+      });
     }
   };
 
@@ -3076,8 +3104,7 @@ function Game_Loot() {
 
   Sprite_Character.prototype.setupDamagePopup = function() {
     if (!Imported.QPopup) return;
-    if (this._character._noPopup) return;
-    //if (!QABS.showDmg) return;
+    if (!QABS.showDmg || this._character._noPopup) return;
     if (this._battler._damageQueue.length > 0) {
       var time = Graphics.frameCount;
       var wait = this._battler._damageQueue.length / 15;

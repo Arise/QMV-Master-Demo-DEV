@@ -64,6 +64,14 @@
     }
   };
 
+  var Alias_Game_Player_collidesWithEvent = Game_Player.prototype.collidesWithEvent;
+  Game_Player.prototype.collidesWithEvent = function(event, type) {
+    if (event.constructor === Game_Loot) {
+      return event.collider('interaction').intersects(this.collider(type));
+    }
+    return Alias_Game_Player_collidesWithEvent.call(this, event, type);
+  };
+
   Game_Player.prototype.updateABS = function() {
     if (this._isDead) return;
     if (this.battler() && this.canInput()) this.updateABSInput();

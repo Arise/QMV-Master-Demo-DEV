@@ -117,8 +117,10 @@
     return this._angularSpeed || this.frameSpeed() / this._radiusL;
   };
 
+  var Alias_Game_CharacterBase_canMove = Game_CharacterBase.prototype.canMove;
   Game_CharacterBase.prototype.canMove = function() {
-    return !this._locked;
+    if (this._locked) return false;
+    return Alias_Game_CharacterBase_canMove.call(this);
   };
 
   Game_CharacterBase.prototype.canPass = function(x, y, dir) {

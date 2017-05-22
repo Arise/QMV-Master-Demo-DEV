@@ -117,6 +117,7 @@
       "prototype - usableSkills - undefined",
       "prototype - onDeath - undefined",
       "alias - prototype - onPositionChange - undefined",
+      "alias - prototype - collidesWithEvent - event, type",
       "prototype - updateABS - undefined",
       "prototype - updateABSInput - undefined",
       "prototype - updateTargeting - undefined",

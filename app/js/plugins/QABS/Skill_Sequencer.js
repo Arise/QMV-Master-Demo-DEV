@@ -14,7 +14,6 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.startAction = function(action) {
-    console.log(action);
     var cmd = action.shift().toLowerCase();
     switch (cmd) {
       case 'user': {
@@ -221,7 +220,6 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userMove = function(action) {
-    // TODO add false offgrid support
     var dist = Number(action[1]) || this._character.moveTiles();
     var route = {
       list: [],
@@ -243,8 +241,6 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userMoveHere = function(action) {
-    console.log(action);
-    // TODO add false offgrid support
     var x1 = this._character.cx();
     var y1 = this._character.cy();
     var x2 = this._skill.collider.center.x;
@@ -273,7 +269,6 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userJump = function(action) {
-    // TODO add false offgrid support
     var dist = Number(action[1]) || 0;
     if (action[0] === 'backward') {
       this._character.pixelJumpBackward(dist);
@@ -284,16 +279,6 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userJumpHere = function(action) {
-    // TODO add false offgrid support
-    /*
-    var x1 = this._character.cx();
-    var y1 = this._character.cy();
-    var x2 = this._skill.collider.center.x;
-    var y2 = this._skill.collider.center.y;
-    var dx = x2 - x1;
-    var dy = y2 - y1;
-    var final = this.adjustPosition(this._character._px, this._character._py, this._character._px + dx, this._character._py + dy);
-    */
     var x1 = this._character.cx();
     var y1 = this._character.cy();
     var x2 = this._skill.collider.center.x;
@@ -442,8 +427,11 @@ function Skill_Sequencer() {
     var distance = Number(action[1]);
     var duration = Number(action[2]);
     ColliderManager.draw(this._skill.collider, duration);
-    var radian = dir === 'forward' ? this._skill.radian : dir;
-    radian = radian === 'backward' ? this.this._character.reverseRadian(this._skill.radian) : radian;
+    var radian = this._skill.radian;
+    if (dir === 'backward') {
+      radian -= Math.PI / 2;
+    }
+    radian += radian < 0 ? Math.PI * 2 : 0;
     this.setSkillRadian(Number(radian));
     this.actionMoveSkill(distance, duration);
     this._waitForMove = action[3] === 'true';
@@ -471,8 +459,11 @@ function Skill_Sequencer() {
     var distance = Number(action[3]);
     var duration = Number(action[4]);
     ColliderManager.draw(this._skill.collider, duration);
-    var radian = dir === 'forward' ? this._skill.radian : dir;
-    radian = radian === 'backward' ? this.this._character.reverseRadian(this._skill.radian) : radian;
+    var radian = this._skill.radian;
+    if (dir === 'backward') {
+      radian -= Math.PI / 2;
+    }
+    radian += radian < 0 ? Math.PI * 2 : 0;
     this.setSkillRadian(Number(radian));
     this.actionWaveSkill(amp, harm, distance, duration);
     this._waitForMove = action[5] === "true";
@@ -548,7 +539,17 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.actionCollider = function(action) {
-    // TODO
+    var display = action[0];
+    if (display === 'show') {
+      this._skill.pictureCollider = new Sprite_SkillCollider(this._skill.collider);
+      var x = this._skill.collider.center.x;
+      var y = this._skill.collider.center.y;
+      this._skill.pictureCollider.move(x, y);
+      QABSManager.addPicture(this._skill.pictureCollider);
+    } else if (display === 'hide' && this._skill.pictureCollider) {
+      QABSManager.removePicture(this._skill.pictureCollider);
+      this._skill.pictureCollider = null;
+    }
   };
 
   Skill_Sequencer.prototype.actionAnimation = function(action) {

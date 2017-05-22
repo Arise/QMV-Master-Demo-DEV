@@ -39,8 +39,7 @@
 
   Sprite_Character.prototype.setupDamagePopup = function() {
     if (!Imported.QPopup) return;
-    if (this._character._noPopup) return;
-    //if (!QABS.showDmg) return;
+    if (!QABS.showDmg || this._character._noPopup) return;
     if (this._battler._damageQueue.length > 0) {
       var time = Graphics.frameCount;
       var wait = this._battler._damageQueue.length / 15;

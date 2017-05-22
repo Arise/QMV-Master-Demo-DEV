@@ -55,7 +55,6 @@
   };
 
   Game_Actor.prototype.displayLevelUp = function(newSkills) {
-    // TODO add levelup styling
     QABSManager.startPopup('level', {
       x: $gamePlayer.cx(),
       y: $gamePlayer.cy(),

@@ -35,8 +35,6 @@
     this._isAbs = false;
   };
 
-  // needed?
-
   var Alias_Game_ActionResult_clear = Game_ActionResult.prototype.clear;
   Game_ActionResult.prototype.clear = function() {
     Alias_Game_ActionResult_clear.call(this);

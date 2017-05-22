@@ -28,14 +28,12 @@
         this.events()[i]._respawn = oldRespawn;
       }
       if (this.events()[i].constructor === Game_Loot) {
-        // TODO kill on spot instead
-        QABS.Manager.removePicture(this.events()[i]._itemIcon);
-        this.events()[i]._itemIcon = null;
-        this.events()[i]._decay = 0;
+        QABSManager.removePicture(this.events()[i]._itemIcon);
+        QABSManager.removeEvent(this.events()[i]);
       }
     }
     $gamePlayer.clearABS();
-    QABS.Manager.clear();
+    QABSManager.clear();
   };
 
   Game_Map.prototype.uncompressBattlers = function() {

@@ -5,11 +5,11 @@
   var Alias_Game_Enemy_setup = Game_Enemy.prototype.setup;
   Game_Enemy.prototype.setup = function(enemyId, x, y) {
     Alias_Game_Enemy_setup.call(this, enemyId, x, y);
-    var meta = Object.assign({}, this.enemy().meta, this.enemy().qmeta);
+    var meta = this.enemy().qmeta;
     this._noAI = meta.noAI;
     this._aiRange = Number(meta.range) || 0;
     this._noPopup = !!meta.noPopup;
-    this._onDeath = meta.onDeath || "";
+    this._onDeath = meta.onDeath || '';
     this._dontErase = !!meta.dontErase;
     this._team  = Number(meta.team) || 2;
   };

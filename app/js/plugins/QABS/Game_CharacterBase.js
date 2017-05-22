@@ -63,7 +63,7 @@
   };
 
   Game_CharacterBase.prototype.canInputSkill = function() {
-    // check if locked
+    if (this._globalLocked > 0) return false;
     if ($gameMap.isEventRunning()) return false;
     if (!$gameSystem._absEnabled) return false;
     if (!this.battler()) return false;
@@ -226,7 +226,7 @@
   };
 
   Game_CharacterBase.prototype.beforeSkill = function(skillId) {
-    var meta = Object.assign({}, $dataSkills[skillId].meta, $dataSkills[skillId].qmeta);
+    var meta = $dataSkills[skillId].qmeta;
     var before = meta.beforeSkill || '';
     if (before !== '') {
       eval(before[1]);

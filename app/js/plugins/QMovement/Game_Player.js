@@ -147,12 +147,9 @@
       var x1 = this._px;
       var y1 = this._py;
       collider.moveTo(x, y);
-      var events = ColliderManager.getCharactersNear(collider, (function(chara) {
-        if (chara.constructor === Game_Event && !chara._erased) {
-          return chara.collider('interaction').intersects(collider);
-        }
-        return false;
-      }).bind(this))
+      var events = ColliderManager.getCharactersNear(collider, function(chara) {
+        return this.collidesWithEvent(chara, 'interaction');
+      }.bind(this))
       collider.moveTo(x1, y1);
       if (events.length === 0) {
         events = null;
@@ -175,6 +172,13 @@
       }
       events = null;
     }
+  };
+
+  Game_Player.prototype.collidesWithEvent = function(event, type) {
+    if (event.constructor === Game_Event && !event._erased) {
+      return event.collider('interaction').intersects(this.collider(type));
+    }
+    return false;
   };
 
   Game_Player.prototype.checkEventTriggerHere = function(triggers) {

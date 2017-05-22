@@ -183,8 +183,7 @@ function QABSManager() {
 
   QABSManager.removeEvent = function(event) {
     var id = event._eventId;
-    if (!id) return;
-    ColliderManager.remove(event);
+    if (!id || !$gameMap._events[id]) return;
     event.removeColliders();
     if (!event._noSprite) {
       var scene = SceneManager._scene;

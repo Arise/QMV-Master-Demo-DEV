@@ -80,6 +80,7 @@
   };
 
   Game_Event.prototype.updateAI = function() {
+    // TODO split up into 2-3 functions
     var bestTarget = this.bestTarget() || $gamePlayer;
     if (!bestTarget) return;
     var targetId = bestTarget.charaId();
@@ -88,8 +89,24 @@
         this._aiWait = QABS.aiWait;
         this.addAgro(targetId);
       }
+      if (this._endWait) {
+        QPlus.removeWaitListener(this._endWait);
+        this._endWait = null;
+      }
     } else {
-      return this.endCombat();
+      if (!this._endWait && this.inCombat()) {
+        bestTarget.removeAgro(this.charaId());
+        if (this._aiPathfind) {
+          this.clearPathfind();
+        }
+        // TODO maybe move randomly to search for
+        // target again before ending its combat
+        this._endWait = QPlus.wait(120).then(function() {
+          this._endWait = null;
+          this.endCombat();
+        }.bind(this))
+      }
+      return;
     }
     var bestAction = null;
     var x1 = bestTarget.cx();
@@ -107,7 +124,7 @@
       this._aiWait++;
     }
     if (bestAction) {
-      //this.useSkill(bestAction);
+      this.useSkill(bestAction);
     } else if (this.canMove()) {
       // TODO add a how far away to stay away from target property
       if (this._freqCount < this.freqThreshold()) {
@@ -177,7 +194,6 @@
     }
     this._inCombat = false;
     this.clearAgro();
-    /*
     if (this._aiPathfind) {
       var x = this.event().x * QMovement.tileSize;
       var y = this.event().y * QMovement.tileSize;
@@ -187,7 +203,6 @@
     } else {
       this.findRespawnLocation();
     }
-    */
     this.refresh();
   };
 
@@ -195,10 +210,9 @@
     var x = this.event().x * QMovement.tileSize;
     var y = this.event().y * QMovement.tileSize;
     var dist = this.moveTiles();
-    this._through = false;
     while (true) {
       var stop;
-      for (var i = 4; i < 5; i++) {
+      for (var i = 1; i < 5; i++) {
         var dir = i * 2;
         var x2 = $gameMap.roundPXWithDirection(x, dir, dist);
         var y2 = $gameMap.roundPYWithDirection(y, dir, dist);
@@ -222,7 +236,10 @@
       var exp = this.battler().exp();
       $gamePlayer.battler().gainExp(exp);
       if (exp > 0) {
-        //QABSManager.startPopup("exp", $gamePlayer.cx(), $gamePlayer.cy(), "Exp: " + exp);
+        QABSManager.startPopup('exp', {
+          x: $gamePlayer.cx(), y: $gamePlayer.cy(),
+          string: 'Exp: ' + exp
+        });
       }
       this.setupLoot();
     }
@@ -233,7 +250,6 @@
   };
 
   Game_Event.prototype.setupLoot = function() {
-    return; // TODO
     var x, y;
     this.battler().makeDropItems().forEach(function(item) {
       x = this.x + (Math.random() / 2) - (Math.random() / 2);
@@ -241,12 +257,12 @@
       var type = 0;
       if (DataManager.isWeapon(item)) type = 1;
       if (DataManager.isArmor(item))  type = 2;
-      QuasiABS.Manager.createItem(x, y, item.id, type);
-    }, this);
+      QABSManager.createItem(x, y, item.id, type);
+    }.bind(this));
     if (this.battler().gold() > 0) {
       x = this.x + (Math.random() / 2) - (Math.random() / 2);
       y = this.y + (Math.random() / 2) - (Math.random() / 2);
-      QuasiABS.Manager.createGold(x, y, this.battler().gold());
+      QABSManager.createGold(x, y, this.battler().gold());
     }
   };
 
