@@ -348,6 +348,14 @@
     return QMovement.tileSize;
   };
 
+  Game_CharacterBase.prototype.terrainTag = function() {
+    return $gameMap.terrainTag(this.x, this.y);
+  };
+
+  Game_CharacterBase.prototype.regionId = function() {
+    return $gameMap.regionId(this.x, this.y);
+  };
+
   var Alias_Game_CharacterBase_update = Game_CharacterBase.prototype.update;
   Game_CharacterBase.prototype.update = function() {
     var prevX = this._realPX;

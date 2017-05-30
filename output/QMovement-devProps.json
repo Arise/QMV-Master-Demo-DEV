@@ -69,6 +69,8 @@
       "override - prototype - isOnLadder - undefined",
       "override - prototype - isOnBush - undefined",
       "prototype - freqThreshold - undefined",
+      "override - prototype - terrainTag - undefined",
+      "override - prototype - regionId - undefined",
       "alias - prototype - update - undefined",
       "override - prototype - updateMove - undefined",
       "prototype - updateArc - undefined",

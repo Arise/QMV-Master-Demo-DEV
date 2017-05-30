@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.3.6';
+Imported.QMovement = '1.3.7';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.3')) {
   alert('Error: QMovement requires QPlus 1.2.3 or newer to work.');
@@ -14,7 +14,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.3')) {
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.3.6
+ * @author Quxios  | Version 1.3.7
  *
  * @repo https://github.com/quxios/QMovement
  *
@@ -2024,6 +2024,14 @@ function ColliderManager() {
 
   Game_CharacterBase.prototype.freqThreshold = function() {
     return QMovement.tileSize;
+  };
+
+  Game_CharacterBase.prototype.terrainTag = function() {
+    return $gameMap.terrainTag(this.x, this.y);
+  };
+
+  Game_CharacterBase.prototype.regionId = function() {
+    return $gameMap.regionId(this.x, this.y);
   };
 
   var Alias_Game_CharacterBase_update = Game_CharacterBase.prototype.update;
