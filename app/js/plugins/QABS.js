@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QABS = '0.0.0';
+Imported.QABS = '1.0.0';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
   alert('Error: QABS requires QPlus 1.3.0 or newer to work.');
@@ -17,7 +17,9 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @author Quxios  | Version 0.0.0
+ * @author Quxios  | Version 1.0.0
+ *
+ * @development
  *
  * @requires QMovement
  *
@@ -392,7 +394,7 @@ function QABS() {
     var skillN = /^Skill Key ([0-9]+)$/.exec(key);
     if (skillN && input !== '') {
       QABS.skillKey[skillN[1]] = {
-        input: input,
+        input: input.split(',').map(function(s) { return s.trim(); }),
         skillId: Number(_PARAMS[key + ' Skill']) || 0,
         rebind: _PARAMS[key + ' Rebind'] === 'true'
       }
@@ -409,7 +411,14 @@ function QABS() {
       })
       var skillId = Number(data[0]) || 0;
       var rebind = data[1] === 'true';
-      var input = QABS.skillKey[key].input;
+      if (!QABS.skillKey[key]) {
+        var msg = 'ERROR: Attempted to apply a skill key that has not been setup';
+        msg += ' in the plugin parameters.\n';
+        msg += 'Skill Key Number: ' + key;
+        alert(msg);
+        continue;
+      }
+      var input = QABS.skillKey[key].input.clone();
       if (input) {
         obj[key] = {
           input: input,
@@ -1039,10 +1048,6 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.userTeleport = function() {
     var x1 = this._skill.collider.x;
     var y1 = this._skill.collider.y;
-    if (!QMovement.offGrid) {
-      x1 = Math.round(x1 / QMovement.tileSize);
-      y1 = Math.round(y1 / QMovement.tileSize);
-    }
     this._character.setPixelPosition(x1, y1);
   };
 
@@ -1104,17 +1109,10 @@ function Skill_Sequencer() {
         wait: false
       }
       route.list.push({ code: 35 });
-      if (QMovement.offGrid) {
-        route.list.push({
-          code: Game_Character.ROUTE_SCRIPT,
-          parameters: ['qmove2(' + radian + ',' + dist + ')']
-        })
-      } else {
-        route.list.push({
-          code: Game_Character.ROUTE_SCRIPT,
-          parameters: ['qmove(' + dir + ',' + dist + ')']
-        })
-      }
+      route.list.push({
+        code: Game_Character.ROUTE_SCRIPT,
+        parameters: ['qmove2(' + radian + ',' + dist + ')']
+      })
       if (!targets[i].isDirectionFixed()) {
         route.list.push({ code: 36 });
       }
@@ -1139,11 +1137,10 @@ function Skill_Sequencer() {
       if (action[0] === 'towards') {
         dir = this.this._character.reverseDir(dir);
       }
-      if (QMovement.offGrid) {
-        targets[i].pixelJump(dx, dy);
-      } else {
-        targets[i].pixelJumpFixed(dir, dist);
-      }
+      var lastDirectionFix = targets[i].isDirectionFixed();
+      targets[i].setDirectionFix(true);
+      targets[i].pixelJump(dx, dy);
+      targets[i].setDirectionFix(lastDirectionFix);
     }
   };
 
@@ -1236,8 +1233,9 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.actionWait = function(action) {
-    ColliderManager.draw(this._skill.collider, Number(action[0]));
-    this._waitCount = Number(action[0]);
+    var duration = Number(action[0]);
+    ColliderManager.draw(this._skill.collider, duration);
+    this._waitCount = duration;
   };
 
   Skill_Sequencer.prototype.actionPicture = function(action) {
@@ -1358,6 +1356,7 @@ function Skill_Sequencer() {
 
   Skill_Sequencer.prototype.canSkillMove = function() {
     var collided = false;
+    var through = this._skill.settings.through;
     var targets = QABSManager.getTargets(this._skill, this._character);
     if (targets.length > 0) {
       // remove targets that have already been hit
@@ -1370,16 +1369,25 @@ function Skill_Sequencer() {
       }
       if (targets.length > 0) {
         this._skill.targets = targets;
-        if (this._skill.settings.through === 1 || this._skill.settings.through === 3) {
+        if (through === 1 || through === 3) {
           collided = true;
           this._skill.targets = [targets[0]];
         }
         this.updateSkillDamage();
       }
     }
-    // TODO check if out of bounds
-    if (!collided && (this._skill.settings.through === 2 || this._skill.settings.through === 3)) {
+    var edge = this._skill.collider.gridEdge();
+    var maxW = $gameMap.width();
+    var maxH = $gameMap.height();
+    if (!$gameMap.isLoopHorizontal()) {
+      if (edge.x2 < 0 || edge.x1 >= maxW) return false;
+    }
+    if (!$gameMap.isLoopVertical()) {
+      if (edge.y2 < 0 || edge.y1 >= maxH) return false;
+    }
+    if (!collided && (through === 2 || through === 3)) {
       ColliderManager.getCollidersNear(this._skill.collider, function(collider) {
+        if (collider === this._skill.collider) return false;
         if (this._skill.settings.overwater && (collider.isWater1 || collider.isWater2)) {
           return false;
         }
@@ -1389,13 +1397,7 @@ function Skill_Sequencer() {
         }
       }.bind(this));
     }
-    if (collided) {
-      this._skill.targetsHit = [];
-      this._skill.moving = false;
-      this._waitForMove = false;
-      return false;
-    }
-    return true;
+    return !collided;
   };
 
   Skill_Sequencer.prototype.isWaitingForCharacter = function() {
@@ -1422,7 +1424,7 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.update = function() {
-    if (this._skill.break) {
+    if (this._skill.break || this._character.battler().isStunned()) {
       return this.onBreak();
     }
     if (this._skill.moving) {
@@ -1503,8 +1505,7 @@ function Skill_Sequencer() {
       y4 += dist * -Math.sin(radian) + oy;
       this._skill.trail.move(x4, y4, dist, h);
     }
-    if (this.canSkillMove()) return;
-    if (x1 === x2 && y1 === y2) {
+    if (!this.canSkillMove() || (x1 === x2 && y1 === y2)) {
       this._skill.targetsHit = [];
       this._skill.moving = false;
       this._waitForMove = false;
@@ -1564,7 +1565,17 @@ function Skill_Sequencer() {
 // Game_Interpreter
 
 (function() {
-  
+  var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+  Game_Interpreter.prototype.pluginCommand = function(command, args) {
+    if (command.toLowerCase() === 'qabs') {
+      return this.qABSCommand(args);
+    }
+    Alias_Game_Interpreter_pluginCommand.call(this, command, args);
+  };
+
+  Game_Interpreter.prototype.qABSCommand = function(args) {
+    // TODO
+  };
 })();
 
 //-----------------------------------------------------------------------------
@@ -1574,7 +1585,8 @@ function Skill_Sequencer() {
   var Alias_Game_System_initialize = Game_System.prototype.initialize;
   Game_System.prototype.initialize = function() {
     Alias_Game_System_initialize.call(this);
-    this._absKeys = Object.assign({}, QABS.skillKey);
+    this._absKeys = JSON.parse(JSON.stringify(QABS.skillKey));
+    this._absClassKeys = {};
     this._absWeaponKeys = {};
     this._absEnabled = true;
     this._disabledEnemies = {};
@@ -1606,30 +1618,34 @@ function Skill_Sequencer() {
     if (!$gameParty.leader()) return;
     var playerClass = $gameParty.leader().currentClass();
     var classKeys = /<skillKeys>([\s\S]*)<\/skillKeys>/i.exec(playerClass.note);
-    if (classKeys && classKeys[1].trim() !== "") {
-      var newKeys = QABS.stringToSkillKeyObj(classKeys[1]);
-      Object.assign(this._absKeys, newKeys);
+    if (classKeys && classKeys[1].trim() !== '') {
+      this._absClassKeys = QABS.stringToSkillKeyObj(classKeys[1]);
       this.preloadSkills();
       this.checkAbsMouse();
     }
   };
 
   Game_System.prototype.absKeys = function() {
-    return Object.assign({}, this._absKeys, this._absWeaponKeys);
+    return Object.assign({},
+      this._absKeys,
+      this._absClassKeys,
+      this._absWeaponKeys
+    );
   };
 
   Game_System.prototype.changeABSSkill = function(skillNumber, skillId, forced) {
-    if (!this._absKeys[skillNumber]) return;
-    if (!forced && !this._absKeys[skillNumber].rebind) return;
-    for (var key in this._absKeys) {
-      if (this._absKeys[key].skillId === skillId) {
-        if (this._absKeys[key].rebind) {
-          this._absKeys[key].skillId = null;
+    var absKeys = this.absKeys();
+    if (!absKeys[skillNumber]) return;
+    if (!forced && !absKeys[skillNumber].rebind) return;
+    for (var key in absKeys) {
+      if (absKeys[key].skillId === skillId) {
+        if (absKeys[key].rebind) {
+          absKeys[key].skillId = null;
         }
         break;
       }
     }
-    this._absKeys[skillNumber].skillId = skillId;
+    absKeys[skillNumber].skillId = skillId;
     this.preloadSkills();
   };
 
@@ -1639,21 +1655,34 @@ function Skill_Sequencer() {
   };
 
   Game_System.prototype.changeABSSkillInput = function(skillNumber, input) {
-    if (!this._absKeys[skillNumber]) return;
-    for (var key in this._absKeys) {
-      if (this._absKeys[key].input === input) {
-        this._absKeys[key].input = '';
+    var absKeys = this.absKeys();
+    if (!absKeys[skillNumber]) return;
+    for (var key in absKeys) {
+      var i = absKeys[key].input.indexOf(input);
+      if (i !== -1) {
+        absKeys[key].input.splice(i, 1);
         break;
       }
     }
-    this._absKeys[skillNumber].input = input;
+    var gamepad = /^\$/.test(input);
+    for (var i = 0; i < absKeys[skillNumber].input.length; i++) {
+      var isGamepad = /^\$/.test(absKeys[skillNumber].input[i])
+      if (gamepad && isGamepad) {
+        absKeys[skillNumber].input[i] = input;
+        break;
+      } else if (!gamepad && !isGamepad) {
+        absKeys[skillNumber].input[i] = input;
+        break;
+      }
+    }
+    absKeys[skillNumber].input = input;
     this.checkAbsMouse();
   };
 
   Game_System.prototype.preloadSkills = function() {
-    var keys = this.absKeys();
-    for (var key in keys) {
-      var skill = $dataSkills[keys[key].skillId];
+    var absKeys = this.absKeys();
+    for (var key in absKeys) {
+      var skill = $dataSkills[absKeys[key].skillId];
       if (skill) {
         var aniId = skill.animationId;
         aniId = aniId < 0 ? 1 : aniId;
@@ -1693,10 +1722,10 @@ function Skill_Sequencer() {
     this._absMouse2 = false;
     var keys = this.absKeys();
     for (var key in keys) {
-      if (keys[key].input === 'mouse1') {
+      if (keys[key].input.contains('mouse1')) {
         this._absMouse1 = true;
       }
-      if (keys[key].input === 'mouse2') {
+      if (keys[key].input.contains('mouse2')) {
         this._absMouse2 = true;
       }
     }
@@ -1853,7 +1882,6 @@ function Skill_Sequencer() {
 
   var Alias_Game_Battler_startDamagePopup = Game_Battler.prototype.startDamagePopup;
   Game_Battler.prototype.startDamagePopup = function() {
-    if (!QABS.showDmg) return;
     var result = Object.assign({}, this._result);
     this._damageQueue.push(result);
     Alias_Game_Battler_startDamagePopup.call(this);
@@ -1917,7 +1945,7 @@ function Skill_Sequencer() {
   };
 
   Game_Battler.prototype.isStunned = function() {
-    return this._isStunned > 0
+    return this._isStunned > 0;
   };
 })();
 
@@ -2100,7 +2128,11 @@ function Skill_Sequencer() {
 
   var Alias_Game_CharacterBase_canMove = Game_CharacterBase.prototype.canMove;
   Game_CharacterBase.prototype.canMove = function() {
-    if (this.battler() && this._skillLocked.length > 0) return false;
+    if (this.battler()) {
+      if (this._skillLocked.length > 0) return false;
+      if (this.battler().isStunned()) return false;
+    }
+    if (this.realMoveSpeed() <= 0) return false;
     return Alias_Game_CharacterBase_canMove.call(this);
   };
 
@@ -2258,9 +2290,7 @@ function Skill_Sequencer() {
     if (!this.canInputSkill()) return;
     if (!this.canUseSkill(skillId)) return;
     if (this._groundTargeting) {
-      QABSManager.removePicture(this._groundTargeting.picture);
-      this._groundTargeting = null;
-      this._selectTargeting = null;
+      this.onTargetingCancel();
     }
     this.beforeSkill(skillId);
     this.forceSkill(skillId);
@@ -2321,10 +2351,7 @@ function Skill_Sequencer() {
     skill.picture = new Sprite_SkillCollider(skill.collider);
     if (this._selectTargeting) {
       if (this._groundTargeting.targets.length === 0 ) {
-        this._groundTargeting = null;
-        this._selectTargeting = null;
-        QABSManager.removePicture(skill.picture);
-        return;
+        return this.onTargetingCancel();
       }
       var target = this._groundTargeting.targets[0];
       var w = skill.collider.width;
@@ -2362,9 +2389,11 @@ function Skill_Sequencer() {
     if (infront) {
       var w2 = collider.width;
       var h2 = collider.height;
-      var radian = this.directionToRadian(this._direction);
+      var radian;
       if (QABS.radianAtks) {
         radian = this._radian;
+      } else {
+        radian = this.directionToRadian(this._direction);
       }
       var w3 = Math.cos(radian) * w1 / 2 + Math.cos(radian) * w2 / 2;
       var h3 = Math.sin(radian) * h1 / 2 + Math.sin(radian) * h2 / 2;
@@ -2436,9 +2465,7 @@ function Skill_Sequencer() {
   Game_Player.prototype.onPositionChange = function() {
     Alias_Game_Player_onPositionChange.call(this);
     if (this._groundTargeting) {
-      QABSManager.removePicture(this._groundTargeting.picture);
-      this._groundTargeting = null;
-      this._selectTargeting = null;
+      this.onTargetingCancel();
     }
   };
 
@@ -2464,18 +2491,24 @@ function Skill_Sequencer() {
     var absKeys = $gameSystem.absKeys();
     for (var key in absKeys) {
       if (!absKeys[key]) continue;
-      var input = absKeys[key].input;
-      if (Input.isTriggered(input)) {
-        Input.stopPropagation();
-        this.useSkill(absKeys[key].skillId);
-      }
-      if (input === 'mouse1' && TouchInput.isTriggered() && this.canClick()) {
-        TouchInput.stopPropagation();
-        this.useSkill(absKeys[key].skillId);
-      }
-      if (input === 'mouse2' && TouchInput.isCancelled() && this.canClick()) {
-        TouchInput.stopPropagation();
-        this.useSkill(absKeys[key].skillId);
+      var inputs = absKeys[key].input;
+      for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        if (Input.isTriggered(input)) {
+          Input.stopPropagation();
+          this.useSkill(absKeys[key].skillId);
+          break;
+        }
+        if (input === 'mouse1' && TouchInput.isTriggered() && this.canClick()) {
+          TouchInput.stopPropagation();
+          this.useSkill(absKeys[key].skillId);
+          break;
+        }
+        if (input === 'mouse2' && TouchInput.isCancelled() && this.canClick()) {
+          TouchInput.stopPropagation();
+          this.useSkill(absKeys[key].skillId);
+          break;
+        }
       }
     }
   };
@@ -2673,7 +2706,7 @@ function Skill_Sequencer() {
         this.addAgro(targetId);
       }
       if (this._endWait) {
-        QPlus.removeWaitListener(this._endWait);
+        this.removeWaitListener(this._endWait);
         this._endWait = null;
       }
     } else {
@@ -2684,7 +2717,9 @@ function Skill_Sequencer() {
         }
         // TODO maybe move randomly to search for
         // target again before ending its combat
-        this._endWait = QPlus.wait(120).then(function() {
+        console.log('start wait');
+        this._endWait = this.wait(120).then(function() {
+          console.log('end wait');
           this._endWait = null;
           this.endCombat();
         }.bind(this))
@@ -3070,7 +3105,6 @@ function Game_Loot() {
   var Alias_Sprite_Character_initMembers = Sprite_Character.prototype.initMembers;
   Sprite_Character.prototype.initMembers = function() {
     Alias_Sprite_Character_initMembers.call(this);
-    this._lastDamageRequest = 0;
     this._damages = [];
     this.createStateSprite();
   };
@@ -3103,15 +3137,8 @@ function Game_Loot() {
   };
 
   Sprite_Character.prototype.setupDamagePopup = function() {
-    if (!Imported.QPopup) return;
-    if (!QABS.showDmg || this._character._noPopup) return;
+    if (!Imported.QPopup || this._character._noPopup) return;
     if (this._battler._damageQueue.length > 0) {
-      var time = Graphics.frameCount;
-      var wait = this._battler._damageQueue.length / 15;
-      if (time - this._lastDamageRequest < wait) {
-        return;
-      }
-      this._lastDamageRequest = time;
       var string;
       var fill = '#ffffff';
       var result = this._battler._damageQueue.shift();
