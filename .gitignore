@@ -41,3 +41,5 @@ app/js/plugins/Q_Culling.js
 app/js/plugins/QuasiPopup.js
 app/js/plugins/QM+SetAngles.js
 app/js/plugins/QuasiABS.js
+app/js/plugins/QuasiABSGauges.js
+app/js/plugins/QuasiABSHudA.js

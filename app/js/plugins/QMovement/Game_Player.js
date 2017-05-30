@@ -15,6 +15,12 @@
     return QMovement.playerCollider;
   };
 
+  var Alias_Game_Player_refresh = Game_Player.prototype.refresh;
+  Game_Player.prototype.refresh = function() {
+    this.reloadColliders();
+    Alias_Game_Player_refresh.call(this);
+  };
+
   Game_Player.prototype.requestMouseMove = function() {
     var currFrame = Graphics.frameCount;
     var dt = currFrame - this._lastMouseRequested;

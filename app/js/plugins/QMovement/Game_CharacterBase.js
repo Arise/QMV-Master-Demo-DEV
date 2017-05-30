@@ -3,8 +3,26 @@
 
 (function() {
   Object.defineProperties(Game_CharacterBase.prototype, {
-    px: { get: function() { return this._px; }, configurable: true },
-    py: { get: function() { return this._py; }, configurable: true }
+    x: {
+      get: function() {
+        return Math.floor(this.cx() / QMovement.tileSize);
+      },
+      configurable: true
+    },
+    y: {
+      get: function() {
+        return Math.floor(this.cy() / QMovement.tileSize);
+      },
+      configurable: true
+    },
+    px: {
+      get: function() { return this._px; },
+      configurable: true
+    },
+    py: {
+      get: function() { return this._py; },
+      configurable: true
+    }
   });
 
   var Alias_Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;

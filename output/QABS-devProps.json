@@ -147,6 +147,10 @@
       "prototype - setupLoot - undefined",
       "prototype - onTargetingEnd - undefined"
     ],
+    "Game_Interpreter": [
+      "alias - prototype - pluginCommand - command, args",
+      "prototype - qABSCommand - args"
+    ],
     "Scene_Map": [
       "alias - prototype - initialize - undefined",
       "alias - prototype - isMenuCalled - undefined"

@@ -124,6 +124,7 @@
     "Game_Player": [
       "alias - prototype - initMembers - undefined",
       "prototype - defaultColliderConfig - undefined",
+      "alias - prototype - refresh - undefined",
       "prototype - requestMouseMove - undefined",
       "prototype - moveByMouse - x, y",
       "prototype - clearMouseMove - undefined",
