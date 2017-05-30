@@ -58,9 +58,7 @@
   Game_Player.prototype.onPositionChange = function() {
     Alias_Game_Player_onPositionChange.call(this);
     if (this._groundTargeting) {
-      QABSManager.removePicture(this._groundTargeting.picture);
-      this._groundTargeting = null;
-      this._selectTargeting = null;
+      this.onTargetingCancel();
     }
   };
 
@@ -86,18 +84,24 @@
     var absKeys = $gameSystem.absKeys();
     for (var key in absKeys) {
       if (!absKeys[key]) continue;
-      var input = absKeys[key].input;
-      if (Input.isTriggered(input)) {
-        Input.stopPropagation();
-        this.useSkill(absKeys[key].skillId);
-      }
-      if (input === 'mouse1' && TouchInput.isTriggered() && this.canClick()) {
-        TouchInput.stopPropagation();
-        this.useSkill(absKeys[key].skillId);
-      }
-      if (input === 'mouse2' && TouchInput.isCancelled() && this.canClick()) {
-        TouchInput.stopPropagation();
-        this.useSkill(absKeys[key].skillId);
+      var inputs = absKeys[key].input;
+      for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        if (Input.isTriggered(input)) {
+          Input.stopPropagation();
+          this.useSkill(absKeys[key].skillId);
+          break;
+        }
+        if (input === 'mouse1' && TouchInput.isTriggered() && this.canClick()) {
+          TouchInput.stopPropagation();
+          this.useSkill(absKeys[key].skillId);
+          break;
+        }
+        if (input === 'mouse2' && TouchInput.isCancelled() && this.canClick()) {
+          TouchInput.stopPropagation();
+          this.useSkill(absKeys[key].skillId);
+          break;
+        }
       }
     }
   };

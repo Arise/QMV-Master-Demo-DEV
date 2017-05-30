@@ -58,7 +58,11 @@
 
   var Alias_Game_CharacterBase_canMove = Game_CharacterBase.prototype.canMove;
   Game_CharacterBase.prototype.canMove = function() {
-    if (this.battler() && this._skillLocked.length > 0) return false;
+    if (this.battler()) {
+      if (this._skillLocked.length > 0) return false;
+      if (this.battler().isStunned()) return false;
+    }
+    if (this.realMoveSpeed() <= 0) return false;
     return Alias_Game_CharacterBase_canMove.call(this);
   };
 
@@ -216,9 +220,7 @@
     if (!this.canInputSkill()) return;
     if (!this.canUseSkill(skillId)) return;
     if (this._groundTargeting) {
-      QABSManager.removePicture(this._groundTargeting.picture);
-      this._groundTargeting = null;
-      this._selectTargeting = null;
+      this.onTargetingCancel();
     }
     this.beforeSkill(skillId);
     this.forceSkill(skillId);
@@ -279,10 +281,7 @@
     skill.picture = new Sprite_SkillCollider(skill.collider);
     if (this._selectTargeting) {
       if (this._groundTargeting.targets.length === 0 ) {
-        this._groundTargeting = null;
-        this._selectTargeting = null;
-        QABSManager.removePicture(skill.picture);
-        return;
+        return this.onTargetingCancel();
       }
       var target = this._groundTargeting.targets[0];
       var w = skill.collider.width;
@@ -320,9 +319,11 @@
     if (infront) {
       var w2 = collider.width;
       var h2 = collider.height;
-      var radian = this.directionToRadian(this._direction);
+      var radian;
       if (QABS.radianAtks) {
         radian = this._radian;
+      } else {
+        radian = this.directionToRadian(this._direction);
       }
       var w3 = Math.cos(radian) * w1 / 2 + Math.cos(radian) * w2 / 2;
       var h3 = Math.sin(radian) * h1 / 2 + Math.sin(radian) * h2 / 2;

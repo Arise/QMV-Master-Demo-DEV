@@ -5,7 +5,8 @@
   var Alias_Game_System_initialize = Game_System.prototype.initialize;
   Game_System.prototype.initialize = function() {
     Alias_Game_System_initialize.call(this);
-    this._absKeys = Object.assign({}, QABS.skillKey);
+    this._absKeys = JSON.parse(JSON.stringify(QABS.skillKey));
+    this._absClassKeys = {};
     this._absWeaponKeys = {};
     this._absEnabled = true;
     this._disabledEnemies = {};
@@ -37,30 +38,34 @@
     if (!$gameParty.leader()) return;
     var playerClass = $gameParty.leader().currentClass();
     var classKeys = /<skillKeys>([\s\S]*)<\/skillKeys>/i.exec(playerClass.note);
-    if (classKeys && classKeys[1].trim() !== "") {
-      var newKeys = QABS.stringToSkillKeyObj(classKeys[1]);
-      Object.assign(this._absKeys, newKeys);
+    if (classKeys && classKeys[1].trim() !== '') {
+      this._absClassKeys = QABS.stringToSkillKeyObj(classKeys[1]);
       this.preloadSkills();
       this.checkAbsMouse();
     }
   };
 
   Game_System.prototype.absKeys = function() {
-    return Object.assign({}, this._absKeys, this._absWeaponKeys);
+    return Object.assign({},
+      this._absKeys,
+      this._absClassKeys,
+      this._absWeaponKeys
+    );
   };
 
   Game_System.prototype.changeABSSkill = function(skillNumber, skillId, forced) {
-    if (!this._absKeys[skillNumber]) return;
-    if (!forced && !this._absKeys[skillNumber].rebind) return;
-    for (var key in this._absKeys) {
-      if (this._absKeys[key].skillId === skillId) {
-        if (this._absKeys[key].rebind) {
-          this._absKeys[key].skillId = null;
+    var absKeys = this.absKeys();
+    if (!absKeys[skillNumber]) return;
+    if (!forced && !absKeys[skillNumber].rebind) return;
+    for (var key in absKeys) {
+      if (absKeys[key].skillId === skillId) {
+        if (absKeys[key].rebind) {
+          absKeys[key].skillId = null;
         }
         break;
       }
     }
-    this._absKeys[skillNumber].skillId = skillId;
+    absKeys[skillNumber].skillId = skillId;
     this.preloadSkills();
   };
 
@@ -70,21 +75,34 @@
   };
 
   Game_System.prototype.changeABSSkillInput = function(skillNumber, input) {
-    if (!this._absKeys[skillNumber]) return;
-    for (var key in this._absKeys) {
-      if (this._absKeys[key].input === input) {
-        this._absKeys[key].input = '';
+    var absKeys = this.absKeys();
+    if (!absKeys[skillNumber]) return;
+    for (var key in absKeys) {
+      var i = absKeys[key].input.indexOf(input);
+      if (i !== -1) {
+        absKeys[key].input.splice(i, 1);
         break;
       }
     }
-    this._absKeys[skillNumber].input = input;
+    var gamepad = /^\$/.test(input);
+    for (var i = 0; i < absKeys[skillNumber].input.length; i++) {
+      var isGamepad = /^\$/.test(absKeys[skillNumber].input[i])
+      if (gamepad && isGamepad) {
+        absKeys[skillNumber].input[i] = input;
+        break;
+      } else if (!gamepad && !isGamepad) {
+        absKeys[skillNumber].input[i] = input;
+        break;
+      }
+    }
+    absKeys[skillNumber].input = input;
     this.checkAbsMouse();
   };
 
   Game_System.prototype.preloadSkills = function() {
-    var keys = this.absKeys();
-    for (var key in keys) {
-      var skill = $dataSkills[keys[key].skillId];
+    var absKeys = this.absKeys();
+    for (var key in absKeys) {
+      var skill = $dataSkills[absKeys[key].skillId];
       if (skill) {
         var aniId = skill.animationId;
         aniId = aniId < 0 ? 1 : aniId;
@@ -124,10 +142,10 @@
     this._absMouse2 = false;
     var keys = this.absKeys();
     for (var key in keys) {
-      if (keys[key].input === 'mouse1') {
+      if (keys[key].input.contains('mouse1')) {
         this._absMouse1 = true;
       }
-      if (keys[key].input === 'mouse2') {
+      if (keys[key].input.contains('mouse2')) {
         this._absMouse2 = true;
       }
     }

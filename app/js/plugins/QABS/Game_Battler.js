@@ -12,7 +12,6 @@
 
   var Alias_Game_Battler_startDamagePopup = Game_Battler.prototype.startDamagePopup;
   Game_Battler.prototype.startDamagePopup = function() {
-    if (!QABS.showDmg) return;
     var result = Object.assign({}, this._result);
     this._damageQueue.push(result);
     Alias_Game_Battler_startDamagePopup.call(this);
@@ -76,6 +75,6 @@
   };
 
   Game_Battler.prototype.isStunned = function() {
-    return this._isStunned > 0
+    return this._isStunned > 0;
   };
 })();

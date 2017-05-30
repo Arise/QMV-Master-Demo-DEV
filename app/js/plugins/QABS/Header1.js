@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QABS = '0.0.0';
+Imported.QABS = '1.0.0';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
   alert('Error: QABS requires QPlus 1.3.0 or newer to work.');
@@ -17,7 +17,9 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @author Quxios  | Version 0.0.0
+ * @author Quxios  | Version 1.0.0
+ *
+ * @development
  *
  * @requires QMovement
  *

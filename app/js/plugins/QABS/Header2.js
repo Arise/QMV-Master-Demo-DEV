@@ -33,7 +33,7 @@ function QABS() {
     var skillN = /^Skill Key ([0-9]+)$/.exec(key);
     if (skillN && input !== '') {
       QABS.skillKey[skillN[1]] = {
-        input: input,
+        input: input.split(',').map(function(s) { return s.trim(); }),
         skillId: Number(_PARAMS[key + ' Skill']) || 0,
         rebind: _PARAMS[key + ' Rebind'] === 'true'
       }
@@ -50,7 +50,14 @@ function QABS() {
       })
       var skillId = Number(data[0]) || 0;
       var rebind = data[1] === 'true';
-      var input = QABS.skillKey[key].input;
+      if (!QABS.skillKey[key]) {
+        var msg = 'ERROR: Attempted to apply a skill key that has not been setup';
+        msg += ' in the plugin parameters.\n';
+        msg += 'Skill Key Number: ' + key;
+        alert(msg);
+        continue;
+      }
+      var input = QABS.skillKey[key].input.clone();
       if (input) {
         obj[key] = {
           input: input,

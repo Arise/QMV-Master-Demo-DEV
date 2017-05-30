@@ -90,7 +90,7 @@
         this.addAgro(targetId);
       }
       if (this._endWait) {
-        QPlus.removeWaitListener(this._endWait);
+        this.removeWaitListener(this._endWait);
         this._endWait = null;
       }
     } else {
@@ -101,7 +101,9 @@
         }
         // TODO maybe move randomly to search for
         // target again before ending its combat
-        this._endWait = QPlus.wait(120).then(function() {
+        console.log('start wait');
+        this._endWait = this.wait(120).then(function() {
+          console.log('end wait');
           this._endWait = null;
           this.endCombat();
         }.bind(this))

@@ -293,10 +293,6 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.userTeleport = function() {
     var x1 = this._skill.collider.x;
     var y1 = this._skill.collider.y;
-    if (!QMovement.offGrid) {
-      x1 = Math.round(x1 / QMovement.tileSize);
-      y1 = Math.round(y1 / QMovement.tileSize);
-    }
     this._character.setPixelPosition(x1, y1);
   };
 
@@ -358,17 +354,10 @@ function Skill_Sequencer() {
         wait: false
       }
       route.list.push({ code: 35 });
-      if (QMovement.offGrid) {
-        route.list.push({
-          code: Game_Character.ROUTE_SCRIPT,
-          parameters: ['qmove2(' + radian + ',' + dist + ')']
-        })
-      } else {
-        route.list.push({
-          code: Game_Character.ROUTE_SCRIPT,
-          parameters: ['qmove(' + dir + ',' + dist + ')']
-        })
-      }
+      route.list.push({
+        code: Game_Character.ROUTE_SCRIPT,
+        parameters: ['qmove2(' + radian + ',' + dist + ')']
+      })
       if (!targets[i].isDirectionFixed()) {
         route.list.push({ code: 36 });
       }
@@ -393,11 +382,10 @@ function Skill_Sequencer() {
       if (action[0] === 'towards') {
         dir = this.this._character.reverseDir(dir);
       }
-      if (QMovement.offGrid) {
-        targets[i].pixelJump(dx, dy);
-      } else {
-        targets[i].pixelJumpFixed(dir, dist);
-      }
+      var lastDirectionFix = targets[i].isDirectionFixed();
+      targets[i].setDirectionFix(true);
+      targets[i].pixelJump(dx, dy);
+      targets[i].setDirectionFix(lastDirectionFix);
     }
   };
 
@@ -490,8 +478,9 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.actionWait = function(action) {
-    ColliderManager.draw(this._skill.collider, Number(action[0]));
-    this._waitCount = Number(action[0]);
+    var duration = Number(action[0]);
+    ColliderManager.draw(this._skill.collider, duration);
+    this._waitCount = duration;
   };
 
   Skill_Sequencer.prototype.actionPicture = function(action) {
@@ -612,6 +601,7 @@ function Skill_Sequencer() {
 
   Skill_Sequencer.prototype.canSkillMove = function() {
     var collided = false;
+    var through = this._skill.settings.through;
     var targets = QABSManager.getTargets(this._skill, this._character);
     if (targets.length > 0) {
       // remove targets that have already been hit
@@ -624,16 +614,25 @@ function Skill_Sequencer() {
       }
       if (targets.length > 0) {
         this._skill.targets = targets;
-        if (this._skill.settings.through === 1 || this._skill.settings.through === 3) {
+        if (through === 1 || through === 3) {
           collided = true;
           this._skill.targets = [targets[0]];
         }
         this.updateSkillDamage();
       }
     }
-    // TODO check if out of bounds
-    if (!collided && (this._skill.settings.through === 2 || this._skill.settings.through === 3)) {
+    var edge = this._skill.collider.gridEdge();
+    var maxW = $gameMap.width();
+    var maxH = $gameMap.height();
+    if (!$gameMap.isLoopHorizontal()) {
+      if (edge.x2 < 0 || edge.x1 >= maxW) return false;
+    }
+    if (!$gameMap.isLoopVertical()) {
+      if (edge.y2 < 0 || edge.y1 >= maxH) return false;
+    }
+    if (!collided && (through === 2 || through === 3)) {
       ColliderManager.getCollidersNear(this._skill.collider, function(collider) {
+        if (collider === this._skill.collider) return false;
         if (this._skill.settings.overwater && (collider.isWater1 || collider.isWater2)) {
           return false;
         }
@@ -643,13 +642,7 @@ function Skill_Sequencer() {
         }
       }.bind(this));
     }
-    if (collided) {
-      this._skill.targetsHit = [];
-      this._skill.moving = false;
-      this._waitForMove = false;
-      return false;
-    }
-    return true;
+    return !collided;
   };
 
   Skill_Sequencer.prototype.isWaitingForCharacter = function() {
@@ -676,7 +669,7 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.update = function() {
-    if (this._skill.break) {
+    if (this._skill.break || this._character.battler().isStunned()) {
       return this.onBreak();
     }
     if (this._skill.moving) {
@@ -757,8 +750,7 @@ function Skill_Sequencer() {
       y4 += dist * -Math.sin(radian) + oy;
       this._skill.trail.move(x4, y4, dist, h);
     }
-    if (this.canSkillMove()) return;
-    if (x1 === x2 && y1 === y2) {
+    if (!this.canSkillMove() || (x1 === x2 && y1 === y2)) {
       this._skill.targetsHit = [];
       this._skill.moving = false;
       this._waitForMove = false;

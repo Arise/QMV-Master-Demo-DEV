@@ -5,7 +5,6 @@
   var Alias_Sprite_Character_initMembers = Sprite_Character.prototype.initMembers;
   Sprite_Character.prototype.initMembers = function() {
     Alias_Sprite_Character_initMembers.call(this);
-    this._lastDamageRequest = 0;
     this._damages = [];
     this.createStateSprite();
   };
@@ -38,15 +37,8 @@
   };
 
   Sprite_Character.prototype.setupDamagePopup = function() {
-    if (!Imported.QPopup) return;
-    if (!QABS.showDmg || this._character._noPopup) return;
+    if (!Imported.QPopup || this._character._noPopup) return;
     if (this._battler._damageQueue.length > 0) {
-      var time = Graphics.frameCount;
-      var wait = this._battler._damageQueue.length / 15;
-      if (time - this._lastDamageRequest < wait) {
-        return;
-      }
-      this._lastDamageRequest = time;
       var string;
       var fill = '#ffffff';
       var result = this._battler._damageQueue.shift();
