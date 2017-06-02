@@ -89,7 +89,7 @@
     var diag = {
       1: [4, 2],   3: [6, 2],
       7: [4, 8],   9: [6, 8]
-    };
+    }
     this.moveDiagonally(diag[dir][0], diag[dir][1]);
   };
 

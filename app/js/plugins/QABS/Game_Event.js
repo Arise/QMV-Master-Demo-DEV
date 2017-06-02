@@ -70,6 +70,15 @@
     }, this)
   };
 
+  var Alias_Game_Event_bestTarget = Game_Event.prototype.bestTarget;
+  Game_Event.prototype.bestTarget = function() {
+    var best = Alias_Game_Event_bestTarget.call(this);
+    if (!best && this.team() === 2) {
+      return $gamePlayer;
+    }
+    return best;
+  };
+
   Game_Event.prototype.updateABS = function() {
     Game_CharacterBase.prototype.updateABS.call(this);
     if (!this._isDead && this.hasAI() && this.isNearTheScreen()) {
@@ -80,8 +89,7 @@
   };
 
   Game_Event.prototype.updateAI = function() {
-    // TODO split up into 2-3 functions
-    var bestTarget = this.bestTarget() || $gamePlayer;
+    var bestTarget = this.bestTarget();
     if (!bestTarget) return;
     var targetId = bestTarget.charaId();
     if (this.isTargetInRange(bestTarget)) {
@@ -101,9 +109,7 @@
         }
         // TODO maybe move randomly to search for
         // target again before ending its combat
-        console.log('start wait');
         this._endWait = this.wait(120).then(function() {
-          console.log('end wait');
           this._endWait = null;
           this.endCombat();
         }.bind(this))
@@ -185,9 +191,9 @@
 
   Game_Event.prototype.respawn = function() {
     this._erased = false;
-    this.setupBattler();
-    this.findRespawnLocation();
     this.refresh();
+    this.findRespawnLocation();
+    this.setupBattler();
   };
 
   Game_Event.prototype.endCombat = function() {
@@ -212,6 +218,7 @@
     var x = this.event().x * QMovement.tileSize;
     var y = this.event().y * QMovement.tileSize;
     var dist = this.moveTiles();
+    // TODO change this to a Dijkstra's algorithm
     while (true) {
       var stop;
       for (var i = 1; i < 5; i++) {
@@ -233,7 +240,14 @@
 
   Game_Event.prototype.onDeath = function() {
     if (this._isDead) return;
-    if (this._onDeath) eval(this._onDeath);
+    if (this._onDeath) {
+      try {
+        eval(this._onDeath);
+      } catch (e) {
+        var id = this.battler()._enemyId;
+        console.error('Error with `onDeath` meta inside enemy ' + id, e);
+      } 
+    }
     if (this._agroList[0] > 0) {
       var exp = this.battler().exp();
       $gamePlayer.battler().gainExp(exp);

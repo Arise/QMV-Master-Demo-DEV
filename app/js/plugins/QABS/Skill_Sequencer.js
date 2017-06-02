@@ -241,13 +241,10 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userMoveHere = function(action) {
-    var x1 = this._character.cx();
-    var y1 = this._character.cy();
-    var x2 = this._skill.collider.center.x;
-    var y2 = this._skill.collider.center.y;
-    var final = this.adjustPosition(x1, y1, x2, y2);
-    var dx = final.x - x1;
-    var dy = final.y - y1;
+    var center = this._character.centerWithCollider(this._skill.collider);
+    var final = this._character.adjustPosition(center.x, center.y);
+    var dx = final.x - this._character.px;
+    var dy = final.y - this._character.py;
     var radian = Math.atan2(dy, dx);
     var dist = Math.sqrt(dx * dx + dy * dy);
     var route = {
@@ -270,22 +267,33 @@ function Skill_Sequencer() {
 
   Skill_Sequencer.prototype.userJump = function(action) {
     var dist = Number(action[1]) || 0;
+    var x1 = x2 = this._character.px;
+    var y1 = y2 = this._character.py;
+    var dir = this._character._direction;
+    if (action[0] === 'backward') {
+      x2 -= dir === 6 ? dist : dir === 4 ? -dist : 0;
+      y2 -= dir === 2 ? dist : dir === 8 ? -dist : 0;
+    } else if (action[0] === 'forward') {
+      x2 += dir === 6 ? dist : dir === 4 ? -dist : 0;
+      y2 += dir === 2 ? dist : dir === 8 ? -dist : 0;
+    }
+    var final = this._character.adjustPosition(x2, y2);
+    var dx = final.x - x1;
+    var dy = final.y - y1;
+    dist = Math.sqrt(dx * dx + dy * dy);
     if (action[0] === 'backward') {
       this._character.pixelJumpBackward(dist);
-    } else if (action[0] === 'forward')  {
+    } else if (action[0] === 'forward') {
       this._character.pixelJumpForward(dist);
     }
     this._waitForUserJump = action[2] ? action[2] === 'true' : false;
   };
 
   Skill_Sequencer.prototype.userJumpHere = function(action) {
-    var x1 = this._character.cx();
-    var y1 = this._character.cy();
-    var x2 = this._skill.collider.center.x;
-    var y2 = this._skill.collider.center.y;
-    var final = this.adjustPosition(x1, y1, x2, y2);
-    var dx = final.x - x1;
-    var dy = final.y - y1;
+    var center = this._character.centerWithCollider(this._skill.collider);
+    var final = this._character.adjustPosition(center.x, center.y);
+    var dx = final.x - this._character.px;
+    var dy = final.y - this._character.py;
     this._character.pixelJump(dx, dy);
     this._waitForUserJump = action[0] ? action[0] === 'true' : false;
   };
@@ -344,8 +352,13 @@ function Skill_Sequencer() {
       radian += radian < 0 ? Math.PI * 2 : 0;
       var dir = this._character.radianToDirection(radian);
       if (action[0] === 'towards') {
-        dir = this.this._character.reverseDir(dir);
+        dir = this._character.reverseDir(dir);
         radian += Math.PI;
+      } else if (action[0] === 'into') {
+        var dxi = this._skill.collider.center.x - targets[i].cx();
+        var dyi = this._skill.collider.center.y - targets[i].cy();
+        radian = Math.atan2(dyi, dxi);
+        dist2 = Math.min(dist2, Math.sqrt(dxi * dxi + dyi * dyi));
       }
       var route = {
         list: [],
@@ -374,14 +387,24 @@ function Skill_Sequencer() {
     for (var i = 0; i < targets.length; i++) {
       var dist2 = dist - dist * eval('targets[i].battler().' + QABS.mrst);
       if (dist2 <= 0) return;
-      var dx = targets[i].cx() - this._character.cx();
-      var dy = targets[i].cy() - this._character.cy();
-      var radian = Math.atan2(dy, dx);
-      radian += radian < 0 ? Math.PI * 2 : 0;
-      var dir = this._character.radianToDirection(radian);
+      var radian = this._skill.radian;
       if (action[0] === 'towards') {
-        dir = this.this._character.reverseDir(dir);
+        radian += Math.PI;
+      } else if (action[0] === 'into') {
+        var dxi = this._skill.collider.center.x - targets[i].cx();
+        var dyi = this._skill.collider.center.y - targets[i].cy();
+        radian = Math.atan2(dyi, dxi);
+        dist2 = Math.min(dist2, Math.sqrt(dxi * dxi + dyi * dyi));
       }
+      var dx = Math.round(dist2 * Math.cos(radian));
+      var dy = Math.round(dist2 * Math.sin(radian));
+      var x1 = targets[i].px;
+      var y1 = targets[i].py;
+      var x2 = x1 + dx;
+      var y2 = y1 + dy;
+      var final = targets[i].adjustPosition(x2, y2);
+      dx = final.x - x1;
+      dy = final.y - y1;
       var lastDirectionFix = targets[i].isDirectionFixed();
       targets[i].setDirectionFix(true);
       targets[i].pixelJump(dx, dy);
@@ -787,21 +810,6 @@ function Skill_Sequencer() {
     if (this.canSkillMove()) {
       this._skill.waving = false;
     }
-  };
-
-  Skill_Sequencer.prototype.adjustPosition = function(xi, yi, xf, yf) {
-    var final = new Point(xf, yf);
-    var dx = xf - xi;
-    var dy = yf - yi;
-    var radian = Math.atan2(dy, dx);
-    var vx = Math.cos(radian) * this._character.moveTiles();
-    var vy = Math.sin(radian) * this._character.moveTiles();
-    while (!this._character.canPixelPass(final.x, final.y, 5, 'collision')) {
-      final.x -= vx;
-      final.y -= vy;
-    }
-    this._character.collider('collision').moveTo(xi, yi);
-    return final;
   };
 
 })();

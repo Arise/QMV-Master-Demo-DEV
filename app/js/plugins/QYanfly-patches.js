@@ -3,13 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QYanflyPatches = '1.0.0';
+Imported.QYanflyPatches = '1.0.2';
 
 //=============================================================================
  /*:
  * @plugindesc <QYanfly-patches>
  * Patches for Yanfly plugins and QPlugins
- * @author Quxios  | Version 1.0.0
+ * @author Quxios  | Version 1.0.2
  *
  * @help
  * Patches for QMovement:
@@ -25,7 +25,7 @@ Imported.QYanflyPatches = '1.0.0';
   //---------------------------------------------------------------------------
   // Yanfly patches for QMovement
 
-  if (Import.QMovement) {
+  if (Imported.QMovement) {
     //-------------------------------------------------------------------------
     // YEP_RegionRestrictions Patches
 
@@ -37,13 +37,21 @@ Imported.QYanflyPatches = '1.0.0';
         var y = Math.floor(collider.center.y  / QMovement.tileSize);
         if (this.isEventRegionForbid(x, y)) return true;
         if (this.isPlayerRegionForbid(x, y)) return true;
-        if (!this.isEventRegionAllow(x, y)) return true;
-        if (!this.isPlayerRegionAllow(x, y)) return true;
-        return Alias_Game_CharacterBase_collidesWithAnyTile.call(this);
+        if (this.isEventRegionAllow(x, y)) return false;
+        if (this.isPlayerRegionAllow(x, y)) return false;
+        return Alias_Game_CharacterBase_collidesWithAnyTile.call(this, type);
       };
 
-      Game_CharacterBase.prototype.getRegionId = function(x, y, d) {
-        return $gameMap.regionId(x, y);
+      var Alias_Game_CharacterBase_collidedWithTile = Game_CharacterBase.prototype.collidedWithTile;
+      Game_CharacterBase.prototype.collidedWithTile = function(type, collider) {
+        if (collider.regionId) {
+          if (this.isPlayer()) {
+            if ($gameMap.allowEventRegions().contains(collider.regionId)) return false;
+          } else if (this.isEvent()) {
+            if ($gameMap.allowPlayerRegions().contains(collider.regionId)) return false;
+          }
+        }
+        return Alias_Game_CharacterBase_collidedWithTile.call(this, type, collider);
       };
     }
 
@@ -53,6 +61,14 @@ Imported.QYanflyPatches = '1.0.0';
     if (Imported.YEP_SlipperyTiles) {
       Game_CharacterBase.prototype.onSlipperyFloor = function() {
         return $gameMap.isSlippery(this.x, this.y);
+      };
+
+      Game_Player.prototype.updateSlippery = function() {
+          if ($gameMap.isEventRunning()) return;
+          if (this.onSlipperyFloor() && !this.startedMoving()) {
+            $gameTemp.clearDestination();
+      			this.moveStraight(this._direction);
+          }
       };
     }
   }

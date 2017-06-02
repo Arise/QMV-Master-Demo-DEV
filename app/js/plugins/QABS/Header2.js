@@ -16,7 +16,7 @@ function QABS() {
   QABS.lootDecay = Number(_PARAMS['Loot Decay']) || 1;
   QABS.aoeLoot = _PARAMS['AoE Loot'] === 'true';
   QABS.lootTrigger = _PARAMS['Loot Touch Trigger'] === 'true' ? 2 : 0;
-  QABS.goldIcon = Number(_PARAMS['Gold Icon']) || 314;
+  QABS.goldIcon = Number(_PARAMS['Gold Icon'] || 314);
   QABS.levelAni = Number(_PARAMS['Level Animation']) || 0;
   QABS.showDmg = _PARAMS['Show Damage'] === 'true';
 
@@ -27,18 +27,23 @@ function QABS() {
   QABS.aiSight = _PARAMS['AI Uses QSight'] === 'true';
   QABS.aiPathfind = _PARAMS['AI uses QPathfind'] === 'true';
 
-  QABS.skillKey = {};
-  for (var key in _PARAMS) {
-    var input = _PARAMS[key];
-    var skillN = /^Skill Key ([0-9]+)$/.exec(key);
-    if (skillN && input !== '') {
-      QABS.skillKey[skillN[1]] = {
-        input: input.split(',').map(function(s) { return s.trim(); }),
-        skillId: Number(_PARAMS[key + ' Skill']) || 0,
-        rebind: _PARAMS[key + ' Rebind'] === 'true'
+  QABS.getDefaultSkillKeys = function() {
+    var obj = {};
+    for (var key in _PARAMS) {
+      var input = _PARAMS[key];
+      var skillN = /^Skill Key ([0-9]+)$/.exec(key);
+      if (skillN && input !== '') {
+        obj[skillN[1]] = {
+          input: input.split(',').map(function(s) { return s.trim(); }),
+          skillId: Number(_PARAMS[key + ' Skill']) || 0,
+          rebind: _PARAMS[key + ' Rebind'] === 'true'
+        }
       }
     }
-  }
+    return obj;
+  };
+
+  QABS.skillKey = QABS.getDefaultSkillKeys();
 
   QABS.stringToSkillKeyObj = function(string) {
     var obj = QPlus.stringToObj(string);

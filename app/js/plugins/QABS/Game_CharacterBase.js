@@ -231,7 +231,11 @@
     var meta = $dataSkills[skillId].qmeta;
     var before = meta.beforeSkill || '';
     if (before !== '') {
-      eval(before[1]);
+      try {
+        eval(before[1]);
+      } catch (e) {
+        console.error('Error with `beforeSkill` meta inside skill ' + skillId, e);
+      }
     }
   };
 

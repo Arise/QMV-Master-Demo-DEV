@@ -290,11 +290,11 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  * ============================================================================
  * ## About
  * ============================================================================
- *
+ * A collider based action battle system for QMovement.
  * ============================================================================
  * ## How to use
  * ============================================================================
- *
+ * TODO
  * ----------------------------------------------------------------------------
  * **Sub section**
  * ----------------------------------------------------------------------------
@@ -346,15 +346,78 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  * animationTarget
  *
  * ============================================================================
+ * ## Enemy Notetags
+ * ============================================================================
+ * **Event**
+ * ----------------------------------------------------------------------------
+ * To mark an event as an enemy, add the notetag:
+ * ~~~
+ *  <enemy:X>
+ * ~~~
+ * Where X is the Id of the enemy in the database.
+ * ----------------------------------------------------------------------------
+ * **Enemy Database**
+ * ----------------------------------------------------------------------------
+ * To disable the enemy AI, add this notetag
+ * ~~~
+ *  <noAI>
+ * ~~~
+ *
+ * To disable damage popups on this enemy, add this notetag
+ * ~~~
+ *  <noPopup>
+ * ~~~
+ *
+ * To keep the event around after it dies, add this notetag
+ * ~~~
+ *  <dontErase>
+ * ~~~
+ *
+ * To run some JS when the enemy dies, add this notetag
+ * ~~~
+ *  <onDeath>
+ *  javascript code
+ *  </onDeath>
+ * ~~~~
+ *
+ * To change the team of the enemy, use this notetag
+ * ~~~
+ *  <team:X>
+ * ~~~
+ * Set X to the team.
+ * - 0: Neutral
+ * - 1: Player team
+ * - 2: Enemy team
+ * - 3+ can also be used
+ * *Note teams don't do much because there is no team based AI*
+ * ============================================================================
+ * ## State Notetags
+ * ============================================================================
+ * To have a state affect the characters move speed use:
+ * ~~~
+ *  <moveSpeed:X>
+ * ~~~
+ * Set X to the value to modify the move speed by. Can be negative.
+ *
+ * To disable a characters actions, use the following notetag. When disabled
+ * the character can't use any skills until the state is removed.
+ * ~~~
+ *  <stun>
+ * ~~~
+ * ============================================================================
  * ## Links
  * ============================================================================
  * RPGMakerWebs:
  *
- *   http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
+ *  http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
  *
  * Terms of use:
  *
- *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *  https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *
+ * Like my plugins? Support me on Patreon!
+ *
+ *  https://www.patreon.com/quxios
  *
  * @tags QM-Addon, ABS, Battle
  */
@@ -377,7 +440,7 @@ function QABS() {
   QABS.lootDecay = Number(_PARAMS['Loot Decay']) || 1;
   QABS.aoeLoot = _PARAMS['AoE Loot'] === 'true';
   QABS.lootTrigger = _PARAMS['Loot Touch Trigger'] === 'true' ? 2 : 0;
-  QABS.goldIcon = Number(_PARAMS['Gold Icon']) || 314;
+  QABS.goldIcon = Number(_PARAMS['Gold Icon'] || 314);
   QABS.levelAni = Number(_PARAMS['Level Animation']) || 0;
   QABS.showDmg = _PARAMS['Show Damage'] === 'true';
 
@@ -388,18 +451,23 @@ function QABS() {
   QABS.aiSight = _PARAMS['AI Uses QSight'] === 'true';
   QABS.aiPathfind = _PARAMS['AI uses QPathfind'] === 'true';
 
-  QABS.skillKey = {};
-  for (var key in _PARAMS) {
-    var input = _PARAMS[key];
-    var skillN = /^Skill Key ([0-9]+)$/.exec(key);
-    if (skillN && input !== '') {
-      QABS.skillKey[skillN[1]] = {
-        input: input.split(',').map(function(s) { return s.trim(); }),
-        skillId: Number(_PARAMS[key + ' Skill']) || 0,
-        rebind: _PARAMS[key + ' Rebind'] === 'true'
+  QABS.getDefaultSkillKeys = function() {
+    var obj = {};
+    for (var key in _PARAMS) {
+      var input = _PARAMS[key];
+      var skillN = /^Skill Key ([0-9]+)$/.exec(key);
+      if (skillN && input !== '') {
+        obj[skillN[1]] = {
+          input: input.split(',').map(function(s) { return s.trim(); }),
+          skillId: Number(_PARAMS[key + ' Skill']) || 0,
+          rebind: _PARAMS[key + ' Rebind'] === 'true'
+        }
       }
     }
-  }
+    return obj;
+  };
+
+  QABS.skillKey = QABS.getDefaultSkillKeys();
 
   QABS.stringToSkillKeyObj = function(string) {
     var obj = QPlus.stringToObj(string);
@@ -996,13 +1064,10 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userMoveHere = function(action) {
-    var x1 = this._character.cx();
-    var y1 = this._character.cy();
-    var x2 = this._skill.collider.center.x;
-    var y2 = this._skill.collider.center.y;
-    var final = this.adjustPosition(x1, y1, x2, y2);
-    var dx = final.x - x1;
-    var dy = final.y - y1;
+    var center = this._character.centerWithCollider(this._skill.collider);
+    var final = this._character.adjustPosition(center.x, center.y);
+    var dx = final.x - this._character.px;
+    var dy = final.y - this._character.py;
     var radian = Math.atan2(dy, dx);
     var dist = Math.sqrt(dx * dx + dy * dy);
     var route = {
@@ -1025,22 +1090,33 @@ function Skill_Sequencer() {
 
   Skill_Sequencer.prototype.userJump = function(action) {
     var dist = Number(action[1]) || 0;
+    var x1 = x2 = this._character.px;
+    var y1 = y2 = this._character.py;
+    var dir = this._character._direction;
+    if (action[0] === 'backward') {
+      x2 -= dir === 6 ? dist : dir === 4 ? -dist : 0;
+      y2 -= dir === 2 ? dist : dir === 8 ? -dist : 0;
+    } else if (action[0] === 'forward') {
+      x2 += dir === 6 ? dist : dir === 4 ? -dist : 0;
+      y2 += dir === 2 ? dist : dir === 8 ? -dist : 0;
+    }
+    var final = this._character.adjustPosition(x2, y2);
+    var dx = final.x - x1;
+    var dy = final.y - y1;
+    dist = Math.sqrt(dx * dx + dy * dy);
     if (action[0] === 'backward') {
       this._character.pixelJumpBackward(dist);
-    } else if (action[0] === 'forward')  {
+    } else if (action[0] === 'forward') {
       this._character.pixelJumpForward(dist);
     }
     this._waitForUserJump = action[2] ? action[2] === 'true' : false;
   };
 
   Skill_Sequencer.prototype.userJumpHere = function(action) {
-    var x1 = this._character.cx();
-    var y1 = this._character.cy();
-    var x2 = this._skill.collider.center.x;
-    var y2 = this._skill.collider.center.y;
-    var final = this.adjustPosition(x1, y1, x2, y2);
-    var dx = final.x - x1;
-    var dy = final.y - y1;
+    var center = this._character.centerWithCollider(this._skill.collider);
+    var final = this._character.adjustPosition(center.x, center.y);
+    var dx = final.x - this._character.px;
+    var dy = final.y - this._character.py;
     this._character.pixelJump(dx, dy);
     this._waitForUserJump = action[0] ? action[0] === 'true' : false;
   };
@@ -1099,8 +1175,13 @@ function Skill_Sequencer() {
       radian += radian < 0 ? Math.PI * 2 : 0;
       var dir = this._character.radianToDirection(radian);
       if (action[0] === 'towards') {
-        dir = this.this._character.reverseDir(dir);
+        dir = this._character.reverseDir(dir);
         radian += Math.PI;
+      } else if (action[0] === 'into') {
+        var dxi = this._skill.collider.center.x - targets[i].cx();
+        var dyi = this._skill.collider.center.y - targets[i].cy();
+        radian = Math.atan2(dyi, dxi);
+        dist2 = Math.min(dist2, Math.sqrt(dxi * dxi + dyi * dyi));
       }
       var route = {
         list: [],
@@ -1129,14 +1210,24 @@ function Skill_Sequencer() {
     for (var i = 0; i < targets.length; i++) {
       var dist2 = dist - dist * eval('targets[i].battler().' + QABS.mrst);
       if (dist2 <= 0) return;
-      var dx = targets[i].cx() - this._character.cx();
-      var dy = targets[i].cy() - this._character.cy();
-      var radian = Math.atan2(dy, dx);
-      radian += radian < 0 ? Math.PI * 2 : 0;
-      var dir = this._character.radianToDirection(radian);
+      var radian = this._skill.radian;
       if (action[0] === 'towards') {
-        dir = this.this._character.reverseDir(dir);
+        radian += Math.PI;
+      } else if (action[0] === 'into') {
+        var dxi = this._skill.collider.center.x - targets[i].cx();
+        var dyi = this._skill.collider.center.y - targets[i].cy();
+        radian = Math.atan2(dyi, dxi);
+        dist2 = Math.min(dist2, Math.sqrt(dxi * dxi + dyi * dyi));
       }
+      var dx = Math.round(dist2 * Math.cos(radian));
+      var dy = Math.round(dist2 * Math.sin(radian));
+      var x1 = targets[i].px;
+      var y1 = targets[i].py;
+      var x2 = x1 + dx;
+      var y2 = y1 + dy;
+      var final = targets[i].adjustPosition(x2, y2);
+      dx = final.x - x1;
+      dy = final.y - y1;
       var lastDirectionFix = targets[i].isDirectionFixed();
       targets[i].setDirectionFix(true);
       targets[i].pixelJump(dx, dy);
@@ -1544,21 +1635,6 @@ function Skill_Sequencer() {
     }
   };
 
-  Skill_Sequencer.prototype.adjustPosition = function(xi, yi, xf, yf) {
-    var final = new Point(xf, yf);
-    var dx = xf - xi;
-    var dy = yf - yi;
-    var radian = Math.atan2(dy, dx);
-    var vx = Math.cos(radian) * this._character.moveTiles();
-    var vy = Math.sin(radian) * this._character.moveTiles();
-    while (!this._character.canPixelPass(final.x, final.y, 5, 'collision')) {
-      final.x -= vx;
-      final.y -= vy;
-    }
-    this._character.collider('collision').moveTo(xi, yi);
-    return final;
-  };
-
 })();
 
 //-----------------------------------------------------------------------------
@@ -1585,7 +1661,7 @@ function Skill_Sequencer() {
   var Alias_Game_System_initialize = Game_System.prototype.initialize;
   Game_System.prototype.initialize = function() {
     Alias_Game_System_initialize.call(this);
-    this._absKeys = JSON.parse(JSON.stringify(QABS.skillKey));
+    this._absKeys = QABS.getDefaultSkillKeys();
     this._absClassKeys = {};
     this._absWeaponKeys = {};
     this._absEnabled = true;
@@ -1626,6 +1702,8 @@ function Skill_Sequencer() {
   };
 
   Game_System.prototype.absKeys = function() {
+    // TODO cache this obj
+    // recache when a change is needed
     return Object.assign({},
       this._absKeys,
       this._absClassKeys,
@@ -2054,7 +2132,7 @@ function Skill_Sequencer() {
     this._noPopup = !!meta.noPopup;
     this._onDeath = meta.onDeath || '';
     this._dontErase = !!meta.dontErase;
-    this._team  = Number(meta.team) || 2;
+    this._team = Number(meta.team || 2);
   };
 
   Game_Enemy.prototype.clearStates = function() {
@@ -2301,7 +2379,11 @@ function Skill_Sequencer() {
     var meta = $dataSkills[skillId].qmeta;
     var before = meta.beforeSkill || '';
     if (before !== '') {
-      eval(before[1]);
+      try {
+        eval(before[1]);
+      } catch (e) {
+        console.error('Error with `beforeSkill` meta inside skill ' + skillId, e);
+      }
     }
   };
 
@@ -2464,7 +2546,7 @@ function Skill_Sequencer() {
   var Alias_Game_Player_onPositionChange = Game_Player.prototype.onPositionChange;
   Game_Player.prototype.onPositionChange = function() {
     Alias_Game_Player_onPositionChange.call(this);
-    if (this._groundTargeting) {
+    if (this._groundTargeting && !QABS.lockTargeting) {
       this.onTargetingCancel();
     }
   };
@@ -2580,8 +2662,7 @@ function Skill_Sequencer() {
     var y1 = $gameMap.canvasToMapPY(TouchInput.y);
     var x2 = x1 - w / 2;
     var y2 = y1 - h / 2;
-    var radian = Math.atan2(y1 - this.cy(), x1 - this.cx());
-    this.setDirection(this.radianToDirection(radian, QMovement.diagonal));
+    this.setRadian(Math.atan2(y1 - this.cy(), x1 - this.cx()));
     skill.collider.moveTo(x2, y2);
     skill.picture.move(x2 + w / 2, y2 + h / 2);
     var dx = Math.abs(this.cx() - x2 - w / 2);
@@ -2598,10 +2679,7 @@ function Skill_Sequencer() {
       var y1 = $gameMap.canvasToMapPY(TouchInput.y);
       var x2 = this.cx();
       var y2 = this.cy();
-      var radian = Math.atan2(y1 - y2, x1 - x2);
-      radian += radian < 0 ? Math.PI * 2 : 0;
-      this.setDirection(this.radianToDirection(radian, true));
-      this._radian = radian;
+      this.setRadian(Math.atan2(y1 - y2, x1 - x2));
     }
     Game_CharacterBase.prototype.beforeSkill.call(this, skillId);
   };
@@ -2686,6 +2764,15 @@ function Skill_Sequencer() {
     }, this)
   };
 
+  var Alias_Game_Event_bestTarget = Game_Event.prototype.bestTarget;
+  Game_Event.prototype.bestTarget = function() {
+    var best = Alias_Game_Event_bestTarget.call(this);
+    if (!best && this.team() === 2) {
+      return $gamePlayer;
+    }
+    return best;
+  };
+
   Game_Event.prototype.updateABS = function() {
     Game_CharacterBase.prototype.updateABS.call(this);
     if (!this._isDead && this.hasAI() && this.isNearTheScreen()) {
@@ -2696,8 +2783,7 @@ function Skill_Sequencer() {
   };
 
   Game_Event.prototype.updateAI = function() {
-    // TODO split up into 2-3 functions
-    var bestTarget = this.bestTarget() || $gamePlayer;
+    var bestTarget = this.bestTarget();
     if (!bestTarget) return;
     var targetId = bestTarget.charaId();
     if (this.isTargetInRange(bestTarget)) {
@@ -2717,9 +2803,7 @@ function Skill_Sequencer() {
         }
         // TODO maybe move randomly to search for
         // target again before ending its combat
-        console.log('start wait');
         this._endWait = this.wait(120).then(function() {
-          console.log('end wait');
           this._endWait = null;
           this.endCombat();
         }.bind(this))
@@ -2801,9 +2885,9 @@ function Skill_Sequencer() {
 
   Game_Event.prototype.respawn = function() {
     this._erased = false;
-    this.setupBattler();
-    this.findRespawnLocation();
     this.refresh();
+    this.findRespawnLocation();
+    this.setupBattler();
   };
 
   Game_Event.prototype.endCombat = function() {
@@ -2828,6 +2912,7 @@ function Skill_Sequencer() {
     var x = this.event().x * QMovement.tileSize;
     var y = this.event().y * QMovement.tileSize;
     var dist = this.moveTiles();
+    // TODO change this to a Dijkstra's algorithm
     while (true) {
       var stop;
       for (var i = 1; i < 5; i++) {
@@ -2849,7 +2934,14 @@ function Skill_Sequencer() {
 
   Game_Event.prototype.onDeath = function() {
     if (this._isDead) return;
-    if (this._onDeath) eval(this._onDeath);
+    if (this._onDeath) {
+      try {
+        eval(this._onDeath);
+      } catch (e) {
+        var id = this.battler()._enemyId;
+        console.error('Error with `onDeath` meta inside enemy ' + id, e);
+      } 
+    }
     if (this._agroList[0] > 0) {
       var exp = this.battler().exp();
       $gamePlayer.battler().gainExp(exp);
@@ -3078,6 +3170,10 @@ function Game_Loot() {
 
   Game_Loot.prototype.defaultColliderConfig = function() {
     return 'box,32,32,0,0';
+  };
+
+  Game_Loot.prototype.castsShadow = function() {
+    return false;
   };
 })();
 

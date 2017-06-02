@@ -313,11 +313,11 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  * ============================================================================
  * ## About
  * ============================================================================
- *
+ * A collider based action battle system for QMovement.
  * ============================================================================
  * ## How to use
  * ============================================================================
- *
+ * TODO
  * ----------------------------------------------------------------------------
  * **Sub section**
  * ----------------------------------------------------------------------------
@@ -369,15 +369,78 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  * animationTarget
  *
  * ============================================================================
+ * ## Enemy Notetags
+ * ============================================================================
+ * **Event**
+ * ----------------------------------------------------------------------------
+ * To mark an event as an enemy, add the notetag:
+ * ~~~
+ *  <enemy:X>
+ * ~~~
+ * Where X is the Id of the enemy in the database.
+ * ----------------------------------------------------------------------------
+ * **Enemy Database**
+ * ----------------------------------------------------------------------------
+ * To disable the enemy AI, add this notetag
+ * ~~~
+ *  <noAI>
+ * ~~~
+ *
+ * To disable damage popups on this enemy, add this notetag
+ * ~~~
+ *  <noPopup>
+ * ~~~
+ *
+ * To keep the event around after it dies, add this notetag
+ * ~~~
+ *  <dontErase>
+ * ~~~
+ *
+ * To run some JS when the enemy dies, add this notetag
+ * ~~~
+ *  <onDeath>
+ *  javascript code
+ *  </onDeath>
+ * ~~~~
+ *
+ * To change the team of the enemy, use this notetag
+ * ~~~
+ *  <team:X>
+ * ~~~
+ * Set X to the team.
+ * - 0: Neutral
+ * - 1: Player team
+ * - 2: Enemy team
+ * - 3+ can also be used
+ * *Note teams don't do much because there is no team based AI*
+ * ============================================================================
+ * ## State Notetags
+ * ============================================================================
+ * To have a state affect the characters move speed use:
+ * ~~~
+ *  <moveSpeed:X>
+ * ~~~
+ * Set X to the value to modify the move speed by. Can be negative.
+ *
+ * To disable a characters actions, use the following notetag. When disabled
+ * the character can't use any skills until the state is removed.
+ * ~~~
+ *  <stun>
+ * ~~~
+ * ============================================================================
  * ## Links
  * ============================================================================
  * RPGMakerWebs:
  *
- *   http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
+ *  http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
  *
  * Terms of use:
  *
- *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *  https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *
+ * Like my plugins? Support me on Patreon!
+ *
+ *  https://www.patreon.com/quxios
  *
  * @tags QM-Addon, ABS, Battle
  */

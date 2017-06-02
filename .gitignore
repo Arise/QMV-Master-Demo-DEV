@@ -43,3 +43,5 @@ app/js/plugins/QM+SetAngles.js
 app/js/plugins/QuasiABS.js
 app/js/plugins/QuasiABSGauges.js
 app/js/plugins/QuasiABSHudA.js
+app/js/plugins/YEP_SlipperyTiles.js
+app/js/plugins/YEP_RegionRestrictions.js

@@ -57,7 +57,7 @@
   var Alias_Game_Player_onPositionChange = Game_Player.prototype.onPositionChange;
   Game_Player.prototype.onPositionChange = function() {
     Alias_Game_Player_onPositionChange.call(this);
-    if (this._groundTargeting) {
+    if (this._groundTargeting && !QABS.lockTargeting) {
       this.onTargetingCancel();
     }
   };
@@ -173,8 +173,7 @@
     var y1 = $gameMap.canvasToMapPY(TouchInput.y);
     var x2 = x1 - w / 2;
     var y2 = y1 - h / 2;
-    var radian = Math.atan2(y1 - this.cy(), x1 - this.cx());
-    this.setDirection(this.radianToDirection(radian, QMovement.diagonal));
+    this.setRadian(Math.atan2(y1 - this.cy(), x1 - this.cx()));
     skill.collider.moveTo(x2, y2);
     skill.picture.move(x2 + w / 2, y2 + h / 2);
     var dx = Math.abs(this.cx() - x2 - w / 2);
@@ -191,10 +190,7 @@
       var y1 = $gameMap.canvasToMapPY(TouchInput.y);
       var x2 = this.cx();
       var y2 = this.cy();
-      var radian = Math.atan2(y1 - y2, x1 - x2);
-      radian += radian < 0 ? Math.PI * 2 : 0;
-      this.setDirection(this.radianToDirection(radian, true));
-      this._radian = radian;
+      this.setRadian(Math.atan2(y1 - y2, x1 - x2));
     }
     Game_CharacterBase.prototype.beforeSkill.call(this, skillId);
   };

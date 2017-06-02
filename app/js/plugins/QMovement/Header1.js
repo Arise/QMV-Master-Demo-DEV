@@ -3,18 +3,18 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.3.7';
+Imported.QMovement = '1.3.8';
 
-if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.3')) {
-  alert('Error: QMovement requires QPlus 1.2.3 or newer to work.');
-  throw new Error('Error: QMovement requires QPlus 1.2.3 or newer to work.');
+if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.4')) {
+  alert('Error: QMovement requires QPlus 1.3.4 or newer to work.');
+  throw new Error('Error: QMovement requires QPlus 1.3.4 or newer to work.');
 }
 
 //=============================================================================
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.3.7
+ * @author Quxios  | Version 1.3.8
  *
  * @repo https://github.com/quxios/QMovement
  *
@@ -231,7 +231,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.3')) {
  *  qmove(DIR, AMOUNT, MULTIPLER)
  * ~~~
  * - DIR: Set to a number representing the direction to move;
- *  - 2: left, 4: right, 8: up 2: down,
+ *  - 4: left, 6: right, 8: up 2: down,
  *  - 1: lower left, 3: lower right, 7: upper left, 9: upper right,
  *  - 5: current direction, 0: reverse direction
  * - AMOUNT: The amount to move in that direction, in pixels

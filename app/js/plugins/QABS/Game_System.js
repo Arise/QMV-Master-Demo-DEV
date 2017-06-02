@@ -5,7 +5,7 @@
   var Alias_Game_System_initialize = Game_System.prototype.initialize;
   Game_System.prototype.initialize = function() {
     Alias_Game_System_initialize.call(this);
-    this._absKeys = JSON.parse(JSON.stringify(QABS.skillKey));
+    this._absKeys = QABS.getDefaultSkillKeys();
     this._absClassKeys = {};
     this._absWeaponKeys = {};
     this._absEnabled = true;
@@ -46,6 +46,8 @@
   };
 
   Game_System.prototype.absKeys = function() {
+    // TODO cache this obj
+    // recache when a change is needed
     return Object.assign({},
       this._absKeys,
       this._absClassKeys,

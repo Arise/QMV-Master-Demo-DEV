@@ -11,7 +11,7 @@
     this._noPopup = !!meta.noPopup;
     this._onDeath = meta.onDeath || '';
     this._dontErase = !!meta.dontErase;
-    this._team  = Number(meta.team) || 2;
+    this._team = Number(meta.team || 2);
   };
 
   Game_Enemy.prototype.clearStates = function() {

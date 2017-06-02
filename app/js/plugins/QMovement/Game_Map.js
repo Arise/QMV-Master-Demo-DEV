@@ -170,6 +170,7 @@
     newBox.note      = boxData[4] || '';
     newBox.flag      = flag;
     newBox.terrain   = flag >> 12;
+    newBox.regionId  = this.regionId(x, y);
     newBox.isWater1  = flag >> 12 === QMovement.water1Tag || /<water1>/i.test(newBox.note);
     newBox.isWater2  = flag >> 12 === QMovement.water2Tag || /<water2>/i.test(newBox.note);
     newBox.isLadder  = (flag & 0x20)  || /<ladder>/i.test(newBox.note);

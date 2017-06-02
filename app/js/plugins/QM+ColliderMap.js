@@ -161,7 +161,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
     })
     .onError(function() {
       QMovement.colliderMap = {};
-      alert('Failed to load ' + this.url);
+      alert('Failed to load "data/ColliderMap.json"');
     })
 
   //-----------------------------------------------------------------------------

@@ -136,6 +136,7 @@
       "prototype - team - undefined",
       "prototype - hasAI - undefined",
       "prototype - usableSkills - undefined",
+      "alias - prototype - bestTarget - undefined",
       "prototype - updateABS - undefined",
       "prototype - updateAI - undefined",
       "prototype - updateRespawn - undefined",
@@ -175,6 +176,7 @@
   },
   "new": {
     "QABS": [
+      "static - getDefaultSkillKeys - undefined",
       "static - stringToSkillKeyObj - string",
       "static - getSkillSettings - skill",
       "static - getSkillSequence - skill",
@@ -251,8 +253,7 @@
       "prototype - updateSequence - undefined",
       "prototype - updateSkillDamage - undefined",
       "prototype - updateSkillPosition - undefined",
-      "prototype - updateSkillWavePosition - undefined",
-      "prototype - adjustPosition - xi, yi, xf, yf"
+      "prototype - updateSkillWavePosition - undefined"
     ],
     "Game_Loot": [
       "prototype - initialize - x, y",
@@ -266,7 +267,8 @@
       "prototype - collectDrops - undefined",
       "prototype - aoeCollect - undefined",
       "prototype - update - undefined",
-      "prototype - defaultColliderConfig - undefined"
+      "prototype - defaultColliderConfig - undefined",
+      "prototype - castsShadow - undefined"
     ],
     "Sprite_Icon": [
       "prototype - initialize - index, sheet, w, h",

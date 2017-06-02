@@ -180,4 +180,8 @@ function Game_Loot() {
   Game_Loot.prototype.defaultColliderConfig = function() {
     return 'box,32,32,0,0';
   };
+
+  Game_Loot.prototype.castsShadow = function() {
+    return false;
+  };
 })();

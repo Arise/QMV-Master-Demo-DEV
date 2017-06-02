@@ -47,6 +47,7 @@
       "alias - prototype - setPosition - x, y",
       "alias - prototype - copyPosition - character",
       "alias - prototype - setDirection - d",
+      "prototype - setRadian - radian",
       "prototype - moveTiles - undefined",
       "prototype - frameSpeed - multi",
       "prototype - angularSpeed - undefined",
@@ -121,7 +122,9 @@
       "prototype - deltaPXFrom - x",
       "prototype - deltaPYFrom - y",
       "prototype - pixelDistanceFrom - x, y",
-      "prototype - centerWith - character"
+      "prototype - centerWith - character",
+      "prototype - centerWithCollider - collider",
+      "prototype - adjustPosition - xf, yf"
     ],
     "Game_Player": [
       "alias - prototype - initMembers - undefined",

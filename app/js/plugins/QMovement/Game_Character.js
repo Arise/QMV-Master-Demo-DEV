@@ -228,17 +228,13 @@
   Game_Character.prototype.turnTowardCharacter = function(character) {
     var dx = this.deltaPXFrom(character.cx());
     var dy = this.deltaPYFrom(character.cy());
-    var radian = Math.atan2(-dy, -dx);
-    this.setDirection(this.radianToDirection(radian, QMovement.diagonal));
-    this._radian = radian;
+    this.setRadian(Math.atan2(-dy, -dx));
   };
 
   Game_Character.prototype.turnAwayFromCharacter = function(character) {
     var dx = this.deltaPXFrom(character.cx());
     var dy = this.deltaPYFrom(character.cy());
-    var radian = Math.atan2(dy, dx);
-    this.setDirection(this.radianToDirection(radian, QMovement.diagonal));
-    this._radian = radian;
+    this.setRadian(Math.atan2(dy, dx));
   };
 
   Game_Character.prototype.deltaPXFrom = function(x) {
@@ -260,8 +256,40 @@
     var dy1 = this.cy() - this._py;
     var dx2 = character.cx() - character._px;
     var dy2 = character.cy() - character._py;
-    var dx = dx1 - dx2;
-    var dy = dy1 - dy2;
+    var dx = dx2 - dx1;
+    var dy = dy2 - dy1;
     return new Point(character._px + dx, character._py + dy);
+  };
+
+  Game_Character.prototype.centerWithCollider = function(collider) {
+    var dx1 = this.cx() - this._px;
+    var dy1 = this.cy() - this._py;
+    var dx2 = collider.center.x - collider.x;
+    var dy2 = collider.center.y - collider.y;
+    var dx = dx2 - dx1;
+    var dy = dy2 - dy1;
+    return new Point(collider.x + dx, collider.y + dy);
+  };
+
+  Game_Character.prototype.adjustPosition = function(xf, yf) {
+    var dx = xf - this._px;
+    var dy = yf - this._py;
+    var radian = Math.atan2(dy, dx);
+    var distX = Math.cos(radian) * this.moveTiles();
+    var distY = Math.sin(radian) * this.moveTiles();
+    var final = new Point(xf, yf);
+    while (!this.canPixelPass(final.x, final.y, 5, 'collision')) {
+      final.x -= distX;
+      final.y -= distY;
+      dx = final.x - this._px;
+      dy = final.y - this._py;
+      if (Math.atan2(dy, dx) !== radian) {
+        final.x = this._px;
+        final.y = this._py;
+        break;
+      }
+    }
+    this.moveColliders(this._px, this._py);
+    return final;
   };
 })();
