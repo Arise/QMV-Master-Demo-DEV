@@ -81,10 +81,11 @@
       var qmove = /^qmove\((.*)\)/i.exec(params[0]);
       var qmove2 = /^qmove2\((.*)\)/i.exec(params[0]);
       var arc = /^arc\((.*)\)/i.exec(params[0]);
-      if (qmove) this.subQMove(qmove[1]);
-      if (qmove2) this.subQMove2(qmove2[1]);
-      if (arc) this.subArc(arc[1]);
-      if (qmove || qmove2 || arc) return true;
+      var arc2 = /^arc2\((.*)\)/i.exec(params[0]);
+      if (qmove) return this.subQMove(qmove[1]);
+      if (qmove2) return this.subQMove2(qmove2[1]);
+      if (arc) return this.subArc(arc[1]);
+      if (arc2) return this.subArc2(arc2[1]);
     }
     return false;
   };
@@ -94,6 +95,12 @@
     switch (command.code) {
       case 'arc': {
         this.arc(params[0], params[1], eval(params[2]), params[3], params[4]);
+        break;
+      }
+      case 'arc2': {
+        var x = params[0] + this.px;
+        var y = params[1] + this.py;
+        this.arc(x, y, eval(params[2]), params[3], params[4]);
         break;
       }
       case 'fixedRadianMove': {
@@ -120,6 +127,15 @@
     cmd.code = 'arc';
     cmd.parameters = QPlus.stringToAry(settings);
     this._moveRoute.list[this._moveRouteIndex] = cmd;
+    return true;
+  };
+
+  Game_Character.prototype.subArc2 = function(settings) {
+    var cmd = {};
+    cmd.code = 'arc2';
+    cmd.parameters = QPlus.stringToAry(settings);
+    this._moveRoute.list[this._moveRouteIndex] = cmd;
+    return true;
   };
 
   Game_Character.prototype.subQMove = function(settings) {
@@ -161,6 +177,7 @@
       this._moveRoute.list.splice(this._moveRouteIndex + 1 + i, 0, cmd);
     }
     this._moveRoute.list.splice(this._moveRouteIndex, 1);
+    return true;
   };
 
   Game_Character.prototype.subQMove2 = function(settings) {
@@ -184,6 +201,7 @@
       this._moveRoute.list.splice(this._moveRouteIndex + 1 + i, 0, cmd);
     }
     this._moveRoute.list.splice(this._moveRouteIndex, 1);
+    return true;
   };
 
   Game_Character.prototype.moveRandom = function() {
@@ -228,6 +246,19 @@
   Game_Character.prototype.turnTowardCharacter = function(character) {
     var dx = this.deltaPXFrom(character.cx());
     var dy = this.deltaPYFrom(character.cy());
+    this.setRadian(Math.atan2(-dy, -dx));
+  };
+
+  Game_Character.prototype.turnTowardCharacterForward = function(character, dt) {
+    if (!character.isMoving()) {
+      return this.turnTowardCharacter(character);
+    }
+    dt = dt || 1;
+    var forward = character.forwardV();
+    var x = character.cx() + (forward.x * dt);
+    var y = character.cy() + (forward.y * dt);
+    var dx = this.deltaPXFrom(x);
+    var dy = this.deltaPYFrom(y);
     this.setRadian(Math.atan2(-dy, -dx));
   };
 

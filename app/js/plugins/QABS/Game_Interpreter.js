@@ -11,6 +11,25 @@
   };
 
   Game_Interpreter.prototype.qABSCommand = function(args) {
-    // TODO
+    var cmd = args.shift().toLowerCase();
+    if (cmd === 'disable' || cmd === 'enable') {
+      if (args.length === 0) {
+        $gameSystem._absEnabled = cmd === 'enable';
+      } else {
+        for (var i = 0; i < args.length; i++) {
+          var chara = QPlus.getCharacter(args[i]);
+          if (chara.constructor === Game_Event) {
+            var id = chara.eventId();
+            var mapId = chara._mapId;
+            if (cmd === 'enable') {
+              $gameSystem.enableEnemy(mapId, id);
+            } else {
+              $gameSystem.disableEnemy(mapId, id);
+            }
+          }
+        }
+      }
+      return;
+    }
   };
 })();

@@ -78,7 +78,12 @@ function QABS() {
   QABS.getSkillSettings = function(skill) {
     if (!this._skillSettings.hasOwnProperty(skill.id)) {
       var settings = skill.qmeta.absSettings;
-      this._skillSettings[skill.id] = false;
+      this._skillSettings[skill.id] = {
+        cooldown: 0,
+        through: 0,
+        groundTarget: false,
+        selectTarget: false
+      }
       if (settings) {
         settings = QPlus.stringToObj(settings);
         Object.assign(settings, {
@@ -156,7 +161,8 @@ function QABS() {
       var dist = 0;
       var maxDist = 0;
       actions.forEach(function(action) {
-        var match = /^move(.*)/i.exec(action);
+        // TODO calc for moveToStored / waveToStored
+        var match = /^[move|wave](.*)/i.exec(action);
         if (match) {
           match = match[1].trim();
           match = match.split(' ');
@@ -173,19 +179,4 @@ function QABS() {
     return this._aiRange[skill.id];
   };
 
-  QABS.enable = function() {
-    $gameSystem._absEnabled = true;
-  };
-
-  QABS.disable = function() {
-    $gameSystem._absEnabled = false;
-  };
-
-  QABS.debug = function() {
-    $dataSkills.forEach(function(skill) {
-      if (skill) {
-        $gameParty.leader().learnSkill(skill.id);
-      }
-    })
-  };
 })();

@@ -36,6 +36,9 @@
   };
 
   Game_Player.prototype.canInput = function() {
+    if ($gameMap.isEventRunning() || $gameMessage.isBusy()) {
+      return false;
+    }
     return this.canInputSkill() && !this._groundTargeting;
   };
 
@@ -87,12 +90,12 @@
       var inputs = absKeys[key].input;
       for (var i = 0; i < inputs.length; i++) {
         var input = inputs[i];
-        if (Input.isTriggered(input)) {
+        if (Input.isTriggered(input) || Input.isPressed(input)) {
           Input.stopPropagation();
           this.useSkill(absKeys[key].skillId);
           break;
         }
-        if (input === 'mouse1' && TouchInput.isTriggered() && this.canClick()) {
+        if (input === 'mouse1' && (TouchInput.isTriggered() || TouchInput.isPressed()) && this.canClick()) {
           TouchInput.stopPropagation();
           this.useSkill(absKeys[key].skillId);
           break;
@@ -169,8 +172,12 @@
     var skill = this._groundTargeting;
     var w = skill.collider.width;
     var h = skill.collider.height;
-    var x1 = $gameMap.canvasToMapPX(TouchInput.x);
-    var y1 = $gameMap.canvasToMapPY(TouchInput.y);
+    if (Imported.QInput && Input.preferGamepad()) {
+      // TODO move collider with right analog
+    } else {
+      var x1 = $gameMap.canvasToMapPX(TouchInput.x);
+      var y1 = $gameMap.canvasToMapPY(TouchInput.y);
+    }
     var x2 = x1 - w / 2;
     var y2 = y1 - h / 2;
     this.setRadian(Math.atan2(y1 - this.cy(), x1 - this.cx()));
@@ -185,7 +192,11 @@
 
   Game_Player.prototype.beforeSkill = function(skillId) {
     var skill = $dataSkills[skillId];
-    if (QABS.towardsMouse && !skill.meta.dontTurn) {
+    var towardsMouse = QABS.towardsMouse;
+    if (Imported.QInput && Input.preferGamepad()) {
+      towardsMouse = false;
+    }
+    if (towardsMouse && !skill.meta.dontTurn) {
       var x1 = $gameMap.canvasToMapPX(TouchInput.x);
       var y1 = $gameMap.canvasToMapPY(TouchInput.y);
       var x2 = this.cx();

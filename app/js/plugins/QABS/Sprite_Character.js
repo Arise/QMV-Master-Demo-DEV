@@ -68,7 +68,7 @@
       var preset = $gameSystem.qPopupPreset('QABS-DMG');
       var sprite = QPopup.start({
         string: string,
-        oy: -(this.height - 20),
+        //oy: -(this.patternHeight() - 20), TODO add an OY meta?
         bindTo: this._character.charaId(),
         duration: 80,
         transitions: preset.transitions || [fadeout, slideup],

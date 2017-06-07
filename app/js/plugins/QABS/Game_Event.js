@@ -246,7 +246,7 @@
       } catch (e) {
         var id = this.battler()._enemyId;
         console.error('Error with `onDeath` meta inside enemy ' + id, e);
-      } 
+      }
     }
     if (this._agroList[0] > 0) {
       var exp = this.battler().exp();
@@ -283,7 +283,7 @@
   };
 
   Game_Event.prototype.onTargetingEnd = function() {
-    var skill  = this._groundTargeting;
+    var skill = this._groundTargeting;
     var target = skill.targets[Math.floor(Math.random() * skill.targets.length)];
     var w = skill.collider.width;
     var h = skill.collider.height;

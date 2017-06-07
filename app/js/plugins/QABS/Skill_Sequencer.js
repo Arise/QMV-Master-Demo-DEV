@@ -6,7 +6,6 @@ function Skill_Sequencer() {
 }
 
 (function() {
-  Skill_Sequencer.prototype.constructor = Skill_Sequencer;
 
   Skill_Sequencer.prototype.initialize = function(character, skill) {
     this._character = character;
@@ -17,9 +16,9 @@ function Skill_Sequencer() {
     var cmd = action.shift().toLowerCase();
     switch (cmd) {
       case 'user': {
-          this.startUserAction(action);
-          break;
-        }
+        this.startUserAction(action);
+        break;
+      }
       case 'store': {
         this.actionStore();
         break;
@@ -67,6 +66,10 @@ function Skill_Sequencer() {
       }
       case 'se': {
         this.actionSE(action);
+        break;
+      }
+      case 'qaudio': {
+        this.actionQAudio(action);
         break;
       }
       case 'globallock': {
@@ -199,6 +202,8 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.userLock = function() {
+    var i = this._character._skillLocked.indexOf(this._skill);
+    if (i >= 0) return;
     this._character._skillLocked.push(this._skill);
   };
 
@@ -226,11 +231,14 @@ function Skill_Sequencer() {
       repeat: false,
       skippable: true,
       wait: false
-    };
-    var dir = action[0] === 'backward' ? 0 : 5;
+    }
+    var radian = this._character._radian;
+    if (action[0] === 'backward') {
+      radian -= Math.PI / 2;
+    }
     route.list.push({
       code: Game_Character.ROUTE_SCRIPT,
-      parameters: ['qmove(' + dir + ',' + dist + ')']
+      parameters: ['qmove2(' + radian + ',' + dist + ')']
     });
     route.list.push({
       code: 0
@@ -318,7 +326,7 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.userPose = function(action) {
     if (Imported.QSprite) {
       this._character.playPose(action[0]);
-      this._waitForPose = action[1] === 'true';
+      this._waitForUserPose = action[1] === 'true';
     }
   };
 
@@ -581,7 +589,41 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.actionQAudio = function(action) {
-    // TODO
+    if (!Imported.QAudio) return;
+    var x = this._skill.collider.center.x;
+    var y = this._skill.collider.center.x;
+    var id = Game_Interpreter.prototype.getUniqueQAudioId.call();
+    var name = action[0];
+    var loop = !!QPlus.getArg(action, /^loop$/i);
+    var dontPan = !!QPlus.getArg(action, /^noPan$/i);
+    var fadein = QPlus.getArg(action, /^fadein(\d+)/i);
+    var type = QPlus.getArg(action, /^(bgm|bgs|me|se)$/i) || 'bgm';
+    type = type.toLowerCase();
+    var max = QPlus.getArg(action, /^max(\d+)/i);
+    if (max === null) {
+      max = 90;
+    }
+    max /= 100;
+    var radius = QPlus.getArg(action, /^radius(\d+)/i);
+    if (radius === null) {
+      radius = 5;
+    }
+    var audio = {
+      name: name,
+      volume: 100,
+      pitch: 0,
+      pan: 0
+    }
+    AudioManager.playQAudio(id, audio, {
+      type: type,
+      loop: loop,
+      maxVolume: Number(max),
+      radius: Number(radius),
+      x: x / QMovement.tileSize,
+      y: y / QMovement.tileSize,
+      doPan: !dontPan,
+      fadeIn: Number(fadein) || 0
+    })
   };
 
   Skill_Sequencer.prototype.actionMoveSkill = function(distance, duration) {
@@ -627,10 +669,9 @@ function Skill_Sequencer() {
     var through = this._skill.settings.through;
     var targets = QABSManager.getTargets(this._skill, this._character);
     if (targets.length > 0) {
-      // remove targets that have already been hit
       for (var i = targets.length - 1; i >= 0; i--) {
-        if (!this._skill.targetsHit.contains(targets[i].battler()._charaId)) {
-          this._skill.targetsHit.push(targets[i].battler()._charaId);
+        if (!this._skill.targetsHit.contains(targets[i].charaId())) {
+          this._skill.targetsHit.push(targets[i].charaId());
         } else {
           targets.splice(i, 1);
         }
@@ -639,11 +680,13 @@ function Skill_Sequencer() {
         this._skill.targets = targets;
         if (through === 1 || through === 3) {
           collided = true;
+          // TODO select the nearest target
           this._skill.targets = [targets[0]];
         }
         this.updateSkillDamage();
       }
     }
+    if (collided) return false;
     var edge = this._skill.collider.gridEdge();
     var maxW = $gameMap.width();
     var maxH = $gameMap.height();
@@ -653,12 +696,10 @@ function Skill_Sequencer() {
     if (!$gameMap.isLoopVertical()) {
       if (edge.y2 < 0 || edge.y1 >= maxH) return false;
     }
-    if (!collided && (through === 2 || through === 3)) {
+    if (through === 2 || through === 3) {
       ColliderManager.getCollidersNear(this._skill.collider, function(collider) {
         if (collider === this._skill.collider) return false;
-        if (this._skill.settings.overwater && (collider.isWater1 || collider.isWater2)) {
-          return false;
-        }
+        // TODO add ignorable terrains
         if (this._skill.collider.intersects(collider)) {
           collided = true;
           return 'break';
@@ -668,9 +709,10 @@ function Skill_Sequencer() {
     return !collided;
   };
 
-  Skill_Sequencer.prototype.isWaitingForCharacter = function() {
-    return (this._waitForMove || this._waitForUserMove ||
-      this._waitForUserJump || this._waitForPose);
+  Skill_Sequencer.prototype.isWaiting = function() {
+    return this._waitCount > 0 || this._waitForMove ||
+      this._waitForUserMove || this._waitForUserJump ||
+      this._waitForUserJump || this._waitForUserPose;
   };
 
   Skill_Sequencer.prototype.onBreak = function() {
@@ -698,29 +740,36 @@ function Skill_Sequencer() {
     if (this._skill.moving) {
       this.updateSkillPosition();
     }
-    if (this._waitCount > 0) {
-      return this._waitCount--;
+    if (!this.isWaiting()) {
+      this.updateSequence();
+    } else {
+      this.updateWait();
     }
-    this.updateWaitingForCharacter();
-    if (this.isWaitingForCharacter()) {
-      return;
-    }
-    this.updateSequence();
   };
 
-  Skill_Sequencer.prototype.updateWaitingForCharacter = function() {
-    if (this._waitForUserMove || this._waitForUserJump || this._waitForPose) {
-      if (!this._character.isMoving())   this._waitForUserMove = false;
-      if (!this._character.isJumping())  this._waitForUserJump = false;
-      if (!this._character._posePlaying) this._waitForPose = false;
+  Skill_Sequencer.prototype.updateWait = function() {
+    if (this._waitCount > 0) {
+      this._waitCount--;
+    }
+    if (this._waitForUserMove && !this._character.isMoving()) {
+      this._waitForUserMove = false;
+    }
+    if (this._waitForUserJump && !this._character.isJumping()) {
+      this._waitForUserJump = false;
+    }
+    if (this._waitForUserPose && !this._character._posePlaying) {
+      this._waitForUserPose = false;
     }
   };
 
   Skill_Sequencer.prototype.updateSequence = function() {
-    var sequence = this._skill.sequence.shift();
-    if (sequence) {
-      var action = sequence.split(' ');
+    var sequence = this._skill.sequence;
+    while (sequence.length !== 0) {
+      var action = QPlus.makeArgs(sequence.shift());
       this.startAction(action);
+      if (this.isWaiting()) {
+        break;
+      }
     }
     if (this._skill.sequence.length === 0 && !this._skill.moving) {
       return this.onEnd();

@@ -160,8 +160,8 @@
 
   var Alias_Game_CharacterBase_update = Game_CharacterBase.prototype.update;
   Game_CharacterBase.prototype.update = function() {
-    if (this.battler()) this.updateABS();
     Alias_Game_CharacterBase_update.call(this);
+    if (this.battler()) this.updateABS();
   };
 
   Game_CharacterBase.prototype.updateABS = function() {
@@ -251,10 +251,7 @@
       data: data,
       settings: QABS.getSkillSettings(data),
       sequence: QABS.getSkillSequence(data),
-      ondmg: QABS.getSkillOnDamage(data)
-    }
-    if (!skill.settings || data.scope === 0) return;
-    Object.assign(skill, {
+      ondmg: QABS.getSkillOnDamage(data),
       collider: this.makeSkillCollider(skill.settings),
       sequencer: new Skill_Sequencer(this, skill),
       direction: this._direction,
@@ -262,7 +259,7 @@
       radian: this._radian,
       targetsHit: [],
       forced: forced
-    })
+    }
     if (skill.settings.groundTarget || skill.settings.selectTarget) {
       return this.makeTargetingSkill(skill);
     }
@@ -280,22 +277,16 @@
     skill.targeting.moveTo(this.cx() - diameter / 2, this.cy() - diameter / 2);
     ColliderManager.draw(skill.targeting, -1);
     skill.collider = skill.targeting;
-    this._groundTargeting.targets = QABSManager.getTargets(skill, this);
+    skill.targets = QABSManager.getTargets(skill, this);
     skill.collider = collider;
     skill.picture = new Sprite_SkillCollider(skill.collider);
     if (this._selectTargeting) {
-      if (this._groundTargeting.targets.length === 0 ) {
+      if (skill.targets.length === 0 ) {
         return this.onTargetingCancel();
       }
-      var target = this._groundTargeting.targets[0];
-      var w = skill.collider.width;
-      var h = skill.collider.height;
-      var x = target.cx() - w / 2;
-      var y = target.cy() - h / 2;
       skill.collider.color = '#00ff00';
-      skill.collider.moveTo(x, y);
-      skill.picture.move(x + w / 2, y + h / 2);
       skill.index = 0;
+      this.updateSkillTarget();
     } else {
       var x = $gameMap.canvasToMapPX(TouchInput.x) - skill.collider.width / 2;
       var y = $gameMap.canvasToMapPY(TouchInput.y) - skill.collider.height / 2;

@@ -33,6 +33,7 @@
     this._realPX = 0;
     this._realPY = 0;
     this._radian = this.directionToRadian(this._direction);
+    this._forwardRadian = this.directionToRadian(this._direction);
     this._adjustFrameSpeed = false;
     this._freqCount = 0;
     this._diagonal = false;
@@ -120,7 +121,6 @@
   };
 
   Game_CharacterBase.prototype.setRadian = function(radian) {
-    if (this.isDirectionFixed()) return;
     radian = QPlus.adjustRadian(radian);
     this.setDirection(this.radianToDirection(radian, QMovement.diagonal));
     this._radian = radian;
@@ -140,6 +140,13 @@
 
   Game_CharacterBase.prototype.angularSpeed = function() {
     return this._angularSpeed || this.frameSpeed() / this._radiusL;
+  };
+
+  Game_CharacterBase.prototype.forwardV = function() {
+    return {
+      x: Math.cos(this._forwardRadian) * this.frameSpeed(),
+      y: Math.sin(this._forwardRadian) * this.frameSpeed()
+    }
   };
 
   var Alias_Game_CharacterBase_canMove = Game_CharacterBase.prototype.canMove;
@@ -316,8 +323,13 @@
   };
 
   Game_CharacterBase.prototype.checkEventTriggerTouchFront = function(d) {
-    var x2 = $gameMap.roundPXWithDirection(this.px, d, this.moveTiles());
-    var y2 = $gameMap.roundPYWithDirection(this.py, d, this.moveTiles());
+    var horz = vert = d;
+    if ([1,3,7,9].contains(d)) {
+      horz = (d === 1 || d === 7) ? 4 : 6;
+      vert = (d === 1 || d === 3) ? 2 : 8;
+    }
+    var x2 = $gameMap.roundPXWithDirection(this.px, horz, this.moveTiles());
+    var y2 = $gameMap.roundPYWithDirection(this.py, vert, this.moveTiles());
     this.checkEventTriggerTouch(x2, y2);
   };
 
@@ -489,29 +501,29 @@
     this.setDirectionFix(lastDirectionFix);
   };
 
-  Game_CharacterBase.prototype.moveStraight = function(d, dist) {
+  Game_CharacterBase.prototype.moveStraight = function(dir, dist) {
     dist = dist || this.moveTiles();
-    this.setMovementSuccess(this.canPixelPass(this._px, this._py, d, dist));
+    this.setMovementSuccess(this.canPixelPass(this._px, this._py, dir, dist));
     var originalSpeed = this._moveSpeed;
     if (this.smartMove() === 1 || this.smartMove() > 2) {
-      this.smartMoveSpeed(d);
-      dist = this.moveTiles();
+      this.smartMoveSpeed(dir);
     }
-    this.setDirection(d);
+    this.setDirection(dir);
     if (this.isMovementSucceeded()) {
+      this._forwardRadian = this.directionToRadian(dir);
       this._diagonal = false;
       this._adjustFrameSpeed = false;
-      this._px = $gameMap.roundPXWithDirection(this._px, d, dist);
-      this._py = $gameMap.roundPYWithDirection(this._py, d, dist);
-      this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(d), dist);
-      this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(d), dist);
+      this._px = $gameMap.roundPXWithDirection(this._px, dir, dist);
+      this._py = $gameMap.roundPYWithDirection(this._py, dir, dist);
+      this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(dir), dist);
+      this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(dir), dist);
       this.increaseSteps();
     } else {
-      this.checkEventTriggerTouchFront(d);
+      this.checkEventTriggerTouchFront(dir);
     }
     this._moveSpeed = originalSpeed;
     if (!this.isMovementSucceeded() && this.smartMove() > 1) {
-      this.smartMoveDir8(d);
+      this.smartMoveDir8(dir);
     }
   };
 
@@ -519,15 +531,20 @@
     dist = dist || this.moveTiles();
     this.setMovementSuccess(this.canPixelPassDiagonally(this._px, this._py, horz, vert, dist));
     var originalSpeed = this._moveSpeed;
-    if (this.smartMove() === 1 || this.smartMove() > 2) this.smartMoveSpeed([horz, vert]);
+    if (this.smartMove() === 1 || this.smartMove() > 2) {
+      this.smartMoveSpeed([horz, vert]);
+    }
     this.setDirection(this.direction8(horz, vert));
     if (this.isMovementSucceeded()) {
+      this._forwardRadian = this.directionToRadian(this.direction8(horz, vert));
       this._adjustFrameSpeed = false;
-      this._px = $gameMap.roundPXWithDirection(this._px, horz, this.moveTiles());
-      this._py = $gameMap.roundPYWithDirection(this._py, vert, this.moveTiles());
-      this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(horz), this.moveTiles());
-      this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(vert), this.moveTiles());
+      this._px = $gameMap.roundPXWithDirection(this._px, horz, dist);
+      this._py = $gameMap.roundPYWithDirection(this._py, vert, dist);
+      this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(horz), dist);
+      this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(vert), dist);
       this.increaseSteps();
+    } else {
+      this.checkEventTriggerTouchFront(this.direction8(horz, vert));
     }
     this._moveSpeed = originalSpeed;
     if (!this.isMovementSucceeded() && this.smartMove() > 1) {
@@ -564,19 +581,17 @@
   };
 
   Game_CharacterBase.prototype.fixedMove = function(dir, dist) {
+    dist = dist || this.moveTiles();
     dir = dir === 5 ? this.direction() : dir;
     if ([1, 3, 7, 9].contains(dir)) {
-      var diag = {
-        1: [4, 2],
-        3: [6, 2],
-        7: [4, 8],
-        9: [6, 8]
-      }
-      return this.fixedDiagMove(diag[dir][0], diag[dir][1], dist);
+      var horz = (dir === 1 || dir === 7) ? 4 : 6;
+      var vert = (dir === 1 || dir === 3) ? 2 : 8;
+      return this.fixedDiagMove(horz, vert, dist);
     }
     this.setMovementSuccess(this.canPixelPass(this._px, this._py, dir, dist));
     this.setDirection(dir);
     if (this.isMovementSucceeded()) {
+      this._forwardRadian = this.directionToRadian(dir);
       this._adjustFrameSpeed = false;
       this._px = $gameMap.roundPXWithDirection(this._px, dir, dist);
       this._py = $gameMap.roundPYWithDirection(this._py, dir, dist);
@@ -589,22 +604,25 @@
   };
 
   Game_CharacterBase.prototype.fixedDiagMove = function(horz, vert, dist) {
+    dist = dist || this.moveTiles();
     this.setMovementSuccess(this.canPixelPassDiagonally(this._px, this._py, horz, vert));
     this.setDirection(this.direction8(horz, vert));
     if (this.isMovementSucceeded()) {
+      this._forwardRadian = this.directionToRadian(this.direction8(horz, vert));
       this._adjustFrameSpeed = false;
       this._px = $gameMap.roundPXWithDirection(this._px, horz, dist);
       this._py = $gameMap.roundPYWithDirection(this._py, vert, dist);
       this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(horz), dist);
       this._realPY = $gameMap.pyWithDirection(this._py, this.reverseDir(vert), dist);
       this.increaseSteps();
+    } else {
+      this.checkEventTriggerTouchFront(this.direction8(horz, vert));
     }
   };
 
   Game_CharacterBase.prototype.fixedRadianMove = function(radian, dist) {
     dist = dist || this.moveTiles();
-    var realDir = this.radianToDirection(radian, true);
-    var dir = this.radianToDirection(radian);
+    var dir = this.radianToDirection(radian, true);
     var xAxis = Math.cos(radian);
     var yAxis = Math.sin(radian);
     var horzSteps = Math.abs(xAxis) * dist;
@@ -613,11 +631,11 @@
     var vert = yAxis > 0 ? 2 : yAxis < 0 ? 8 : 0;
     var x2 = $gameMap.roundPXWithDirection(this._px, horz, horzSteps);
     var y2 = $gameMap.roundPYWithDirection(this._py, vert, vertSteps);
-    this.setMovementSuccess(this.canPassToFrom(x2, y2, this._px, this._py, null));
-    this.setDirection(realDir);
+    this.setMovementSuccess(this.canPassToFrom(x2, y2, this._px, this._py));
+    this.setRadian(radian);
     if (this.isMovementSucceeded()) {
+      this._forwardRadian = QPlus.adjustRadian(radian);
       this._adjustFrameSpeed = true;
-      this._radian = radian;
       this._px = x2;
       this._py = y2;
       this._realPX = $gameMap.pxWithDirection(this._px, this.reverseDir(horz), horzSteps);
@@ -702,12 +720,14 @@
     collider.moveTo(x1, y1);
     if (collided) return;
     collider.moveTo(x2, y2);
+    var radian = QPlus.adjustRadian(Math.atan2(y2 - y1, x2 - x1));
+    this._forwardRadian = radian;
     this._px = x2;
     this._py = y2;
     this._realPX = x1;
     this._realPY = y1;
     this._adjustFrameSpeed = false;
-    this.setRadian(Math.atan2(y2 - y1, x2 - x1));
+    this.setRadian(radian);
     this.increaseSteps();
   };
 
@@ -732,7 +752,7 @@
         vert = yAxis > 0 ? 2 : yAxis < 0 ? 8 : 0;
         x2 = $gameMap.roundPXWithDirection(this._px, horz, horzSteps);
         y2 = $gameMap.roundPYWithDirection(this._py, vert, vertSteps);
-        pass = this.canPassToFrom(x2, y2, this._px, this._py, null);
+        pass = this.canPassToFrom(x2, y2, this._px, this._py);
         if (pass) break;
       }
       if (pass) break;

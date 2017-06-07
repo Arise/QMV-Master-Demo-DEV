@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.3.8';
+Imported.QMovement = '1.3.9';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.4')) {
   alert('Error: QMovement requires QPlus 1.3.4 or newer to work.');
@@ -14,7 +14,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.4')) {
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.3.8
+ * @author Quxios  | Version 1.3.9
  *
  * @repo https://github.com/quxios/QMovement
  *

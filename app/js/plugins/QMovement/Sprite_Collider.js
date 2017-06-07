@@ -22,14 +22,16 @@ function Sprite_Collider() {
     this._cache = {
       color: this._collider.color,
       width: this._collider.width,
-      height: this._collider.height
+      height: this._collider.height,
+      radian: this._collider._radian
     }
   };
 
   Sprite_Collider.prototype.needsRedraw = function() {
     return this._cache.width !== this._collider.width ||
       this._cache.height !== this._collider.height ||
-      this._cache.color !== this._collider.color
+      this._cache.color !== this._collider.color ||
+      this._cache.radian !== this._collider._radian
   };
 
   Sprite_Collider.prototype.setupCollider = function(collider) {
