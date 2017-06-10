@@ -222,26 +222,20 @@
     if (this._groundTargeting) {
       this.onTargetingCancel();
     }
-    this.beforeSkill(skillId);
     this.forceSkill(skillId);
-    this.afterSkill(skillId);
-  };
-
-  Game_CharacterBase.prototype.beforeSkill = function(skillId) {
-    var meta = $dataSkills[skillId].qmeta;
-    var before = meta.beforeSkill || '';
-    if (before !== '') {
-      try {
-        eval(before[1]);
-      } catch (e) {
-        console.error('Error with `beforeSkill` meta inside skill ' + skillId, e);
-      }
+    if (!this._groundTargeting) {
+      this.battler().paySkillCost($dataSkills[skillId]);
     }
   };
 
-  Game_CharacterBase.prototype.afterSkill = function(skillId) {
-    if (!this._groundTargeting) {
-      this.battler().paySkillCost($dataSkills[skillId]);
+  Game_CharacterBase.prototype.beforeSkill = function(skill) {
+    var before = skill.data.qmeta.beforeSkill || '';
+    if (before !== '') {
+      try {
+        eval(before);
+      } catch (e) {
+        console.error('Error with `beforeSkill` meta inside skill ' + skill.data.id, e);
+      }
     }
   };
 
@@ -252,14 +246,13 @@
       settings: QABS.getSkillSettings(data),
       sequence: QABS.getSkillSequence(data),
       ondmg: QABS.getSkillOnDamage(data),
-      collider: this.makeSkillCollider(skill.settings),
-      sequencer: new Skill_Sequencer(this, skill),
-      direction: this._direction,
-      userDirection: this._direction,
       radian: this._radian,
       targetsHit: [],
       forced: forced
     }
+    this.beforeSkill(skill);
+    skill.sequencer = new Skill_Sequencer(this, skill);
+    skill.collider = this.makeSkillCollider(skill.settings);
     if (skill.settings.groundTarget || skill.settings.selectTarget) {
       return this.makeTargetingSkill(skill);
     }

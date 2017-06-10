@@ -190,20 +190,39 @@
     skill.collider.color = skill.isOk ? '#00ff00' : '#ff0000';
   };
 
-  Game_Player.prototype.beforeSkill = function(skillId) {
-    var skill = $dataSkills[skillId];
-    var towardsMouse = QABS.towardsMouse;
-    if (Imported.QInput && Input.preferGamepad()) {
-      towardsMouse = false;
-    }
-    if (towardsMouse && !skill.meta.dontTurn) {
+  Game_Player.prototype.beforeSkill = function(skill) {
+    var meta = skill.data.qmeta;
+    var isGamepad = Imported.QInput && Input.preferGamepad();
+    var towardsMouse = QABS.towardsMouse && !isGamepad;
+    if (towardsMouse && !meta.dontTurn) {
       var x1 = $gameMap.canvasToMapPX(TouchInput.x);
       var y1 = $gameMap.canvasToMapPY(TouchInput.y);
       var x2 = this.cx();
       var y2 = this.cy();
       this.setRadian(Math.atan2(y1 - y2, x1 - x2));
+      skill.radian = this._radian;
     }
-    Game_CharacterBase.prototype.beforeSkill.call(this, skillId);
+    if (meta.towardsMove) {
+      var radian;
+      if (isGamepad) {
+        var horz = Input._dirAxesA.x;
+        var vert = Input._dirAxesA.y;
+        if (horz === 0 && vert === 0) {
+          radian = skill.radian;
+        } else {
+          radian = Math.atan2(vert, horz);
+        }
+      } else {
+        var direction = QMovement.diagonal ? Input.dir8 : Input.dir4;
+        if (direction === 0) {
+          radian = skill.radian;
+        } else {
+          radian = this.directionToRadian(direction);
+        }
+      }
+      skill.radian = radian;
+    }
+    Game_CharacterBase.prototype.beforeSkill.call(this, skill);
   };
 
   var Alias_Game_Player_requestMouseMove = Game_Player.prototype.requestMouseMove;

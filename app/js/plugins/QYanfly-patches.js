@@ -67,7 +67,7 @@ Imported.QYanflyPatches = '1.0.2';
           if ($gameMap.isEventRunning()) return;
           if (this.onSlipperyFloor() && !this.startedMoving()) {
             $gameTemp.clearDestination();
-      			this.moveStraight(this._direction);
+      			this.moveRadian(this._radian);
           }
       };
     }

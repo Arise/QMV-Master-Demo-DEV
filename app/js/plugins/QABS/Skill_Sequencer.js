@@ -451,9 +451,9 @@ function Skill_Sequencer() {
       radian -= Math.PI / 2;
     }
     radian += radian < 0 ? Math.PI * 2 : 0;
+    this._waitForMove = action[3] === 'true';
     this.setSkillRadian(Number(radian));
     this.actionMoveSkill(distance, duration);
-    this._waitForMove = action[3] === 'true';
   };
 
   Skill_Sequencer.prototype.actionMoveToStored = function(action) {
@@ -627,12 +627,17 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.actionMoveSkill = function(distance, duration) {
+    var instant = duration === 0;
+    if (duration <= 0) duration = 1;
     this._skill.newX = this._skill.collider.x + Math.round(distance * Math.cos(this._skill.radian));
     this._skill.newY = this._skill.collider.y + Math.round(distance * Math.sin(this._skill.radian));
     this._skill.speed = Math.abs(distance / duration);
     this._skill.speedX = Math.abs(this._skill.speed * Math.cos(this._skill.radian));
     this._skill.speedY = Math.abs(this._skill.speed * Math.sin(this._skill.radian));
     this._skill.moving = true;
+    if (instant) {
+      this.updateSkillPosition();
+    }
   };
 
   Skill_Sequencer.prototype.actionWaveSkill = function(amp, harmonics, distance, duration) {
@@ -650,7 +655,6 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.setSkillRadian = function(radian) {
     var rotate = this._skill.settings.rotate === true;
     this._skill.radian = radian;
-    this._skill.direction = this._character.radianToDirection(radian);
     this._skill.collider.setRadian(Math.PI / 2 + radian);
     if (this._skill.picture) {
       this.setSkillPictureRadian(this._skill.picture, this._skill.radian);

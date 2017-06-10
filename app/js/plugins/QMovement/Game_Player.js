@@ -78,6 +78,7 @@
   };
 
   Game_Player.prototype.moveInputHorizontal = function(dir) {
+    var px = this._px;
     this.moveStraight(dir);
   };
 

@@ -3,8 +3,7 @@
 var $plugins =
 [
 {"name":"QPlus","status":true,"description":"<QPlus> (Should go above all Q Plugins)\r\nSome small changes to MV for easier plugin development.","parameters":{"Quick Test":"true","Default Enabled Switches":""}},
-{"name":"QUpdate","status":true,"description":"<QUpdate>\r\nChecks QPlugins for updates","parameters":{}},
-{"name":"QuasiMovement","status":false,"description":"v1.299\nChange the way RPG Maker MV handles Movement.\n<QuasiMovement>","parameters":{"Grid":"1","Off Grid":"false","Tile Size":"48","=====================":"","Smart Move":"3","Old Smart Move Dir":"false","Mid Pass":"false","Move On Click":"false","Diagonal":"true","Diagonal Speed":"0","Collision":"#ff0000","Water Collision":"#00ff00","Deep Water Collision":"#0000ff","Collision Map Scan":"4","Water Terrain Tag":"1","Deep Water Terrain Tag":"2","Player Box":"36, 24, 6, 24","Event Box":"36, 24, 6, 24","Boat Box":"36, 24, 6, 12","Ship Box":"36, 24, 6, 24","Airship Box":"36, 36, 6, 6","JSON folder":"data/","Collision Map folder":"img/parallaxes/","Region Map folder":"img/parallaxes/","Use Regions Boxes":"false","Show Boxes":"true","Draw Tile Boxes":"true","Cache Colliders as Bitmap":"true"}},
+{"name":"QUpdate","status":false,"description":"<QUpdate>\r\nChecks QPlugins for updates","parameters":{}},
 {"name":"QMovement-dev","status":true,"description":"<QMovement>\r\nMore control over character movement","parameters":{"Grid":"1","Tile Size":"48","Off Grid":"true","=================":"","Smart Move":"3","Mid Pass":"true","Move on click":"true","Diagonal":"true","Diagonal Speed":"0","Player Collider":"box, 36, 24, 6, 24","Event Collider":"box, 36, 24, 6, 24","Show Colliders":"true"}},
 {"name":"QMovement","status":false,"description":"<QMovement>\r\nMore control over character movement","parameters":{"Grid":"1","Tile Size":"48","Off Grid":"true","=================":"","Smart Move":"2","Mid Pass":"false","Move on click":"true","Diagonal":"true","Diagonal Speed":"0","Player Collider":"box, 36, 24, 6, 24","Event Collider":"box, 36, 24, 6, 24","Show Colliders":"true"}},
 {"name":"========================","status":false,"description":"","parameters":{}},
@@ -20,12 +19,12 @@ var $plugins =
 {"name":"QTouch","status":true,"description":"<QTouch>\nBetter mouse handling for MV","parameters":{"Mouse Decay":"60","Default Cursor":"icon/cursor-default.png","Pointer Cursor":"icon/cursor-pointer.png"}},
 {"name":"========================","status":false,"description":"","parameters":{}},
 {"name":"QInput","status":true,"description":"<QInput>\r\nAdds additional keys to Input class, and allows remapping keys.","parameters":{"Threshold":"0.1","========":"","Ok":"#enter, #space, #z, $A","Escape / Cancel":"#esc, #insert, #x, #num0, $B","Menu":"$Y, #esc","Shift":"#shift, #cancel, $X","Control":"#ctrl, #alt","Tab":"#tab","Pageup":"#pageup, #q, $L1","Pagedown":"#pagedown, #w, $R1","Left":"#left, #num4, $LEFT, #a","Right":"#right, #num6, $RIGHT, #d","Up":"#up, #num8, $UP, #w","Down":"#down, #num2, $DOWN, #s","Debug":"#f9","===========":"","FPS":"f2","Streched":"f3","FullScreen":"f4","Restart":"f5","Console":"f8"}},
-{"name":"QInputRemap","status":true,"description":"<QInputRemap>\r\nQuasi Input Addon: Adds Key remapping to Options menu","parameters":{"Hide Keys":"","Disable Keys":"ok, escape","===========":"","Vocab: Ok":"Action","Vocab: Escape":"Cancel","Vocab: Shift":"Run","Vocab: Control":"Control","Vocab: Tab":"Tab","Vocab: Pageup":"Next","Vocab: Pagedown":"Prev","Vocab: Up":"Up","Vocab: Down":"Down","Vocab: Left":"Left","Vocab: Right":"Right"}},
-{"name":"QNameInput","status":true,"description":"<QNameInput>\r\nQuasi Input addon: Adds Keyboard Input to Name Input Scene","parameters":{"Show Window with Keys":"true","Window Width":"480"}},
+{"name":"QInputRemap","status":false,"description":"<QInputRemap>\r\nQuasi Input Addon: Adds Key remapping to Options menu","parameters":{"Hide Keys":"","Disable Keys":"ok, escape","===========":"","Vocab: Ok":"Action","Vocab: Escape":"Cancel","Vocab: Shift":"Run","Vocab: Control":"Control","Vocab: Tab":"Tab","Vocab: Pageup":"Next","Vocab: Pagedown":"Prev","Vocab: Up":"Up","Vocab: Down":"Down","Vocab: Left":"Left","Vocab: Right":"Right"}},
+{"name":"QNameInput","status":false,"description":"<QNameInput>\r\nQuasi Input addon: Adds Keyboard Input to Name Input Scene","parameters":{"Show Window with Keys":"true","Window Width":"480"}},
 {"name":"========================","status":false,"description":"","parameters":{}},
 {"name":"QSprite","status":true,"description":"<QSprite>\r\nLets you configure Spritesheets","parameters":{"File Name Identifier":"%{config}-","Random Idle Interval":"60 300","Use New Adjust":"true"}},
 {"name":"QAudio","status":true,"description":"<QAudio>\r\nFew new audio features","parameters":{"Default Radius":"5","Default Max Volume":"100"}},
-{"name":"QSpeed","status":false,"description":"<QSpeed>\r\nAllows for custom Move speeds and an acceleration effect","parameters":{"Acceleration":"true","Duration":"30","===========":"","Dash Inc":"0.5"}},
+{"name":"QSpeed","status":true,"description":"<QSpeed>\r\nAllows for custom Move speeds and an acceleration effect","parameters":{"Acceleration":"true","Duration":"30","===========":"","Dash Inc":"0.5"}},
 {"name":"QCamera","status":true,"description":"<QCamera>\r\nBetter Camera control","parameters":{"Offset":"0.5","Shift Y":"0","Shift X":"0"}},
 {"name":"QYScale","status":true,"description":"<QYScale>\r\nChange characters scale based off their Y value","parameters":{}},
 {"name":"QMap","status":true,"description":"<QMap>\r\ndesc","parameters":{"":""}},
@@ -35,10 +34,10 @@ var $plugins =
 {"name":"QSight","status":true,"description":"<QSight>\r\nReal time line of sight","parameters":{"See Through Terrain":"","Show":"true"}},
 {"name":"Q_IsoCam","status":false,"description":"<Q_IsoCam>\r\ndesc","parameters":{}},
 {"name":"Q_Culling","status":false,"description":"<QCulling>\r\ndesc","parameters":{}},
-{"name":"QPopup","status":true,"description":"<QPopup>\r\ndesc","parameters":{"":"","===========":""}},
+{"name":"QPopup","status":false,"description":"<QPopup>\r\ndesc","parameters":{"":"","===========":""}},
 {"name":"QM+Followers","status":false,"description":"<QMFollowers>\r\ndesc","parameters":{}},
 {"name":"QM+SetAngles","status":false,"description":"<QMSetAngles>\r\ndesc","parameters":{"Angle 1":"2.670","Angle 3":"0.471","Angle 7":"3.613","Angle 9":"5.812"}},
 {"name":"QM+FaceMouse","status":false,"description":"<QMFaceMouse>\r\nQMovement Addon: Player will face towards mouse position","parameters":{}},
-{"name":"YEP_RegionRestrictions","status":true,"description":"v1.03 Use regions to block out Events and/or the player from\nbeing able to venture into those spots.","parameters":{"Player Restrict":"0","Event Restrict":"0","All Restrict":"0","Player Allow":"0","Event Allow":"0","All Allow":"2"}},
-{"name":"QYanfly-patches","status":true,"description":"<QYanfly-patches>\r\nPatches for Yanfly plugins and QPlugins","parameters":{}}
+{"name":"YEP_RegionRestrictions","status":false,"description":"v1.03 Use regions to block out Events and/or the player from\nbeing able to venture into those spots.","parameters":{"Player Restrict":"0","Event Restrict":"0","All Restrict":"0","Player Allow":"0","Event Allow":"0","All Allow":"2"}},
+{"name":"QYanfly-patches","status":false,"description":"<QYanfly-patches>\r\nPatches for Yanfly plugins and QPlugins","parameters":{}}
 ];

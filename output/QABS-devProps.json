@@ -101,8 +101,7 @@
       "prototype - onTargetingEnd - undefined",
       "prototype - onTargetingCancel - undefined",
       "prototype - useSkill - skillId",
-      "prototype - beforeSkill - skillId",
-      "prototype - afterSkill - skillId",
+      "prototype - beforeSkill - skill",
       "prototype - forceSkill - skillId, forced",
       "prototype - makeTargetingSkill - skill",
       "prototype - makeSkillCollider - settings"
@@ -125,7 +124,7 @@
       "prototype - updateSkillTarget - undefined",
       "prototype - updateGroundTargeting - undefined",
       "prototype - updateGroundTargetingPosition - undefined",
-      "prototype - beforeSkill - skillId",
+      "prototype - beforeSkill - skill",
       "alias - prototype - requestMouseMove - undefined"
     ],
     "Game_Event": [

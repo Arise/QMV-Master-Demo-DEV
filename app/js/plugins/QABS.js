@@ -1265,9 +1265,9 @@ function Skill_Sequencer() {
       radian -= Math.PI / 2;
     }
     radian += radian < 0 ? Math.PI * 2 : 0;
+    this._waitForMove = action[3] === 'true';
     this.setSkillRadian(Number(radian));
     this.actionMoveSkill(distance, duration);
-    this._waitForMove = action[3] === 'true';
   };
 
   Skill_Sequencer.prototype.actionMoveToStored = function(action) {
@@ -1441,12 +1441,17 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.actionMoveSkill = function(distance, duration) {
+    var instant = duration === 0;
+    if (duration <= 0) duration = 1;
     this._skill.newX = this._skill.collider.x + Math.round(distance * Math.cos(this._skill.radian));
     this._skill.newY = this._skill.collider.y + Math.round(distance * Math.sin(this._skill.radian));
     this._skill.speed = Math.abs(distance / duration);
     this._skill.speedX = Math.abs(this._skill.speed * Math.cos(this._skill.radian));
     this._skill.speedY = Math.abs(this._skill.speed * Math.sin(this._skill.radian));
     this._skill.moving = true;
+    if (instant) {
+      this.updateSkillPosition();
+    }
   };
 
   Skill_Sequencer.prototype.actionWaveSkill = function(amp, harmonics, distance, duration) {
@@ -1464,7 +1469,6 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.setSkillRadian = function(radian) {
     var rotate = this._skill.settings.rotate === true;
     this._skill.radian = radian;
-    this._skill.direction = this._character.radianToDirection(radian);
     this._skill.collider.setRadian(Math.PI / 2 + radian);
     if (this._skill.picture) {
       this.setSkillPictureRadian(this._skill.picture, this._skill.radian);
@@ -2429,26 +2433,20 @@ function Skill_Sequencer() {
     if (this._groundTargeting) {
       this.onTargetingCancel();
     }
-    this.beforeSkill(skillId);
     this.forceSkill(skillId);
-    this.afterSkill(skillId);
-  };
-
-  Game_CharacterBase.prototype.beforeSkill = function(skillId) {
-    var meta = $dataSkills[skillId].qmeta;
-    var before = meta.beforeSkill || '';
-    if (before !== '') {
-      try {
-        eval(before[1]);
-      } catch (e) {
-        console.error('Error with `beforeSkill` meta inside skill ' + skillId, e);
-      }
+    if (!this._groundTargeting) {
+      this.battler().paySkillCost($dataSkills[skillId]);
     }
   };
 
-  Game_CharacterBase.prototype.afterSkill = function(skillId) {
-    if (!this._groundTargeting) {
-      this.battler().paySkillCost($dataSkills[skillId]);
+  Game_CharacterBase.prototype.beforeSkill = function(skill) {
+    var before = skill.data.qmeta.beforeSkill || '';
+    if (before !== '') {
+      try {
+        eval(before);
+      } catch (e) {
+        console.error('Error with `beforeSkill` meta inside skill ' + skill.data.id, e);
+      }
     }
   };
 
@@ -2459,14 +2457,13 @@ function Skill_Sequencer() {
       settings: QABS.getSkillSettings(data),
       sequence: QABS.getSkillSequence(data),
       ondmg: QABS.getSkillOnDamage(data),
-      collider: this.makeSkillCollider(skill.settings),
-      sequencer: new Skill_Sequencer(this, skill),
-      direction: this._direction,
-      userDirection: this._direction,
       radian: this._radian,
       targetsHit: [],
       forced: forced
     }
+    this.beforeSkill(skill);
+    skill.sequencer = new Skill_Sequencer(this, skill);
+    skill.collider = this.makeSkillCollider(skill.settings);
     if (skill.settings.groundTarget || skill.settings.selectTarget) {
       return this.makeTargetingSkill(skill);
     }
@@ -2729,20 +2726,39 @@ function Skill_Sequencer() {
     skill.collider.color = skill.isOk ? '#00ff00' : '#ff0000';
   };
 
-  Game_Player.prototype.beforeSkill = function(skillId) {
-    var skill = $dataSkills[skillId];
-    var towardsMouse = QABS.towardsMouse;
-    if (Imported.QInput && Input.preferGamepad()) {
-      towardsMouse = false;
-    }
-    if (towardsMouse && !skill.meta.dontTurn) {
+  Game_Player.prototype.beforeSkill = function(skill) {
+    var meta = skill.data.qmeta;
+    var isGamepad = Imported.QInput && Input.preferGamepad();
+    var towardsMouse = QABS.towardsMouse && !isGamepad;
+    if (towardsMouse && !meta.dontTurn) {
       var x1 = $gameMap.canvasToMapPX(TouchInput.x);
       var y1 = $gameMap.canvasToMapPY(TouchInput.y);
       var x2 = this.cx();
       var y2 = this.cy();
       this.setRadian(Math.atan2(y1 - y2, x1 - x2));
+      skill.radian = this._radian;
     }
-    Game_CharacterBase.prototype.beforeSkill.call(this, skillId);
+    if (meta.towardsMove) {
+      var radian;
+      if (isGamepad) {
+        var horz = Input._dirAxesA.x;
+        var vert = Input._dirAxesA.y;
+        if (horz === 0 && vert === 0) {
+          radian = skill.radian;
+        } else {
+          radian = Math.atan2(vert, horz);
+        }
+      } else {
+        var direction = QMovement.diagonal ? Input.dir8 : Input.dir4;
+        if (direction === 0) {
+          radian = skill.radian;
+        } else {
+          radian = this.directionToRadian(direction);
+        }
+      }
+      skill.radian = radian;
+    }
+    Game_CharacterBase.prototype.beforeSkill.call(this, skill);
   };
 
   var Alias_Game_Player_requestMouseMove = Game_Player.prototype.requestMouseMove;
