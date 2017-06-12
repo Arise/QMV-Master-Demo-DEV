@@ -15,14 +15,13 @@ function something() {
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QName = '1.0.0';
-
 
 if (!Imported.QPlus) {
-  var msg = 'Error: QName requires QPlus to work.';
-  alert(msg);
-  throw new Error(msg);
+  alert('Error: QName requires QPlus to work.');
+  throw new Error('Error: QName requires QPlus to work.');
 }
+
+Imported.QName = '1.0.0';
 
 //=============================================================================
  /*:
@@ -33,7 +32,7 @@ if (!Imported.QPlus) {
  * @requires
  *
  * @video
- * 
+ *
  * @param
  * @desc
  * @default
@@ -70,14 +69,14 @@ if (!Imported.QPlus) {
 // QName Static Class
 
 function QName() {
- throw new Error('This is a static class');
+  throw new Error('This is a static class');
 }
 
 //=============================================================================
 // New Classes
 
 function NewClass() {
- this.initialize.apply(this, arguments);
+  this.initialize.apply(this, arguments);
 }
 
 //=============================================================================

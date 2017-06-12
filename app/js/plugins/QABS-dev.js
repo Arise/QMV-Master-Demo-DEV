@@ -26,15 +26,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QABS = '1.0.0';
 
-if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
-  alert('Error: QABS requires QPlus 1.3.0 or newer to work.');
-  throw new Error('Error: QABS requires QPlus 1.3.0 or newer to work.');
-} else if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.3.1')) {
+if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.3.1')) {
   alert('Error: QABS requires QMovement 1.3.1 or newer to work.');
   throw new Error('Error: QABS requires QMovement 1.3.1 or newer to work.');
 }
+
+Imported.QABS = '1.0.0';
 
 //=============================================================================
  /*:
@@ -48,266 +46,101 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  *
  * @video TODO
  *
+ * @param Attack Settings
+ *
  * @param Quick Target
+ * @parent Attack Settings
  * @desc Ground target skills will instantly cast at mouse location
- * Default: false   Set to true or false
+ * @type Boolean
  * @default false
  *
  * @param Lock when Targeting
+ * @parent Attack Settings
  * @desc Player can not move when using Ground / Select targeting skills
- * Default: false   Set to true or false
+ * @type Boolean
+ * @on Can Move
+ * @off Can't Move
  * @default false
  *
  * @param Attack Towards Mouse
+ * @parent Attack Settings
  * @desc All actions will be used towards your mouse location
  * Default: false   Set to true or false
  * @default false
  *
- * @param =====================
- * @desc Spacer
- * @default
+ * @param Move Resistance Rate Stat
+ * @parent Attack Settings
+ * @desc Which stat to use for Move Resistance Rate
+ * Default: xparam(1)     //  This is Evasion
+ * @default xparam(1)
+ *
+ * @param Loot Settings
  *
  * @param Loot Decay
+ * @parent Loot Settings
  * @desc How long until the loot disappears, in frames.
- * Default: 600
+ * @type Number
+ * @min 1
  * @default 600
  *
  * @param AoE Loot
+ * @parent Loot Settings
  * @desc Collect nearby loot or pick up one at a time.
- * Default: true   Set to true or false
+ * @type Boolean
  * @default true
  *
  * @param Loot Touch Trigger
+ * @parent Loot Settings
  * @desc Pick up loot on player touch
- * Default: false  Set to true or false
+ * @type Boolean
  * @default false
  *
  * @param Gold Icon
+ * @parent Loot Settings
  * @desc Icon Index to display for gold loot
  * Default: 314
  * @default 314
  *
  * @param Level Animation
+ * @parent Loot Settings
  * @desc The animation ID to play on level up.
- * Default: 52   Set to 0 for no animation.
+ * Default: 52
+ * @type Animation
  * @default 52
  *
- * @param =====================
- * @desc Spacer
- * @default
- *
- * @param Move Resistance Rate Stat
- * @desc Which stat to use for Move Resistance Rate
- * Default: xparam(1)     //  This is Evasion
- * @default xparam(1)
- *
- * @param =====================
- * @desc Spacer
- * @default
+ * @param Enemy AI
  *
  * @param AI Default Sight Range
+ * @parent Enemy AI
  * @desc Default range for enemies to go after player, in pixels
  * Default: 240
+ * @type Number
+ * @min 1
  * @default 240
  *
  * @param AI Action Wait
+ * @parent Enemy AI
  * @desc How many frames to wait before running AI for next skill
  * Default: 30
+ * @min 1
  * @default 30
  *
  * @param AI Uses QSight
+ * @parent Enemy AI
  * @desc Set to true or false if AI should use QSight
  * May decrease performance
+ * @type Boolean
  * @default true
  *
  * @param AI uses QPathfind
+ * @parent Enemy AI
  * @desc Set to true or false if AI should use QPathfind
  * May decrease performance
+ * @type Boolean
  * @default true
  *
- * @param =====================
- * @desc Spacer
- * @default
- *
- * @param Skill Key 1
- * @desc Select which input key for Skill Key 1
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 1 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 1 Skill
- * @desc Select which skill is used by default for Skill Key 1
- * Leave empty to set ingame
- * @default
- *
- * @param Skill Key 2
- * @desc Select which input key for Skill Key 2
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 2 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 2 Skill
- * @desc Select which skill is used by default for Skill Key 2
- * Leave empty to set set ingame
- * @default
- *
- * @param Skill Key 3
- * @desc Select which input key for Skill Key 3
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 3 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 3 Skill
- * @desc Select which skill is used by default for Skill Key 3
- * Leave empty to set ingame
- * @default
- *
- * @param Skill Key 4
- * @desc Select which input key for Skill Key 4
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 4 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 4 Skill
- * @desc Select which skill is used by default for Skill Key 4
- * Leave empty to set ingame
- * @default
- *
- * @param Skill Key 5
- * @desc Select which input key for Skill Key 5
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 5 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 5 Skill
- * @desc Select which skill is used by default for Skill Key 5
- * Leave empty to set ingame
- * @default
- *
- * @param Skill Key 6
- * @desc Select which input key for Skill Key 6
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 6 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 6 Skill
- * @desc Select which skill is used by default for Skill Key 6
- * Leave empty to set ingame
- * @default
- *
- * @param Skill Key 7
- * @desc Select which input key for Skill Key 7
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 7 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 7 Skill
- * @desc Select which skill is used by default for Skill Key 7
- * Leave empty to set ingame
- * @default
- *
- * @param Skill Key 8
- * @desc Select which input key for Skill Key 8
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 8 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 8 Skill
- * @desc Select which skill is used by default for Skill Key 8
- * Leave empty to set ingame
- * @default
- *
- * @param Skill Key 9
- * @desc Select which input key for Skill Key 9
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 9 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 9 Skill
- * @desc Select which skill is used by default for Skill Key 9
- * Leave empty to set ingame
- * @default
- *
- * @param Skill Key 10
- * @desc Select which input key for Skill Key 10
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 10 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 10 Skill
- * @desc Select which skill is used by default for Skill Key 10
- * Leave empty to set ingame
- * @default
- *
- * @param Skill Key 11
- * @desc Select which input key for Skill Key 11
- * Leave empty to disable
- * @default
- *
- * @param Skill Key 11 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 11 Skill
- * @desc Select which skill is used by default for Skill Key 11
- * Leave empty to set ingame
- * @default
- *
- * @param Skill Key 12
- * @desc Select which input key for Skill Key 12
- * Leave empty to disable this skill key
- * @default
- *
- * @param Skill Key 12 Rebind
- * @desc Set to true or false if the skill in this key
- * can be reassisgned
- * @default true
- *
- * @param Skill Key 12 Skill
- * @desc Select which skill is used by default for Skill Key 12
- * Leave empty to set ingame
- * @default
+ * @param Default Skills
+ * @type Struct<SkillKey>[]
  *
  * @help
  * ============================================================================
@@ -443,5 +276,26 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.0')) {
  *  https://www.patreon.com/quxios
  *
  * @tags QM-Addon, ABS, Battle
+ */
+ /*~struct~SkillKey:
+ * @param Keyboard Input
+ * @desc Set to which keyboard input to use for this skill
+ * @default
+ *
+ * @param Gamepad Input
+ * @desc Set to which gamepad input to use for this skill
+ * @default
+ *
+ * @param Rebind
+ * @desc Can this skill be reassigned?
+ * @type Boolean
+ * @on Yes
+ * @off No
+ * @default true
+ *
+ * @param Skill Id
+ * @desc Which skill does this skill use
+ * @type skill
+ * @default
  */
 //=============================================================================

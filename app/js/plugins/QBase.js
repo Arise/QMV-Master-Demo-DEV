@@ -3,12 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QName = '1.0.0';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, 'x.y.z')) {
   alert('Error: QName requires QPlus x.y.z or newer to work.');
   throw new Error('Error: QName requires QPlus x.y.z or newer to work.');
 }
+
+Imported.QName = '1.0.0';
 
 //=============================================================================
  /*:
@@ -78,7 +79,7 @@ function NewClass() {
 // QName
 
 (function() {
-  var _PARAMS = QPlus.getParams('<QName>');
+  var _PARAMS = QPlus.getParams('<QName>', true);
 
   //-----------------------------------------------------------------------------
   // Game_Interpreter

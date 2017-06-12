@@ -6,38 +6,36 @@ function QABS() {
 }
 
 (function() {
-  var _PARAMS = QPlus.getParams('<QABS>');
+  var _PARAMS = QPlus.getParams('<QABS>', true);
 
-  QABS.quickTarget = _PARAMS['Quick Target'] === 'true';
-  QABS.lockTargeting = _PARAMS['Lock when Targeting'] === 'true';
-  QABS.towardsMouse = _PARAMS['Attack Towards Mouse'] === 'true';
+  QABS.quickTarget = _PARAMS['Quick Target'];
+  QABS.lockTargeting = _PARAMS['Lock when Targeting'];
+  QABS.towardsMouse = _PARAMS['Attack Towards Mouse'];
   QABS.radianAtks = QMovement.offGrid;
 
-  QABS.lootDecay = Number(_PARAMS['Loot Decay']) || 1;
-  QABS.aoeLoot = _PARAMS['AoE Loot'] === 'true';
-  QABS.lootTrigger = _PARAMS['Loot Touch Trigger'] === 'true' ? 2 : 0;
-  QABS.goldIcon = Number(_PARAMS['Gold Icon'] || 314);
-  QABS.levelAni = Number(_PARAMS['Level Animation']) || 0;
-  QABS.showDmg = _PARAMS['Show Damage'] === 'true';
+  QABS.lootDecay = _PARAMS['Loot Decay'];
+  QABS.aoeLoot = _PARAMS['AoE Loot'];
+  QABS.lootTrigger = _PARAMS['Loot Touch Trigger'] ? 2 : 0;
+  QABS.goldIcon = _PARAMS['Gold Icon'];
+  QABS.levelAni = _PARAMS['Level Animation'];
+  QABS.showDmg = _PARAMS['Show Damage'];
 
   QABS.mrst = _PARAMS['Move Resistance Rate Stat'];
 
-  QABS.aiLength = Number(_PARAMS['AI Default Sight Range']) || 0;
-  QABS.aiWait = Number(_PARAMS['AI Action Wait']) || 30;
-  QABS.aiSight = _PARAMS['AI Uses QSight'] === 'true';
-  QABS.aiPathfind = _PARAMS['AI uses QPathfind'] === 'true';
+  QABS.aiLength = _PARAMS['AI Default Sight Range'];
+  QABS.aiWait = _PARAMS['AI Action Wait'];
+  QABS.aiSight = _PARAMS['AI Uses QSight'];
+  QABS.aiPathfind = _PARAMS['AI uses QPathfind'];
 
   QABS.getDefaultSkillKeys = function() {
     var obj = {};
-    for (var key in _PARAMS) {
-      var input = _PARAMS[key];
-      var skillN = /^Skill Key ([0-9]+)$/.exec(key);
-      if (skillN && input !== '') {
-        obj[skillN[1]] = {
-          input: input.split(',').map(function(s) { return s.trim(); }),
-          skillId: Number(_PARAMS[key + ' Skill']) || 0,
-          rebind: _PARAMS[key + ' Rebind'] === 'true'
-        }
+    var skills = _PARAMS['Default Skills'];
+    for (var i = 0; i < skills.length; i++) {
+      var skill = skills[i];
+      obj[i + 1] = {
+        input: [skill['Keyboard Input'].trim(), skill['Gamepad Input'].trim()],
+        rebind: skill.Rebind,
+        skillId: skill['Skill Id']
       }
     }
     return obj;
@@ -60,6 +58,7 @@ function QABS() {
         msg += ' in the plugin parameters.\n';
         msg += 'Skill Key Number: ' + key;
         alert(msg);
+        delete obj[key];
         continue;
       }
       var input = QABS.skillKey[key].input.clone();

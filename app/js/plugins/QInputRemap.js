@@ -3,15 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QInputRemap = '2.1.0';
 
-if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.1')) {
-  alert('Error: QInputRemap requires QPlus 1.2.1 or newer to work.');
-  throw new Error('Error: QInputRemap requires QPlus 1.2.1 or newer to work.');
-} else if (!Imported.QInput || !QPlus.versionCheck(Imported.QInput, '2.1.1')) {
+if (!Imported.QInput || !QPlus.versionCheck(Imported.QInput, '2.1.1')) {
   alert('Error: QInputRemap requires QInput 2.1.1 or newer to work.');
   throw new Error('Error: QInputRemap requires QInput 2.1.1 or newer to work.');
 }
+
+Imported.QInputRemap = '2.1.0';
 
 //=============================================================================
  /*:

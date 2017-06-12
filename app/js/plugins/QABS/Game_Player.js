@@ -173,7 +173,10 @@
     var w = skill.collider.width;
     var h = skill.collider.height;
     if (Imported.QInput && Input.preferGamepad()) {
-      // TODO move collider with right analog
+      var x1 = skill.collider.center.x;
+      var y1 = skill.collider.center.y;
+      x1 += Input._dirAxesB.x * 5;
+      y1 += Input._dirAxesB.y * 5;
     } else {
       var x1 = $gameMap.canvasToMapPX(TouchInput.x);
       var y1 = $gameMap.canvasToMapPY(TouchInput.y);

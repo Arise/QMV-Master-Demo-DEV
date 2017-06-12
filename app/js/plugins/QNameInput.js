@@ -3,12 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QNameInput = '2.0.2';
 
 if (!Imported.QInput) {
   alert('Error: QNameInput requires QInput to work.');
   throw new Error('Error: QNameInput requires QInput to work.');
 }
+
+Imported.QNameInput = '2.0.2';
 
 //=============================================================================
  /*:
@@ -21,11 +22,14 @@ if (!Imported.QInput) {
  * @param Show Window with Keys
  * @desc Set to true or false to display the old input window.
  * Default: false    MV Default: true
+ * @type boolean
  * @default false
  *
  * @param Window Width
  * @desc Set the width of the window
  * MV Default: 480
+ * @type Number
+ * @min 0
  * @default 480
  *
  * @help

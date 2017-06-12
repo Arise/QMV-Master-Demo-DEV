@@ -3,12 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMovement = '1.3.10';
 
-if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.4')) {
-  alert('Error: QMovement requires QPlus 1.3.4 or newer to work.');
-  throw new Error('Error: QMovement requires QPlus 1.3.4 or newer to work.');
+if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
+  alert('Error: QMovement requires QPlus 1.4.0 or newer to work.');
+  throw new Error('Error: QMovement requires QPlus 1.4.0 or newer to work.');
 }
+
+Imported.QMovement = '1.3.10';
 
 //=============================================================================
  /*:
@@ -22,71 +23,103 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.4')) {
  *
  * @video TODO
  *
+ * @param Main Settings
+ *
  * @param Grid
+ * @parent Main Settings
  * @desc The amount of pixels you want to move per Movement.
  * Plugin Default: 1   MV Default: 48
+ * @type Number
+ * @min 1
  * @default 1
  *
  * @param Tile Size
+ * @parent Main Settings
  * @desc Size of tiles in pixels
  * Default: 48
+ * @type Number
+ * @min 1
  * @default 48
  *
  * @param Off Grid
+ * @parent Main Settings
  * @desc Allow characters to move off grid?
- * Set to true to enable, false to disable
+ * @type boolean
+ * @on Yes
+ * @off No
  * @default true
  *
- * @param =================
- * @desc spacer
- * @default
+ * @param Optional Settings
  *
  * @param Smart Move
- * @desc If the move didn't succeed, try again at lower speeds.
- * 0: Disabled  1: Speed  2: Dir  3: Speed & Dir
+ * @parent Optional Settings
+ * @desc If the move didn't succeed, try again at lower speeds or at
+ * a different direction
+ * @type select
+ * @option Disabled
+ * @value 0
+ * @option Adjust Speed
+ * @value 1
+ * @option Adjust Direction
+ * @value 2
+ * @option Adjust Speed and Direction
+ * @value 3
  * @default 2
  *
  * @param Mid Pass
+ * @parent Optional Settings
  * @desc An extra collision check for the midpoint of the Movement.
- * Set to true to enable, false to disable
+ * @type boolean
+ * @on Enable
+ * @off Disable
  * @default false
  *
  * @param Move on click
+ * @parent Optional Settings
  * @desc Set if player moves with mouse click
  * * Requires QPathfind to work
+ * @on Enable
+ * @off Disable
  * @default true
  *
  * @param Diagonal
+ * @parent Optional Settings
  * @desc Allow for diagonal movement?
- * Set to true or false
+ * @on Yes
+ * @off No
  * @default true
  *
  * @param Diagonal Speed
+ * @parent Optional Settings
  * @desc Adjust the speed when moving diagonal.
  * Default: 0 TODO not functional
+ * @type Number
+ * @min 0
  * @default 0
  *
- * @param =================
- * @desc spacer
- * @default
+ * @param Default Colliders
  *
  * @param Player Collider
+ * @parent Default Colliders
  * @desc Default player collider.
- * type width, height, ox, oy
+ * type, width, height, ox, oy
  * @default box, 36, 24, 6, 24
  *
  * @param Event Collider
+ * @parent Default Colliders
  * @desc Default event collider.
- * type width, height, ox, oy
+ * type, width, height, ox, oy
  * @default box, 36, 24, 6, 24
  *
- * @param =================
- * @desc spacer
- * @default
+ * @param Debug Settings
  *
  * @param Show Colliders
+ * @parent Debug Settings
  * @desc Show the Box Colliders by default during testing.
- * Set to true or false      -Toggle on/off with F10 during play test
+ * -Can be toggled on/off with F10 during play test
+ * @type boolean
+ * @on Show by default
+ * @off Hide by default
  * @default true
  *
  * @help

@@ -40,19 +40,22 @@
     var classKeys = /<skillKeys>([\s\S]*)<\/skillKeys>/i.exec(playerClass.note);
     if (classKeys && classKeys[1].trim() !== '') {
       this._absClassKeys = QABS.stringToSkillKeyObj(classKeys[1]);
-      this.preloadSkills();
-      this.checkAbsMouse();
+      this.resetABSKeys();
     }
   };
 
-  Game_System.prototype.absKeys = function() {
-    // TODO cache this obj
-    // recache when a change is needed
-    return Object.assign({},
-      this._absKeys,
+  Game_System.prototype.resetABSKeys = function() {
+    this._absKeys = Object.assign({},
+      QABS.getDefaultSkillKeys(),
       this._absClassKeys,
       this._absWeaponKeys
     );
+    this.preloadSkills();
+    this.checkAbsMouse();
+  };
+
+  Game_System.prototype.absKeys = function() {
+    return this._absKeys;
   };
 
   Game_System.prototype.changeABSSkill = function(skillNumber, skillId, forced) {
@@ -68,12 +71,12 @@
       }
     }
     absKeys[skillNumber].skillId = skillId;
-    this.preloadSkills();
+    this.resetABSKeys();
   };
 
   Game_System.prototype.changeABSWeaponSkills = function(skillSet) {
     this._absWeaponKeys = skillSet;
-    this.preloadSkills();
+    this.resetABSKeys();
   };
 
   Game_System.prototype.changeABSSkillInput = function(skillNumber, input) {
@@ -86,18 +89,8 @@
         break;
       }
     }
-    var gamepad = /^\$/.test(input);
-    for (var i = 0; i < absKeys[skillNumber].input.length; i++) {
-      var isGamepad = /^\$/.test(absKeys[skillNumber].input[i])
-      if (gamepad && isGamepad) {
-        absKeys[skillNumber].input[i] = input;
-        break;
-      } else if (!gamepad && !isGamepad) {
-        absKeys[skillNumber].input[i] = input;
-        break;
-      }
-    }
-    absKeys[skillNumber].input = input;
+    var i = /^\$/.test(input) ? 1 : 0;
+    absKeys[skillNumber].input[i] = input;
     this.checkAbsMouse();
   };
 
@@ -144,10 +137,10 @@
     this._absMouse2 = false;
     var keys = this.absKeys();
     for (var key in keys) {
-      if (keys[key].input.contains('mouse1')) {
+      if (keys[key].input[0] === 'mouse1') {
         this._absMouse1 = true;
       }
-      if (keys[key].input.contains('mouse2')) {
+      if (keys[key].input[0] === 'mouse2') {
         this._absMouse2 = true;
       }
     }

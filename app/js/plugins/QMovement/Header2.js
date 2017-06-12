@@ -6,15 +6,15 @@ function QMovement() {
 }
 
 (function() {
-  var _PARAMS = QPlus.getParams('<QMovement>');
+  var _PARAMS = QPlus.getParams('<QMovement>', true);
 
-  QMovement.grid = Number(_PARAMS['Grid']) || 1;
-  QMovement.tileSize = Number(_PARAMS['Tile Size']);
-  QMovement.offGrid = _PARAMS['Off Grid'] === 'true';
-  QMovement.smartMove = Number(_PARAMS['Smart Move']);
-  QMovement.midPass = _PARAMS['Mid Pass'] === 'true';
-  QMovement.moveOnClick = _PARAMS['Move on click'] === 'true';
-  QMovement.diagonal = _PARAMS['Diagonal'] === 'true';
+  QMovement.grid = _PARAMS['Grid'];
+  QMovement.tileSize = _PARAMS['Tile Size'];
+  QMovement.offGrid = _PARAMS['Off Grid'];
+  QMovement.smartMove = _PARAMS['Smart Move'];
+  QMovement.midPass = _PARAMS['Mid Pass'];
+  QMovement.moveOnClick = _PARAMS['Move on click'];
+  QMovement.diagonal = _PARAMS['Diagonal'];
   QMovement.collision = '#FF0000'; // will be changable in a separate addon
   QMovement.water1 = '#00FF00'; // will be changable in a separate addon
   QMovement.water2 = '#0000FF'; // will be changable in a separate addon
@@ -22,7 +22,7 @@ function QMovement() {
   QMovement.water2Tag = 2; // will be changable in a separate addon
   QMovement.playerCollider = _PARAMS['Player Collider'];
   QMovement.eventCollider = _PARAMS['Event Collider'];
-  QMovement.showColliders = _PARAMS['Show Colliders'] === 'true';
+  QMovement.showColliders = _PARAMS['Show Colliders'];
   QMovement.tileBoxes = {
     1537: [48, 6, 0, 42],
     1538: [6, 48],

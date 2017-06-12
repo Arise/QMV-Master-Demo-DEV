@@ -5,9 +5,9 @@
 var Imported = Imported || {};
 Imported.QSprite = '2.1.6';
 
-if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.0')) {
-  alert('Error: QSprite requires QPlus 1.2.0 or newer to work.');
-  throw new Error('Error: QSprite requires QPlus 1.2.0 or newer to work.');
+if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
+  alert('Error: QSprite requires QPlus 1.4.0 or newer to work.');
+  throw new Error('Error: QSprite requires QPlus 1.4.0 or newer to work.');
 }
 
 //=============================================================================
@@ -30,7 +30,9 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.2.0')) {
  *
  * @param Use New Adjust
  * @desc Use new pose speed adjust?
- * Set to true or false
+ * @type Boolean
+ * @on Yes
+ * @off No
  * @default true
  *
  * @help
@@ -244,7 +246,7 @@ QSprite.json = null;
 // QSprite
 
 (function() {
-  var _PARAMS = QPlus.getParams('<QSprite>');
+  var _PARAMS = QPlus.getParams('<QSprite>', true);
   var _IDENTIFIER = _PARAMS['File Name Identifier'] || '%{config}-';
   _IDENTIFIER = _IDENTIFIER.replace('{config}', '(.+?)');
   _IDENTIFIER = new RegExp(_IDENTIFIER);
@@ -252,7 +254,7 @@ QSprite.json = null;
   if (!_IDLEINTERVAL[1] || _IDLEINTERVAL[1] < _IDLEINTERVAL[0]) {
     _IDLEINTERVAL[1] = _IDLEINTERVAL[0];
   }
-  var _USENEWADJUST = _PARAMS['Use New Adjust'] === 'true';
+  var _USENEWADJUST = _PARAMS['Use New Adjust'];
   var _HASQMOVEMENT = Imported.Quasi_Movement || Imported.QMovement;
 
   QPlus.request('data/QSprite.json')

@@ -3,15 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMFaceMouse = '1.0.0';
 
-if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.3.4')) {
-  alert('Error: QM+FaceMouse requires QPlus 1.3.4 or newer to work.');
-  throw new Error('Error: QM+FaceMouse requires QPlus 1.3.4 or newer to work.');
-} else if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.3.8')) {
+if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.3.8')) {
   alert('Error: QM+FaceMouse requires QMovement 1.3.8 or newer to work.');
   throw new Error('Error: QM+FaceMouse requires QMovement 1.3.8 or newer to work.');
 }
+
+Imported.QMFaceMouse = '1.0.0';
 
 //=============================================================================
  /*:

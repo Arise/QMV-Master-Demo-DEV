@@ -3,15 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QMColliderMap = '1.0.0';
 
-if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.1.5')) {
-  alert('Error: QM+ColliderMap requires QPlus 1.1.5 or newer to work.');
-  throw new Error('Error: QM+ColliderMap requires QPlus 1.1.5 or newer to work.');
-} else if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.2.0')) {
+if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.2.0')) {
   alert('Error: QM+ColliderMap requires QMovement 1.2.0 or newer to work.');
   throw new Error('Error: QM+ColliderMap requires QMovement 1.2.0 or newer to work.');
 }
+
+Imported.QMColliderMap = '1.0.0';
 
 //=============================================================================
  /*:

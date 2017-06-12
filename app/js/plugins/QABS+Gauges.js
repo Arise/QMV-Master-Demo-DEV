@@ -3,12 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QABS_Gauges = '1.0.1';
 
 if (!Imported.QABS || !QPlus.versionCheck(Imported.QABS, '1.0.0')) {
   alert('Error: QABS+Gauges requires QABS 1.0.0 or newer to work.');
   throw new Error('Error: QABS+Gauges requires QABS 1.0.0 or newer to work.');
 }
+
+Imported.QABS_Gauges = '1.0.1';
 
 //=============================================================================
  /*:
@@ -18,100 +19,132 @@ if (!Imported.QABS || !QPlus.versionCheck(Imported.QABS, '1.0.0')) {
  *
  * @requires QABS
  *
+ * @param Gauge Configs
+ *
  * @param Gauge Width
+ * @parent Gauge Configs
  * @desc Set the width of the gauge.
  * Default: 48
+ * @type Number
+ * @min 1
  * @default 48
  *
  * @param Gauge Height
+ * @parent Gauge Configs
  * @desc Set the height of the gauge.
  * Default: 4
+ * @type Number
+ * @min 1
  * @default 4
  *
  * @param Boss Gauge Width
+ * @parent Gauge Configs
  * @desc Set the width of the boss gauge.
  * Default: 480
+ * @type Number
+ * @min 1
  * @default 480
  *
  * @param Boss Gauge Height
+ * @parent Gauge Configs
  * @desc Set the height of the boss gauge.
  * Default: 16
+ * @type Number
+ * @min 1
  * @default 16
  *
  * @param Gauge Default OX
+ * @parent Gauge Configs
  * @desc Set the default gauges X offset, can be negative
  * Default: 0
+ * @type Number
  * @default 0
  *
  * @param Gauge Default OY
+ * @parent Gauge Configs
  * @desc Set the default gauges Y offset, can be negative
  * Default: -48
+ * @type Number
  * @default -48
  *
  * @param Boss Gauge Default OX
+ * @parent Gauge Configs
  * @desc Set the default boss gauges X offset, can be negative
  * Default: 0
+ * @type Number
  * @default 0
  *
  * @param Boss Gauge Default OY
+ * @parent Gauge Configs
  * @desc Set the default boss gauges Y offset, can be negative
  * Default: 24
+ * @type Number
  * @default 24
  *
- * @param =====================
- * @desc Spacer
- * @default
+ * @param Gauge Colors
  *
  * @param Gauge Background Color
+ * @parent Gauge Colors
  * @desc  The hex color behind the gauge.
  * Default: #202040
  * @default #202040
  *
  * @param Gauge Inbetween Color
+ * @parent Gauge Colors
  * @desc  The hex color between background and gradient
  * Default: #ffffff
  * @default #ffffff
  *
  * @param Gauge HP Color 1
+ * @parent Gauge Colors
  * @desc  The hex color for first color of the gradient
  * Default: #e08040
  * @default #e08040
  *
  * @param Gauge HP Color 2
+ * @parent Gauge Colors
  * @desc  The hex color for second color of the gradient
  * Default: #f0c040
  * @default #f0c040
  *
- * @param =====================
- * @desc Spacer
- * @default
+ * @param Gauge Text
  *
  * @param Text Font
+ * @parent Gauge Text
  * @desc The font to use for the enemy name.
  * Default: GameFont
  * @default GameFont
  *
  * @param Font Size
+ * @parent Gauge Text
  * @desc The font size to use for the enemy name.
  * Default: 14
+ * @type Number
+ * @min 1
  * @default 14
  *
  * @param Font Color
+ * @parent Gauge Text
  * @desc The font color to use for the enemy name.
  * Default: #ffffff
  * @default #ffffff
  *
  * @param Boss Text Font
+ * @parent Gauge Text
  * @desc The font to use for the enemy name.
  * Default: GameFont
  * @default GameFont
  *
  * @param Boss Font Size
+ * @parent Gauge Text
  * @desc The font size to use for the enemy name.
  * Default: 18
+ * @type Number
+ * @min 1
  * @default 18
  *
  * @param Boss Font Color
+ * @parent Gauge Text
  * @desc The font color to use for the enemy name.
  * Default: #ffffff
  * @default #ffffff
@@ -185,17 +218,16 @@ function Sprite_BossGauge() {
 // QABS Gauges
 
 (function() {
-  var _PARAMS = QPlus.getParams('<QABSGauges>');
+  var _PARAMS = QPlus.getParams('<QABSGauges>', true);
 
-  var _CMFOLDER = _PARAMS['Show Unassigned Keys'] === 'true';
-  var _WIDTH = Number(_PARAMS['Gauge Width']) || 0;
-  var _HEIGHT = Number(_PARAMS['Gauge Height']) || 0;
-  var _BOSS_WIDTH = Number(_PARAMS['Boss Gauge Width']) || 0;
-  var _BOSS_HEIGHT = Number(_PARAMS['Boss Gauge Height']) || 0;
-  var _OX = Number(_PARAMS['Gauge Default OX']) || 0;
-  var _OY = Number(_PARAMS['Gauge Default OY']) || 0;
-  var _BOSS_OX = Number(_PARAMS['Boss Gauge Default OX']) || 0;
-  var _BOSS_OY = Number(_PARAMS['Boss Gauge Default OY']) || 24;
+  var _WIDTH = _PARAMS['Gauge Width'];
+  var _HEIGHT = _PARAMS['Gauge Height'];
+  var _BOSS_WIDTH = _PARAMS['Boss Gauge Width'];
+  var _BOSS_HEIGHT = _PARAMS['Boss Gauge Height'];
+  var _OX = _PARAMS['Gauge Default OX'];
+  var _OY = _PARAMS['Gauge Default OY'];
+  var _BOSS_OX = _PARAMS['Boss Gauge Default OX'];
+  var _BOSS_OY = _PARAMS['Boss Gauge Default OY'];
 
   var _BG_COLOR = parseInt(_PARAMS['Gauge Background Color'].replace('#', ''), 16);
   var _INNER_COLOR = parseInt(_PARAMS['Gauge Inbetween Color'].replace('#', ''), 16);
@@ -203,11 +235,11 @@ function Sprite_BossGauge() {
   var _COLOR2 = _PARAMS['Gauge HP Color 2'];
 
   var _FONT_FACE = _PARAMS['Text Font'];
-  var _FONT_SIZE = Number(_PARAMS['Font Size']);
+  var _FONT_SIZE = _PARAMS['Font Size'];
   var _TEXT_COLOR = _PARAMS['Font Color'];
   var _BOSS_FONT_FACE = _PARAMS['Boss Text Font'];
-  var _BOSS_FONT_SIZE = Number(_PARAMS['Boss Font Size']);
-  var _BOSS_TEXT_COLOR = _PARAMS['Boss Font Color']
+  var _BOSS_FONT_SIZE = _PARAMS['Boss Font Size'];
+  var _BOSS_TEXT_COLOR = _PARAMS['Boss Font Color'];
 
   //-----------------------------------------------------------------------------
   // Game_Enemy

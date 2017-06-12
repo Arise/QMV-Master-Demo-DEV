@@ -3,12 +3,13 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QABS_Skillbar = '1.0.0';
 
 if (!Imported.QABS || !QPlus.versionCheck(Imported.QABS, '1.0.0')) {
   alert('Error: QABS+Skillbar requires QABS 1.0.0 or newer to work.');
   throw new Error('Error: QABS+Skillbar requires QABS 1.0.0 or newer to work.');
 }
+
+Imported.QABS_Skillbar = '1.0.0';
 
 //=============================================================================
  /*:
@@ -20,12 +21,16 @@ if (!Imported.QABS || !QPlus.versionCheck(Imported.QABS, '1.0.0')) {
  *
  * @param Show Unassigned Keys
  * @desc Shows Keys even if they have nothing assigned to them
- * Default: false   Set to true or false
+ * @type boolean
+ * @on Show
+ * @off Hide
  * @default false
  *
  * @param Default visibility
  * @desc Is the skillbar visible by default
- * Set to true or false
+ * @type boolean
+ * @on Visible
+ * @off Hidden
  * @default true
  *
  * @help
@@ -68,7 +73,7 @@ if (!Imported.QABS || !QPlus.versionCheck(Imported.QABS, '1.0.0')) {
 //=============================================================================
 
 function QABSSkillbar() {
- throw new Error('This is a static class');
+  throw new Error('This is a static class');
 }
 
 function Sprite_Skillbar() {
@@ -86,9 +91,10 @@ function Sprite_SkillInfo() {
   QABSSkillbar.over = false;
   QABSSkillbar.requestRefresh = true;
 
-  var _PARAMS = QPlus.getParams('<QABSSkillbar>');
-  var _SHOW_UNASSIGNED = _PARAMS['Show Unassigned Keys'] === 'true';
-  var _VISIBLE = _PARAMS['Default visibility'] === 'true';
+  var _PARAMS = QPlus.getParams('<QABSSkillbar>', true);
+
+  var _SHOW_UNASSIGNED = _PARAMS['Show Unassigned Keys'];
+  var _VISIBLE = _PARAMS['Default visibility'];
 
   //-----------------------------------------------------------------------------
   // Game_Interpreter

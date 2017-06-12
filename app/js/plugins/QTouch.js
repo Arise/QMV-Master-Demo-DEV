@@ -5,9 +5,9 @@
 var Imported = Imported || {};
 Imported.QTouch = '1.0.1';
 
-if (!Imported.QPlus) {
-  alert('Error: QTouch requires QPlus to work.');
-  throw new Error('Error: QTouch requires QPlus to work.');
+if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
+  alert('Error: QPopup requires QPlus 1.4.0 or newer to work.');
+  throw new Error('Error: QPopup requires QPlus 1.4.0 or newer to work.');
 }
 
 //=============================================================================
@@ -20,7 +20,9 @@ if (!Imported.QPlus) {
  *
  * @param Mouse Decay
  * @desc Set the duration until mouse cursor is hidden while its not moving.
- * Default: 60      Set to 0 to disable      Value is in frames
+ * Set to 0 to disable      Value is in frames
+ * @type Number
+ * @min 0
  * @default 60
  *
  * @param Default Cursor
@@ -77,12 +79,12 @@ function Sprite_QButton() {
 // QTouch
 
 (function() {
-  var _PARAMS = QPlus.getParams('<QTouch>');
-  var _MOUSEDECAY = Number(_PARAMS['Mouse Decay']) || 0;
+  var _PARAMS = QPlus.getParams('<QTouch>', true);
+  var _MOUSEDECAY = _PARAMS['Mouse Decay'];
   var _CURSORIMGS = {
     default: _PARAMS['Default Cursor'],
     pointer: _PARAMS['Pointer Cursor']
-  };
+  }
 
   //-----------------------------------------------------------------------------
   // TouchInput
