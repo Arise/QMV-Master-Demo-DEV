@@ -25,8 +25,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
  *
  * @param Random Idle Interval
  * @desc Set the time interval between random Idles (in frames)
- * Set as a range seperated with a space. min value first
- * @default 60 300
+ * @type Struct<Range>
  *
  * @param Use New Adjust
  * @desc Use new pose speed adjust?
@@ -231,6 +230,17 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
  *
  * @tags character, sprite, animation
  */
+ /*~struct~Range:
+ * @param Min
+ * @desc Set to the min value
+ * @type Number
+ * @default 60
+ *
+ * @param Max
+ * @desc Set to max value
+ * @type Number
+ * @default 300
+ */
 //=============================================================================
 
 //=============================================================================
@@ -250,8 +260,11 @@ QSprite.json = null;
   var _IDENTIFIER = _PARAMS['File Name Identifier'] || '%{config}-';
   _IDENTIFIER = _IDENTIFIER.replace('{config}', '(.+?)');
   _IDENTIFIER = new RegExp(_IDENTIFIER);
-  var _IDLEINTERVAL = _PARAMS['Random Idle Interval'].trim().split(' ').map(Number);
-  if (!_IDLEINTERVAL[1] || _IDLEINTERVAL[1] < _IDLEINTERVAL[0]) {
+  var _IDLEINTERVAL = [
+    _PARAMS['Random Idle Interval'].Min,
+    _PARAMS['Random Idle Interval'].Max
+  ]
+  if (_IDLEINTERVAL[1] < _IDLEINTERVAL[0]) {
     _IDLEINTERVAL[1] = _IDLEINTERVAL[0];
   }
   var _USENEWADJUST = _PARAMS['Use New Adjust'];

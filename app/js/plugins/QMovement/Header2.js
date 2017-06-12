@@ -20,8 +20,20 @@ function QMovement() {
   QMovement.water2 = '#0000FF'; // will be changable in a separate addon
   QMovement.water1Tag = 1; // will be changable in a separate addon
   QMovement.water2Tag = 2; // will be changable in a separate addon
-  QMovement.playerCollider = _PARAMS['Player Collider'];
-  QMovement.eventCollider = _PARAMS['Event Collider'];
+  QMovement.playerCollider = [
+    _PARAMS['Player Collider'].Type,
+    _PARAMS['Player Collider'].Width,
+    _PARAMS['Player Collider'].Height,
+    _PARAMS['Player Collider']['Offset X'],
+    _PARAMS['Player Collider']['Offset Y']
+  ];
+  QMovement.eventCollider = [
+    _PARAMS['Event Collider'].Type,
+    _PARAMS['Event Collider'].Width,
+    _PARAMS['Event Collider'].Height,
+    _PARAMS['Event Collider']['Offset X'],
+    _PARAMS['Event Collider']['Offset Y']
+  ];
   QMovement.showColliders = _PARAMS['Show Colliders'];
   QMovement.tileBoxes = {
     1537: [48, 6, 0, 42],

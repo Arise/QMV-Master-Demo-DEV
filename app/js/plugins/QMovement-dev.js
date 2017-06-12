@@ -119,15 +119,13 @@ Imported.QMovement = '1.3.10';
  *
  * @param Player Collider
  * @parent Default Colliders
- * @desc Default player collider.
- * type, width, height, ox, oy
- * @default box, 36, 24, 6, 24
+ * @desc Default collider for the player.
+ * @type Struct<Collider>
  *
  * @param Event Collider
  * @parent Default Colliders
- * @desc Default event collider.
- * type, width, height, ox, oy
- * @default box, 36, 24, 6, 24
+ * @desc Default collider for events.
+ * @type Struct<Collider>
  *
  * @param Debug Settings
  *
@@ -470,5 +468,32 @@ Imported.QMovement = '1.3.10';
  *  https://www.patreon.com/quxios
  *
  * @tags movement, pixel, character
+ */
+ /*~struct~Collider:
+ * @param Type
+ * @desc Set to box or circle
+ * @default box
+ *
+ * @param Width
+ * @desc Set to the width of the collider.
+ * @type Number
+ * @default 36
+ *
+ * @param Height
+ * @desc Set to the height of the collider.
+ * @type Number
+ * @default 36
+ *
+ * @param Offset X
+ * @desc Set to the x offset of the collider.
+ * @type Number
+ * @min -9999
+ * @default 6
+ *
+ * @param Offset Y
+ * @desc Set to the y offset of the collider.
+ * @type Number
+ * @min -9999
+ * @default 24
  */
 //=============================================================================
