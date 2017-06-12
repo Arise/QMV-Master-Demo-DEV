@@ -464,7 +464,7 @@ Imported.QMovement = '1.3.10';
  * @param Height
  * @desc Set to the height of the collider.
  * @type Number
- * @default 36
+ * @default 24
  *
  * @param Offset X
  * @desc Set to the x offset of the collider.
