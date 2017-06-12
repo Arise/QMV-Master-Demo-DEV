@@ -157,7 +157,7 @@ function QPlus() {
       return p.description.contains(id) && p.status
     });
     if (!plugin[0]) return {};
-    var params = plugin[0].parameters;
+    var params = Object.assign({}, plugin[0].parameters);
     if (convert) {
       for (var param in params) {
         params[param] = this.stringToType(params[param]);

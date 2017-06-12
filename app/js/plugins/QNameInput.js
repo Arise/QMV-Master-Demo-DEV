@@ -64,7 +64,7 @@ Imported.QNameInput = '2.0.3';
 // QNameInput
 
 (function() {
-  var _PARAMS = QPlus.getParams('<QInputRemap>', true);
+  var _PARAMS = QPlus.getParams('<QNameInput>', true);
   var _SHOW  = _PARAMS["Show Window with Keys"];
   var _WIDTH = _PARAMS["Window Width"];
 
