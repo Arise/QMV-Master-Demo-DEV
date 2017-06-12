@@ -3,7 +3,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QSprite = '2.1.6';
+Imported.QSprite = '2.1.7';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
   alert('Error: QSprite requires QPlus 1.4.0 or newer to work.');
@@ -14,7 +14,7 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
  /*:
  * @plugindesc <QSprite>
  * Lets you configure Spritesheets
- * @author Quxios  | Version 2.1.6
+ * @author Quxios  | Version 2.1.7
  *
  * @requires QPlus
  *

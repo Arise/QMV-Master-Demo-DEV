@@ -9,13 +9,13 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
   throw new Error('Error: QAudio requires QPlus 1.4.0 or newer to work.');
 }
 
-Imported.QAudio = '2.3.0';
+Imported.QAudio = '2.3.1';
 
 //=============================================================================
  /*:
  * @plugindesc <QAudio>
  * Few new audio features
- * @author Quxios  | Version 2.3.0
+ * @author Quxios  | Version 2.3.1
  *
  * @requires QPlus
  *

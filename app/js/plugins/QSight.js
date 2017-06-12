@@ -5,8 +5,8 @@
 var Imported = Imported || {};
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
-  alert('Error: QPopup requires QPlus 1.4.0 or newer to work.');
-  throw new Error('Error: QPopup requires QPlus 1.4.0 or newer to work.');
+  alert('Error: QSight requires QPlus 1.4.0 or newer to work.');
+  throw new Error('Error: QSight requires QPlus 1.4.0 or newer to work.');
 } if (Imported.QMovement && !QPlus.versionCheck(Imported.QMovement, '1.1.4')) {
   alert('Error: QSight requires QMovement 1.1.4 or newer to work.');
   throw new Error('Error: QSight requires QMovement 1.1.4 or newer to work.');

@@ -12,13 +12,13 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
   throw new Error('Error: QPathfind requires QMovement 1.1.9 or newer to work.');
 }
 
-Imported.QPathfind = '1.4.5';
+Imported.QPathfind = '1.4.6';
 
 //=============================================================================
  /*:
  * @plugindesc <QPathfind>
  * A* Pathfinding algorithm
- * @author Quxios  | Version 1.4.5
+ * @author Quxios  | Version 1.4.6
  *
  * @requires QPlus
  *

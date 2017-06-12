@@ -9,13 +9,13 @@ if (!Imported.QInput || !QPlus.versionCheck(Imported.QInput, '2.1.1')) {
   throw new Error('Error: QInputRemap requires QInput 2.1.1 or newer to work.');
 }
 
-Imported.QInputRemap = '2.1.0';
+Imported.QInputRemap = '2.1.1';
 
 //=============================================================================
  /*:
  * @plugindesc <QInputRemap>
  * Quasi Input Addon: Adds Key remapping to Options menu
- * @author Quxios  | Version 2.1.0
+ * @author Quxios  | Version 2.1.1
  *
  * @requires QInput
  *

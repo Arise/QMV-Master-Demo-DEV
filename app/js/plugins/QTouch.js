@@ -3,18 +3,18 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QTouch = '1.0.1';
+Imported.QTouch = '1.0.2';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
-  alert('Error: QPopup requires QPlus 1.4.0 or newer to work.');
-  throw new Error('Error: QPopup requires QPlus 1.4.0 or newer to work.');
+  alert('Error: QTouch requires QPlus 1.4.0 or newer to work.');
+  throw new Error('Error: QTouch requires QPlus 1.4.0 or newer to work.');
 }
 
 //=============================================================================
  /*:
  * @plugindesc <QTouch>
  * Better mouse handling for MV
- * @author Quxios  | Version 1.0.1
+ * @author Quxios  | Version 1.0.2
  *
  * @video https://youtu.be/2UrazG-XRxw
  *

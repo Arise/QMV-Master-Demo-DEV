@@ -3,18 +3,18 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.QSpeed = '1.2.1';
+Imported.QSpeed = '1.2.2';
 
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
-  alert('Error: QPopup requires QPlus 1.4.0 or newer to work.');
-  throw new Error('Error: QPopup requires QPlus 1.4.0 or newer to work.');
+  alert('Error: QSpeed requires QPlus 1.4.0 or newer to work.');
+  throw new Error('Error: QSpeed requires QPlus 1.4.0 or newer to work.');
 }
 
 //=============================================================================
  /*:
  * @plugindesc <QSpeed>
  * Allows for custom Move speeds and an acceleration effect
- * @author Quxios  | Version 1.2.1
+ * @author Quxios  | Version 1.2.2
  *
  * @requires QPlus
  *

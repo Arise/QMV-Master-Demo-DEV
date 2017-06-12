@@ -9,13 +9,13 @@ if (!Imported.QInput) {
   throw new Error('Error: QNameInput requires QInput to work.');
 }
 
-Imported.QNameInput = '2.0.2';
+Imported.QNameInput = '2.0.3';
 
 //=============================================================================
  /*:
  * @plugindesc <QNameInput>
  * Quasi Input addon: Adds Keyboard Input to Name Input Scene
- * @author Quxios  | Version 2.0.2
+ * @author Quxios  | Version 2.0.3
  *
  * @requires QInput
  *
