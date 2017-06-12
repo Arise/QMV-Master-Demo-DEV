@@ -285,7 +285,6 @@ function QABS() {
 
 (function() {
   var _PARAMS = QPlus.getParams('<QABS>', true);
-  console.log(_PARAMS);
 
   QABS.quickTarget = _PARAMS['Quick Target'];
   QABS.lockTargeting = _PARAMS['Lock when Targeting'];
@@ -1613,19 +1612,22 @@ function Skill_Sequencer() {
     var classKeys = /<skillKeys>([\s\S]*)<\/skillKeys>/i.exec(playerClass.note);
     if (classKeys && classKeys[1].trim() !== '') {
       this._absClassKeys = QABS.stringToSkillKeyObj(classKeys[1]);
-      this.preloadSkills();
-      this.checkAbsMouse();
+      this.resetABSKeys();
     }
   };
 
-  Game_System.prototype.absKeys = function() {
-    // TODO cache this obj
-    // recache when a change is needed
-    return Object.assign({},
-      this._absKeys,
+  Game_System.prototype.resetABSKeys = function() {
+    this._absKeys = Object.assign({},
+      QABS.getDefaultSkillKeys(),
       this._absClassKeys,
       this._absWeaponKeys
     );
+    this.preloadSkills();
+    this.checkAbsMouse();
+  };
+
+  Game_System.prototype.absKeys = function() {
+    return this._absKeys;
   };
 
   Game_System.prototype.changeABSSkill = function(skillNumber, skillId, forced) {
@@ -1641,12 +1643,12 @@ function Skill_Sequencer() {
       }
     }
     absKeys[skillNumber].skillId = skillId;
-    this.preloadSkills();
+    this.resetABSKeys();
   };
 
   Game_System.prototype.changeABSWeaponSkills = function(skillSet) {
     this._absWeaponKeys = skillSet;
-    this.preloadSkills();
+    this.resetABSKeys();
   };
 
   Game_System.prototype.changeABSSkillInput = function(skillNumber, input) {
@@ -1659,18 +1661,8 @@ function Skill_Sequencer() {
         break;
       }
     }
-    var gamepad = /^\$/.test(input);
-    for (var i = 0; i < absKeys[skillNumber].input.length; i++) {
-      var isGamepad = /^\$/.test(absKeys[skillNumber].input[i])
-      if (gamepad && isGamepad) {
-        absKeys[skillNumber].input[i] = input;
-        break;
-      } else if (!gamepad && !isGamepad) {
-        absKeys[skillNumber].input[i] = input;
-        break;
-      }
-    }
-    absKeys[skillNumber].input = input;
+    var i = /^\$/.test(input) ? 1 : 0;
+    absKeys[skillNumber].input[i] = input;
     this.checkAbsMouse();
   };
 
@@ -1717,10 +1709,10 @@ function Skill_Sequencer() {
     this._absMouse2 = false;
     var keys = this.absKeys();
     for (var key in keys) {
-      if (keys[key].input.contains('mouse1')) {
+      if (keys[key].input[0] === 'mouse1') {
         this._absMouse1 = true;
       }
-      if (keys[key].input.contains('mouse2')) {
+      if (keys[key].input[0] === 'mouse2') {
         this._absMouse2 = true;
       }
     }
@@ -2563,7 +2555,10 @@ function Skill_Sequencer() {
     var w = skill.collider.width;
     var h = skill.collider.height;
     if (Imported.QInput && Input.preferGamepad()) {
-      // TODO move collider with right analog
+      var x1 = skill.collider.center.x;
+      var y1 = skill.collider.center.y;
+      x1 += Input._dirAxesB.x * 5;
+      y1 += Input._dirAxesB.y * 5;
     } else {
       var x1 = $gameMap.canvasToMapPX(TouchInput.x);
       var y1 = $gameMap.canvasToMapPY(TouchInput.y);

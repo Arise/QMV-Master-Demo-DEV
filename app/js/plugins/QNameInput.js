@@ -29,7 +29,7 @@ Imported.QNameInput = '2.0.2';
  * @desc Set the width of the window
  * MV Default: 480
  * @type Number
- * @min 0
+ * @min 1
  * @default 480
  *
  * @help
@@ -41,17 +41,20 @@ Imported.QNameInput = '2.0.2';
  * ## How to use
  * ============================================================================
  * Place somewhere below QInput plugin.
- *
  * ============================================================================
  * ## Links
  * ============================================================================
  * RPGMakerWebs:
  *
- *   http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
+ *  http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
  *
  * Terms of use:
  *
- *   https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *  https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+ *
+ * Like my plugins? Support me on Patreon!
+ *
+ *  https://www.patreon.com/quxios
  *
  * @tags input
  */
@@ -61,11 +64,9 @@ Imported.QNameInput = '2.0.2';
 // QNameInput
 
 (function() {
-  var _PARAMS = $plugins.filter(function(p) {
-    return p.description.contains('<QNameInput>') && p.status
-  })[0].parameters;
-  var _SHOW  = _PARAMS["Show Window with Keys"] === 'true';
-  var _WIDTH = Number(_PARAMS["Window Width"]) || 480;
+  var _PARAMS = QPlus.getParams('<QInputRemap>', true);
+  var _SHOW  = _PARAMS["Show Window with Keys"];
+  var _WIDTH = _PARAMS["Window Width"];
 
   //-----------------------------------------------------------------------------
   // Scene_Name
