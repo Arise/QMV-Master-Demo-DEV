@@ -42,12 +42,20 @@ function Polygon_Collider() {
   Object.defineProperty(Polygon_Collider.prototype, 'ox', {
     get() {
       return this._offset.x + this._pivot.x;
+    },
+    set(value) {
+      this._offset.x = value;
+      this.refreshVertices();
     }
   });
 
   Object.defineProperty(Polygon_Collider.prototype, 'oy', {
     get() {
       return this._offset.y + this._pivot.y;
+    },
+    set(value) {
+      this._offset.y = value - this._pivot.y;
+      this.refreshVertices();
     }
   });
 
@@ -198,7 +206,7 @@ function Polygon_Collider() {
     this._pivot.x = x;
     this._pivot.y = y;
     this.makeVectors();
-    this.refreshVertices();
+    this.rotate(0); // Resets base vertices
   };
 
   Polygon_Collider.prototype.centerPivot = function() {
@@ -206,7 +214,6 @@ function Polygon_Collider() {
     this._pivot.y = this.height / 2;
     this.makeVectors();
     this.rotate(0); // Resets base vertices
-    this.refreshVertices();
   };
 
   Polygon_Collider.prototype.setRadian = function(radian) {

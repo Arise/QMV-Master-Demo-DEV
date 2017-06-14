@@ -9,13 +9,13 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
   throw new Error('Error: QMovement requires QPlus 1.4.0 or newer to work.');
 }
 
-Imported.QMovement = '1.3.11';
+Imported.QMovement = '1.4.0';
 
 //=============================================================================
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.3.11
+ * @author Quxios  | Version 1.4.0
  *
  * @repo https://github.com/quxios/QMovement
  *
@@ -97,17 +97,28 @@ Imported.QMovement = '1.3.11';
  * @min 0
  * @default 0
  *
- * @param Default Colliders
+ * @param Colliders
  *
  * @param Player Collider
- * @parent Default Colliders
+ * @text Default Player Collider
+ * @parent Colliders
  * @desc Default collider for the player.
  * @type Struct<Collider>
+ * @default {"Type":"box","Width":"36","Height":"24","Offset X":"6","Offset Y":"24"}
  *
  * @param Event Collider
- * @parent Default Colliders
+ * @text Default Event Collider
+ * @parent Colliders
  * @desc Default collider for events.
  * @type Struct<Collider>
+ * @default {"Type":"box","Width":"36","Height":"24","Offset X":"6","Offset Y":"24"}
+ *
+ * @param Presets
+ * @parent Colliders
+ * @desc List of preset colliders that you can assign to
+ * events
+ * @type Struct<ColliderPreset>[]
+ * @default []
  *
  * @param Debug Settings
  *
@@ -184,15 +195,20 @@ Imported.QMovement = '1.3.11';
  * not found
  * - Collision: This collider is used for collision checking
  * - Interaction: This collider is used for checking interaction.
- * ============================================================================
- * ## Collider Terms
- * ============================================================================
+ * ----------------------------------------------------------------------------
+ * **Collider Presets**
+ * ----------------------------------------------------------------------------
+ * You can create colliders in the plugin parameters which you can use when
+ * setting up other colliders.
+ * ----------------------------------------------------------------------------
+ * **Collider Terms**
+ * ----------------------------------------------------------------------------
  * ![Colliders Terms Image](https://quxios.github.io/imgs/qmovement/colliderInfo.png)
  * ----------------------------------------------------------------------------
  * **Collider Notetag**
  * ----------------------------------------------------------------------------
  * ~~~
- *  <collider: shape, width, height, ox, oy>
+ *  <collider: [SHAPE], [WIDTH], [HEIGHT], [OX], [OY]>
  * ~~~
  * This notetag sets all collider types to these values.
  * - SHAPE: Set to box, circle or poly
@@ -206,7 +222,7 @@ Imported.QMovement = '1.3.11';
  * ----------------------------------------------------------------------------
  * ~~~
  *  <colliders>
- *  type: shape, width, height, ox, oy
+ *  [TYPE]: [SHAPE], [WIDTH], [HEIGHT], [OX], [OY]
  *  </colliders>
  * ~~~
  * This notetag sets all collider types to these values.
@@ -229,6 +245,32 @@ Imported.QMovement = '1.3.11';
  *  interaction: box: 32, 32, 8, 8
  *  </colliders>
  * ~~~
+ * ----------------------------------------------------------------------------
+ * **Using Preset**
+ * ----------------------------------------------------------------------------
+ * To use a collider preset in the notetag, the format is:
+ * ~~~
+ *  preset, [PRESETID]
+ * ~~~
+ * - PRESETID: The PresetID you set in the preset parameter.
+ *
+ * You will use this format instead of the: `SHAPE, WIDTH, HEIGHT, OX, OY`
+ *
+ * Example:
+ * ~~~
+ *  <collider: preset, largeCollider>
+ * ~~~
+ * Will look for the preset with the ID `largeCollider`
+ *
+ * Example 2:
+ * ~~~
+ *  <colliders>
+ *  default: preset, largeDefault
+ *  collision: preset, largeCollider
+ *  interaction: preset, largeInteraction
+ *  </colliders>
+ * ~~~
+ * Will use the presets; `largeDefault`, `largeCollider`, and `largeInteraction`
  * ----------------------------------------------------------------------------
  * **Poly Colliders**
  * ----------------------------------------------------------------------------
@@ -295,8 +337,10 @@ Imported.QMovement = '1.3.11';
  * Will make the character do a full 360 arc clockwise around the point 480, 480
  * and it'll take 60 frames.
  * ============================================================================
- * ## Notetags
+ * ## Event Notetags
  * ============================================================================
+ * **Offsets**
+ * ----------------------------------------------------------------------------
  * To shift an events initial starting position, you can use the following
  * note tags:
  * ~~~
@@ -305,6 +349,14 @@ Imported.QMovement = '1.3.11';
  *  <oy:X>
  * ~~~
  * Where X is the number of pixels to shift the event. Can be negative.
+ * ----------------------------------------------------------------------------
+ * **SmartDir**
+ * ----------------------------------------------------------------------------
+ * By default, when the player collides with an event it won't trigger the
+ * Smart Move Dir effect. To enable this, add following notetag to the event:
+ * ~~~
+ *  <smartDir>
+ * ~~~
  * ============================================================================
  * ## Plugin Commands
  * ============================================================================
@@ -454,6 +506,47 @@ Imported.QMovement = '1.3.11';
  /*~struct~Collider:
  * @param Type
  * @desc Set to box or circle
+ * @type select
+ * @option Box
+ * @value box
+ * @option Circle
+ * @value circle
+ * @default box
+ *
+ * @param Width
+ * @desc Set to the width of the collider.
+ * @type Number
+ * @default 36
+ *
+ * @param Height
+ * @desc Set to the height of the collider.
+ * @type Number
+ * @default 24
+ *
+ * @param Offset X
+ * @desc Set to the x offset of the collider.
+ * @type Number
+ * @min -9999
+ * @default 6
+ *
+ * @param Offset Y
+ * @desc Set to the y offset of the collider.
+ * @type Number
+ * @min -9999
+ * @default 24
+ */
+ /*~struct~ColliderPreset:
+ * @param ID
+ * @desc The ID of this preset, needs to be unique!
+ * @default
+ *
+ * @param Type
+ * @desc Set to box or circle
+ * @type select
+ * @option Box
+ * @value box
+ * @option Circle
+ * @value circle
  * @default box
  *
  * @param Width

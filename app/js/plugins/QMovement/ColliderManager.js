@@ -255,7 +255,15 @@ function ColliderManager() {
   };
 
   ColliderManager.convertToCollider = function(arr) {
-    var type = arr[0];
+    var type = arr[0].toLowerCase();
+    if (type === 'preset') {
+      var arr = QMovement.presets[arr[1]];
+      if (!arr) {
+        alert("ERROR: Tried to use a collider preset that doesn't exist: ", type);
+        return null;
+      }
+      type = arr[0].toLowerCase();
+    }
     var w = arr[1] || 0;
     var h = arr[2] || 0;
     var ox = arr[3] || 0;

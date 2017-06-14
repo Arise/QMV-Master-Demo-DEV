@@ -11,6 +11,10 @@
       "alias - prototype - onBeforeSave - undefined",
       "alias - prototype - onAfterLoad - undefined"
     ],
+    "Game_Party": [
+      "override - prototype - steps - undefined",
+      "override - prototype - increaseSteps - undefined"
+    ],
     "Game_Map": [
       "alias - prototype - setup - mapId",
       "override - prototype - tileWidth - undefined",
@@ -94,7 +98,6 @@
       "prototype - arc - pivotX, pivotY, radians, cc, frames",
       "prototype - smartMove - undefined",
       "prototype - smartMoveDir8 - dir",
-      "prototype - smartMoveRadian - radian, dist",
       "prototype - smartMoveSpeed - dir",
       "prototype - reloadColliders - undefined",
       "prototype - removeColliders - undefined",

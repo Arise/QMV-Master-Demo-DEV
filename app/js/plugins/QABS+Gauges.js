@@ -58,6 +58,7 @@ Imported.QABS_Gauges = '1.0.1';
  * @desc Set the default gauges X offset, can be negative
  * Default: 0
  * @type Number
+ * @min -9999
  * @default 0
  *
  * @param Gauge Default OY
@@ -65,6 +66,7 @@ Imported.QABS_Gauges = '1.0.1';
  * @desc Set the default gauges Y offset, can be negative
  * Default: -48
  * @type Number
+ * @min -9999
  * @default -48
  *
  * @param Boss Gauge Default OX
@@ -72,6 +74,7 @@ Imported.QABS_Gauges = '1.0.1';
  * @desc Set the default boss gauges X offset, can be negative
  * Default: 0
  * @type Number
+ * @min -9999
  * @default 0
  *
  * @param Boss Gauge Default OY
@@ -79,6 +82,7 @@ Imported.QABS_Gauges = '1.0.1';
  * @desc Set the default boss gauges Y offset, can be negative
  * Default: 24
  * @type Number
+ * @min -9999
  * @default 24
  *
  * @param Gauge Colors

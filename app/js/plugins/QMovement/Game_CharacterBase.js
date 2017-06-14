@@ -559,8 +559,6 @@
   Game_CharacterBase.prototype.moveRadian = function(radian, dist) {
     dist = dist || this.moveTiles();
     this.fixedRadianMove(radian, dist);
-    // TODO make this better instead of using realDir
-    // try using different angles between +- 45 degrees
     if (!this.isMovementSucceeded() && this.smartMove() > 1) {
       var realDir = this.radianToDirection(radian, true);
       var xAxis = Math.cos(radian);
@@ -673,11 +671,28 @@
   };
 
   Game_CharacterBase.prototype.smartMoveDir8 = function(dir) {
+    var dist = this.moveTiles();
+    var collider = this.collider('collision');
     var x1 = this._px;
     var y1 = this._py;
-    var dist = this.moveTiles();
+    var x2 = $gameMap.roundPXWithDirection(x1, dir, dist);
+    var y2 = $gameMap.roundPYWithDirection(y1, dir, dist);
+    collider.moveTo(x2, y2);
+    var collided = false;
+    ColliderManager.getCharactersNear(collider, (function(chara) {
+      if (chara.isThrough() || chara === this || !chara.isNormalPriority() ||
+          /<smartdir>/i.test(chara.notes())) {
+        return false;
+      }
+      if (chara.collider('collision').intersects(collider)) {
+        collided = true;
+        return 'break';
+      }
+      return false;
+    }).bind(this));
+    collider.moveTo(x1, y1);
+    if (collided) return;
     var horz = [4, 6].contains(dir) ? true : false;
-    var collider = this.collider('collision');
     var steps = horz ? collider.height : collider.width;
     steps /= 2;
     var pass = false;
@@ -704,22 +719,6 @@
       if (pass) break;
     }
     if (!pass) return;
-    collider.moveTo(x2, y2);
-    var collided = false;
-    ColliderManager.getCharactersNear(collider, (function(chara) {
-      if (chara.isThrough() || chara === this || !chara.isNormalPriority()) {
-        return false;
-      }
-      if (chara.collider('collision').intersects(collider) &&
-        chara.notes && !/<smartdir>/i.test(chara.notes())) {
-        collided = true;
-        return 'break';
-      }
-      return false;
-    }).bind(this));
-    collider.moveTo(x1, y1);
-    if (collided) return;
-    collider.moveTo(x2, y2);
     var radian = QPlus.adjustRadian(Math.atan2(y2 - y1, x2 - x1));
     this._forwardRadian = radian;
     this._px = x2;
@@ -728,58 +727,6 @@
     this._realPY = y1;
     this._adjustFrameSpeed = false;
     this.setRadian(radian);
-    this.increaseSteps();
-  };
-
-  Game_CharacterBase.prototype.smartMoveRadian = function(radian, dist) {
-    // Incomplete func, might remove as results aren't as good as smartMoveDir8
-    // is a radian version of .smartMoveDir8
-    var radian2 = radian;
-    var horzSteps, vertSteps;
-    var horz, vert;
-    var x2, y2;
-    var a = Math.PI / 4;
-    var pass = false;
-    for (var i = 0; i < 2; i++) {
-      var sign = i === 0 ? 1 : -1;
-      for (var j = 1; j < 8; j++) {
-        radian2 = j !== 0 ? radian + a * sign / j : radian;
-        var xAxis = Math.cos(radian2);
-        var yAxis = Math.sin(radian2);
-        horzSteps = Math.round(Math.abs(xAxis) * dist);
-        vertSteps = Math.round(Math.abs(yAxis) * dist);
-        horz = xAxis > 0 ? 6 : xAxis < 0 ? 4 : 0;
-        vert = yAxis > 0 ? 2 : yAxis < 0 ? 8 : 0;
-        x2 = $gameMap.roundPXWithDirection(this._px, horz, horzSteps);
-        y2 = $gameMap.roundPYWithDirection(this._py, vert, vertSteps);
-        pass = this.canPassToFrom(x2, y2, this._px, this._py);
-        if (pass) break;
-      }
-      if (pass) break;
-    }
-    if (!pass) return;
-    var collider = this.collider('collision');
-    collider.moveTo(x2, y2);
-    var collided = false;
-    ColliderManager.getCharactersNear(collider, (function(chara) {
-      if (chara.isThrough() || chara === this || !chara.isNormalPriority()) {
-        return false;
-      }
-      if (chara.collider('collision').intersects(collider) &&
-        chara.notes && !/<smartdir>/i.test(chara.notes())) {
-        collided = true;
-        return 'break';
-      }
-      return false;
-    }).bind(this));
-    collider.moveTo(this._px, this._py);
-    if (collided) return;
-    this._adjustFrameSpeed = true;
-    this._realPX = this._px;
-    this._realPY = this._py;
-    this._px = x2;
-    this._py = y2;
-    this.setRadian(radian2);
     this.increaseSteps();
   };
 
@@ -846,10 +793,8 @@
   };
 
   Game_CharacterBase.prototype.makeCollider = function(name, settings) {
-    if (settings[0] === 'box' || settings[0] === 'circle') {
-      settings[4] = (settings[4] || 0) - this.shiftY();
-    }
     this._colliders[name] = ColliderManager.convertToCollider(settings);
+    this._colliders[name].oy -= this.shiftY();
     this._colliders[name]._charaId = this.charaId();
     ColliderManager.addCollider(this._colliders[name], -1, true);
   };
