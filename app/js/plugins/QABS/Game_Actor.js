@@ -2,6 +2,13 @@
 // Game_Actor
 
 (function() {
+  var Alias_Game_Actor_setup = Game_Actor.prototype.setup;
+  Game_Actor.prototype.setup = function(actorId) {
+    Alias_Game_Actor_setup.call(this, actorId);
+    var meta = this.actor().qmeta;
+    this._popupOY = meta.popupOY;
+  };
+
   var Alias_Game_Actor_changeClass = Game_Actor.prototype.changeClass;
   Game_Actor.prototype.changeClass = function(classId, keepExp) {
     Alias_Game_Actor_changeClass.call(this, classId, keepExp);
@@ -55,13 +62,12 @@
   };
 
   Game_Actor.prototype.displayLevelUp = function(newSkills) {
-    QABSManager.startPopup('level', {
+    QABSManager.startPopup('QABS-LEVEL', {
       x: $gamePlayer.cx(),
       y: $gamePlayer.cy(),
       string: 'Level Up!'
     })
     QABSManager.startAnimation(QABS.levelAnimation, $gamePlayer.cx(), $gamePlayer.cy());
-    //$gamePlayer.requestAnimation(QABS.levelAnimation);
   };
 
   Game_Actor.prototype.onPlayerWalk = function() {

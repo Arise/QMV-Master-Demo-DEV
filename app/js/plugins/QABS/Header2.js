@@ -50,7 +50,7 @@ function QABS() {
         return i !== '';
       }).map(function(i) {
         return i.trim();
-      })
+      });
       var skillId = Number(data[0]) || 0;
       var rebind = data[1] === 'true';
       if (!QABS.skillKey[key]) {
@@ -61,13 +61,10 @@ function QABS() {
         delete obj[key];
         continue;
       }
-      var input = QABS.skillKey[key].input.clone();
-      if (input) {
-        obj[key] = {
-          input: input,
-          skillId: skillId,
-          rebind: rebind
-        }
+      obj[key] = {
+        input: QABS.skillKey[key].input.clone(),
+        skillId: skillId,
+        rebind: rebind
       }
     }
     return obj;
@@ -144,7 +141,7 @@ function QABS() {
   QABS._weaponSkills = {};
   QABS.weaponSkills = function(id) {
     if (!this._weaponSkills[id]) {
-      var skills = $dataWeapons[id].qmeta.absSkills;
+      var skills = $dataWeapons[id].qmeta.skillKeys || $dataWeapons[id].qmeta.absSkills;
       this._weaponSkills[id] = {};
       if (skills) {
         this._weaponSkills[id] = this.stringToSkillKeyObj(skills);

@@ -5,7 +5,6 @@
   var Alias_Sprite_Character_initMembers = Sprite_Character.prototype.initMembers;
   Sprite_Character.prototype.initMembers = function() {
     Alias_Sprite_Character_initMembers.call(this);
-    this._damages = [];
     this.createStateSprite();
   };
 
@@ -42,42 +41,36 @@
       var string;
       var fill = '#ffffff';
       var result = this._battler._damageQueue.shift();
+      var type = 'DMG';
       if (result.missed || result.evaded) {
         string = 'Missed';
+        type = 'MISSED';
       } else if (result.hpAffected) {
         var dmg = result.hpDamage;
+        string = String(Math.abs(dmg));
         if (dmg >= 0) {
-          string = String(dmg);
-          fill = '#ffffff';
+          type = 'DMG';
         } else {
-          string = String(Math.abs(dmg));
-          fill = '#00ff00';
+          type = 'HEAL';
         }
       } else if (result.mpDamage) {
         string = String(result.mpDamage);
-        fill = '#0000ff';
+        type = 'MP';
       }
       if (!string && string !== '0') return;
       var iconIndex = result.damageIcon;
       if (iconIndex) {
         string = '\\I[' + iconIndex + ']' + string;
       }
-      if (result.critical) fill = '#FF8C00';
-      var fadeout = '50 30 fadeout';
-      var slideup = '0 80 slideup 24';
-      var preset = $gameSystem.qPopupPreset('QABS-DMG');
-      var sprite = QPopup.start({
+      if (result.critical) {
+        type += '-CRIT';
+      }
+      QABSManager.startPopup('QABS-' + type, {
         string: string,
-        //oy: -(this.patternHeight() - 20), TODO add an OY meta?
+        oy: this._battler._popupOY,
         bindTo: this._character.charaId(),
-        duration: 80,
-        transitions: preset.transitions || [fadeout, slideup],
-        style: Object.assign({},
-          preset.style,
-          { fill: fill }
-        )
-      })
-      this._damages.push(sprite);
+        duration: 80
+      });
       this._battler.clearDamagePopup();
       this._battler.clearResult();
     }

@@ -9,13 +9,13 @@ if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.3.1')) {
   throw new Error('Error: QABS requires QMovement 1.3.1 or newer to work.');
 }
 
-Imported.QABS = '1.0.0';
+Imported.QABS = '1.1.0';
 
 //=============================================================================
  /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @author Quxios  | Version 1.0.0
+ * @author Quxios  | Version 1.1.0
  *
  * @development
  *
@@ -123,63 +123,218 @@ Imported.QABS = '1.0.0';
  * ============================================================================
  * ## About
  * ============================================================================
- * A collider based action battle system for QMovement.
+ * A collider based action battle system for QMovement. *Note* This is not
+ * your simple rpg maker action battle system. Using this plugin you can
+ * create more advance like action games.
  * ============================================================================
- * ## How to use
+ * ## Is this for you?
  * ============================================================================
- * TODO
+ * First, this is a very complex action battle system. If you're looking for
+ * something that you can spend less than an hour to set up then this plugin
+ * is not for you.
+ *
+ * To make full use of this plugin you need to know how to properly use and
+ * setup QMovement. If you don't know what that plugin is or what colliders
+ * are then again, this plugin is not for you.
+ *
+ * There are a lot of actions for skill sequences so you can create some pretty
+ * crazy skills. Learning how to use the actions may take awhile since there
+ * are a lot of actions, and maybe more to come.
+ *
+ * Enemies have a very basic AI. If you want to create more AI styles, you
+ * will need to know how to JS and create a plugin / extend this plugin.
+ * ============================================================================
+ * ## Skill Keys
+ * ============================================================================
+ * **Default Skill keys**
  * ----------------------------------------------------------------------------
- * **Sub section**
+ * For the player to be able to use a skill from a hotkey, you will first need
+ * to create a skill key in the plugin parameter `Default Skills`.
+ *
+ * ![Skill Keys](https://quxios.github.io/imgs/qabs/skillKeys.png)
+ *
+ * When creating a skill key you have 4 parameters:
+ *
+ * - Keyboard Input: The keyboard input that will trigger this skill, set this
+ *  to `mouse1` for left click, and `mouse2` for right click.
+ * - Gamepad Input: The gamepad input that will trigger this skill.
+ * - Rebind: If this is true, the skill that's assigned to this skill key can
+ *  be reassigned.
+ * - Skill Id: The skill that this skill key will use when triggered.
+ *
+ * Note for input values, those are the button values; `ok`, 'cancel', ect. Or
+ * if you're using an input plugin, use their value, for example in QInput you can
+ * use the `#A` for the a key or `#tab` for tab, ect.
+ *
+ * Note that rebind doesn't do much as this doesn't have a rebinding feature.
+ * But the ground work is there so it can easily be created for an addon.
+ *
+ * Note that the `Skill Key Number` is the number next to the skill key you created.
+ * `Skill Key Number` will referenced later.
+ *
+ * ![Skill Keys](https://quxios.github.io/imgs/qabs/skillKeysNumber.png)
+ *
  * ----------------------------------------------------------------------------
+ * **Class Skill keys**
+ * ----------------------------------------------------------------------------
+ * You can change the players skill keys based on their class by adding the notetag:
+ * ~~~
+ *  <skillKeys>
+ *  [SKILL KEY NUMBER]: [SKILL ID] [REBIND?]
+ *  </skillKeys>
+ * ~~~
+ * - SKILL KEY NUMBER: The skill key that you want to change
+ * - SKILL ID: The skill to assign to this skill key number
+ * - REBIND?: Set to true or false if this can be reassigned
  *
- * ============================================================================
- * ## Skill Sequences
- * ============================================================================
- * user ---
- * user casting [true|false]
- * user lock
- * user unlock
- * user speed [inc|dec] [amt]
- * user move [forward|backward] [dist] [wait? true|false]
- * user moveHere [wait? true|false]
- * user jump [forward|backward] [dist] [wait? true|false]
- * user jumpHere [wait? true|false]
- * user teleport
- * user setDirection [dir]
- * user directionFix [true|false]
- * user pose [pose] [wait? true|false]
- * user forceSkill [skillId] [angleOffset in degrees]
- * user animation [animationId]
- * store
- * move [forward|backward] [dist] [duration] [wait? true|false]
- * moveToStored [duration] [wait? true|false]
- * wave [forward|backward] [amplitude] [harm] [dist] [duration] [wait? true|false]
- * waveToStored [amplitude] [harm] [duration] [wait? true|false]
- * trigger
- * wait [duration]
- * picture [fileName] [rotatable? true|false] [base direction]
- * trail [fileName] [rotatable? true|false] [base direction]
- * collider
- * animation [animationId]
- * se [name] [volume] [pitch] [pan]
- * qaudio TODO
- * globalLock
- * globalUnlock
+ * *Important!* make sure the skill key you are trying to set is created in the
+ * plugin parameters `Default Skills`. If it's not, the game will have an error.
  *
- * ============================================================================
- * ## Skill OnDamage
- * ============================================================================
- * target ---
- * target move [towards|away] [dist]
- * target jump [towards|away] [dist]
- * target pose [pose]
- * target cancel
- * user
- * user forceSkill
- * animationTarget
+ * Example:
+ * ~~~
+ *  <skillKeys>
+ *  1: 2
+ *  3: 15
+ *  4: 16
+ *  </skillKeys>
+ * ~~~
+ * Class Skill keys will replace the default skill keys. So if you set up skill
+ * keys 1 through 9 in the parameters and a class changes the skills for skill
+ * keys 1, 3, 4. The over all skill keys will be, 1, 3, 4 from the class and
+ * the rest are from the default values.
+ * ----------------------------------------------------------------------------
+ * **Weapon Skill keys**
+ * ----------------------------------------------------------------------------
+ * Weapons can also change the skill keys. For example you might want to change
+ * the main attack to use a range skill if the player has a bow on! To do this
+ * you use a similar tag as the class:
+ * ~~~
+ *  <skillKeys>
+ *  [SKILL KEY NUMBER]: [SKILL ID]
+ *  </skillKeys>
+ * ~~~
+ * - SKILL KEY NUMBER: The skill key that you want to change
+ * - SKILL ID: The skill to assign to this skill key number
  *
+ * *Important!* make sure the skill key you are trying to set is created in the
+ * plugin parameters `Default Skills`. If it's not, the game will have an error.
+ *
+ * Example:
+ * ~~~
+ *  <skillKeys>
+ *  1: 3
+ *  </skillKeys>
+ * ~~~
+ * Weapon skill keys take top priority, so they will replace both class keys
+ * and teh default keys! This example will replace skill key 1 with the skill
+ * id 3
  * ============================================================================
- * ## Enemy Notetags
+ * ## Skills
+ * ============================================================================
+ * **Skill Settings**
+ * ----------------------------------------------------------------------------
+ * Each skill should have a skill settings tag. This tag can change the settings
+ * for the skills cooldown, through, and other effects. The tag is:
+ * ~~~
+ *  <absSettings>
+ *  [SETTINGS]: [VALUE]
+ *  </absSettings>
+ * ~~~
+ * Here's a list of all the settings:
+ * ~~~
+ *  collider: [SHAPE], [WIDTH], [HEIGHT]
+ *  cooldown: [NUMBER]
+ *  infront: [TRUE or FALSE]
+ *  rotate: [TRUE or FALSE]
+ *  through: [0, 1, 2 or 3]
+ *  groundtarget: [NUMBER]
+ *  selecttarget: [NUMBER]
+ * ~~~
+ * - collider: Set this to the collider this skill will use. See QMovement help
+ * for details on colliders. Default: The users collider
+ *   - format is `shape, width, height`
+ * - cooldown: Set to the number of frames until you can use this skill again.
+ * Default: 0
+ * - infront: Set to true or false. When true, the collider will appear in front
+ * of the user. When false the collider will be centered on the user. Default: false
+ * - rotate: Set to true or false. When true, the collider will rotate based on
+ * the users direction. Default: false
+ * - through: Set to 0, 1, 2, or 3. Default: 0
+ *   - 0: Goes through events and tiles
+ *   - 1: Goes through tiles but stops when it hits an event
+ *   - 2: Goes through events but stops when it hits a tile
+ *   - 3: Stops when it hits an event or tile
+ * - groundtarget: Set to the max distance for the ground target. If value is
+ * 0 ground targeting will not be used. Default: 0
+ * - selecttarget: Set to the max distance for the select target. If value is
+ * 0 select targeting will not be used. Default: 0
+ * ----------------------------------------------------------------------------
+ * **Skill Sequence**
+ * ----------------------------------------------------------------------------
+ * When a skill is used, it's sequence will run. You will need to configure
+ * a sequence to tell the skill what it should do or it won't do anything.
+ * This is done with the notetag:
+ * ~~~
+ *  <absSequence>
+ *  [ACTION]
+ *  </absSequence>
+ * ~~~
+ * There are a bunch of actions. Each action should be on a different line.
+ * Here's a list of all the actions:
+ * ~~~
+ *  user casting [TRUE or FALSE]
+ *  user lock
+ *  user unlock
+ *  user speed [INC or DEC] [VALUE]
+ *  user move [FORWARD or BACKWARD] [DIST] [WAIT? TRUE or FALSE]
+ *  user moveHere [WAIT? TRUE or FALSE]
+ *  user jump [FORWARD or BACKWARD] [DIST] [WAIT? TRUE or FALSE]
+ *  user jumpHere [WAIT? TRUE or FALSE]
+ *  user teleport
+ *  user setDirection [DIR]
+ *  user directionFix [TRUE or FALSE]
+ *  user pose [POSE NAME] [WAIT? TRUE or FALSE]
+ *  user forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
+ *  user animation [ANIMATION ID]
+ *  store
+ *  move [FORWARD or BACKWARD] [DIST] [DURATION] [WAIT? TRUE or FALSE]
+ *  moveToStored [DURATION] [WAIT? TRUE or FALSE]
+ *  wave [FORWARD or BACKWARD] [AMPLITUDE] [HARM] [DIST] [DURATION] [WAIT? TRUE or FALSE]
+ *  waveToStored [AMPLITUDE] [HARM] [DURATION] [WAIT? TRUE or FALSE]
+ *  trigger
+ *  wait [DURATION]
+ *  picture [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
+ *  trail [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
+ *  collider [SHOW or HIDE]
+ *  animation [ANIMATION ID]
+ *  se [NAME] [VOLUME] [PITCH] [PAN]
+ *  qaudio [NAME] [QAUDIO OPTIONS]
+ *  globalLock
+ *  globalUnlock
+ * ~~~
+ * more info~ TODO
+ * ----------------------------------------------------------------------------
+ * **Skill On Damage**
+ * ----------------------------------------------------------------------------
+ * Whenever a skill hits a target you can run another sequence. This is done
+ * by using the notetag:
+ * ~~~
+ *  <absOnDamage>
+ *  [ACTION]
+ *  </absOnDamage>
+ * ~~~
+ * There are a few actions you can add here:
+ * ~~~
+ *  target move [TOWARDS or AWAY] [DIST]
+ *  target jump [TOWARDS or AWAY] [DIST]
+ *  target pose [POSE]
+ *  target cancel
+ *  user forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
+ *  animationTarget [0 or 1]
+ * ~~~
+ * more info~ TODO
+ * ============================================================================
+ * ## Enemies
  * ============================================================================
  * **Event**
  * ----------------------------------------------------------------------------
@@ -191,15 +346,33 @@ Imported.QABS = '1.0.0';
  * ----------------------------------------------------------------------------
  * **Enemy Database**
  * ----------------------------------------------------------------------------
+ * To set the enemies respawn
+ * ~~~
+ *  <respawn: X>
+ * ~~~
+ * - X: How long until it respawns, in frames.
+ *
  * To disable the enemy AI, add this notetag
  * ~~~
  *  <noAI>
  * ~~~
  *
+ * To set it's AI range
+ * ~~~
+ *  <range: X>
+ * ~~~
+ * - X: The range in pixels
+ *
  * To disable damage popups on this enemy, add this notetag
  * ~~~
  *  <noPopup>
  * ~~~
+ *
+ * To add an offset to the popup's y use:
+ * ~~~
+ *  <popupOY:Y>
+ * ~~~
+ * - Y: The y offset in pixels, can be negative
  *
  * To keep the event around after it dies, add this notetag
  * ~~~
@@ -211,7 +384,7 @@ Imported.QABS = '1.0.0';
  *  <onDeath>
  *  javascript code
  *  </onDeath>
- * ~~~~
+ * ~~~
  *
  * To change the team of the enemy, use this notetag
  * ~~~
@@ -224,7 +397,7 @@ Imported.QABS = '1.0.0';
  * - 3+ can also be used
  * *Note teams don't do much because there is no team based AI*
  * ============================================================================
- * ## State Notetags
+ * ## States
  * ============================================================================
  * To have a state affect the characters move speed use:
  * ~~~

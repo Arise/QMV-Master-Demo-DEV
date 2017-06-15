@@ -34,7 +34,7 @@
           range: this._aiRange / QMovement.tileSize,
           handler: 'AI',
           targetId: '0'
-        })
+        });
       }
       var actions = this._battler.enemy().actions;
       for (var i = 0; i < actions.length; i++) {
@@ -92,6 +92,12 @@
     var bestTarget = this.bestTarget();
     if (!bestTarget) return;
     var targetId = bestTarget.charaId();
+    if (this.updateAIRange(bestTarget)) return;
+    this.updateAIAction(bestTarget, this.updateAIGetAction(bestTarget));
+  };
+
+  Game_Event.prototype.updateAIRange = function(bestTarget) {
+    var targetId = bestTarget.charaId();
     if (this.isTargetInRange(bestTarget)) {
       if (!this._agroList.hasOwnProperty(targetId)) {
         this._aiWait = QABS.aiWait;
@@ -107,23 +113,21 @@
         if (this._aiPathfind) {
           this.clearPathfind();
         }
-        // TODO maybe move randomly to search for
-        // target again before ending its combat
         this._endWait = this.wait(120).then(function() {
           this._endWait = null;
           this.endCombat();
         }.bind(this))
       }
-      return;
+      return true;
     }
+    return false;
+  };
+
+  Game_Event.prototype.updateAIGetAction = function(bestTarget, dx, dy) {
     var bestAction = null;
-    var x1 = bestTarget.cx();
-    var y1 = bestTarget.cy();
-    var x2 = this.cx();
-    var y2 = this.cy();
-    var dx = x1 - x2;
-    var dy = y1 - y2;
     if (this._aiWait >= QABS.aiWait) {
+      var dx = bestTarget.cx() - this.cx();
+      var dy = bestTarget.cy() - this.cy();
       this._radian = Math.atan2(dy, dx);
       this._radian += this._radian < 0 ? Math.PI * 2 : 0;
       bestAction = QABSManager.bestAction(this.charaId());
@@ -131,23 +135,26 @@
     } else {
       this._aiWait++;
     }
+    return bestAction;
+  };
+
+  Game_Event.prototype.updateAIAction = function(bestTarget, bestAction) {
     if (bestAction) {
       this.useSkill(bestAction);
-    } else if (this.canMove()) {
-      // TODO add a how far away to stay away from target property
-      if (this._freqCount < this.freqThreshold()) {
-        if (this._aiPathfind) {
-          var mw = this.collider('collision').width + bestTarget.collider('collision').width;
-          var mh = this.collider('collision').height + bestTarget.collider('collision').height;
-          if (Math.abs(dx) <= mw && Math.abs(dy) <= mh) {
-            this.clearPathfind();
-            this.moveTowardCharacter(bestTarget);
-          } else {
-            this.initChase(bestTarget.charaId());
-          }
-        } else {
+    } else if (this.canMove() && this._freqCount < this.freqThreshold()) {
+      if (this._aiPathfind) {
+        var dx = bestTarget.cx() - this.cx();
+        var dy = bestTarget.cy() - this.cy();
+        var mw = this.collider('collision').width + bestTarget.collider('collision').width;
+        var mh = this.collider('collision').height + bestTarget.collider('collision').height;
+        if (Math.abs(dx) <= mw && Math.abs(dy) <= mh) {
+          this.clearPathfind();
           this.moveTowardCharacter(bestTarget);
+        } else {
+          this.initChase(bestTarget.charaId());
         }
+      } else {
+        this.moveTowardCharacter(bestTarget);
       }
     }
   };
@@ -252,7 +259,7 @@
       var exp = this.battler().exp();
       $gamePlayer.battler().gainExp(exp);
       if (exp > 0) {
-        QABSManager.startPopup('exp', {
+        QABSManager.startPopup('QABS-EXP', {
           x: $gamePlayer.cx(), y: $gamePlayer.cy(),
           string: 'Exp: ' + exp
         });

@@ -31,18 +31,16 @@ function QABSManager() {
     var chara = QPlus.getCharacter(userId);
     if (!chara.battler()) return null;
     var targets;
-    var action = {};
     var skills = chara.usableSkills().filter(function(skillId) {
       if (!skillId) return false;
       targets = QABSManager.skillWillHit(skillId, userId);
       if (targets && targets.length > 0) {
-        action[skillId] = targets;
         return true;
       }
       return false;
     })
     if (skills.length === 0) return null;
-    return skills[Math.floor(Math.random() * skills.length)]
+    return skills[Math.floor(Math.random() * skills.length)];
   };
 
   QABSManager.skillWillHit = function(skillId, userId) {
@@ -97,10 +95,10 @@ function QABSManager() {
     if (!Imported.QPopup) return;
     var preset = $gameSystem.qPopupPreset(type);
     Object.assign(options, {
-      duration: 80,
       style: preset.style,
       transitions: preset.transitions
     })
+    if (!options.duration) options.duration = 80;
     if (!options.transitions) {
       var start = options.duration - 30;
       var end = start + 30;
@@ -108,10 +106,8 @@ function QABSManager() {
       var slideup = '0 ' + end + ' slideup 24';
       options.transitions = [fadeout, slideup];
     }
-    QPopup.start(options);
+    return QPopup.start(options);
   };
-
-  // TODO QABSManager.startNotification
 
   QABSManager._animations = [];
   QABSManager.startAnimation = function(id, x, y) {

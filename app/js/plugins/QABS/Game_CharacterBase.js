@@ -261,33 +261,6 @@
     ColliderManager.draw(skill.collider, skill.sequence.length + 60);
   };
 
-  Game_CharacterBase.prototype.makeTargetingSkill = function(skill) {
-    this._groundTargeting = skill;
-    this._selectTargeting = this.constructor === Game_Event ? true : skill.settings.selectTarget;
-    var collider = skill.collider;
-    var diameter = skill.settings.range * 2;
-    skill.targeting = new Circle_Collider(diameter, diameter);
-    skill.targeting.moveTo(this.cx() - diameter / 2, this.cy() - diameter / 2);
-    ColliderManager.draw(skill.targeting, -1);
-    skill.collider = skill.targeting;
-    skill.targets = QABSManager.getTargets(skill, this);
-    skill.collider = collider;
-    skill.picture = new Sprite_SkillCollider(skill.collider);
-    if (this._selectTargeting) {
-      if (skill.targets.length === 0 ) {
-        return this.onTargetingCancel();
-      }
-      skill.collider.color = '#00ff00';
-      skill.index = 0;
-      this.updateSkillTarget();
-    } else {
-      var x = $gameMap.canvasToMapPX(TouchInput.x) - skill.collider.width / 2;
-      var y = $gameMap.canvasToMapPY(TouchInput.y) - skill.collider.height / 2;
-      skill.picture.move(x, y);
-    }
-    QABSManager.addPicture(skill.picture);
-  };
-
   Game_CharacterBase.prototype.makeSkillCollider = function(settings) {
     var w1 = this.collider('collision').width;
     var h1 = this.collider('collision').height;
@@ -320,5 +293,32 @@
     }
     collider.moveTo(x1, y1);
     return collider;
+  };
+
+  Game_CharacterBase.prototype.makeTargetingSkill = function(skill) {
+    this._groundTargeting = skill;
+    this._selectTargeting = this.constructor === Game_Event ? true : skill.settings.selectTarget;
+    var collider = skill.collider;
+    var diameter = skill.settings.range * 2;
+    skill.targeting = new Circle_Collider(diameter, diameter);
+    skill.targeting.moveTo(this.cx() - diameter / 2, this.cy() - diameter / 2);
+    ColliderManager.draw(skill.targeting, -1);
+    skill.collider = skill.targeting;
+    skill.targets = QABSManager.getTargets(skill, this);
+    skill.collider = collider;
+    skill.picture = new Sprite_SkillCollider(skill.collider);
+    if (this._selectTargeting) {
+      if (skill.targets.length === 0 ) {
+        return this.onTargetingCancel();
+      }
+      skill.collider.color = '#00ff00';
+      skill.index = 0;
+      this.updateSkillTarget();
+    } else {
+      var x = $gameMap.canvasToMapPX(TouchInput.x) - skill.collider.width / 2;
+      var y = $gameMap.canvasToMapPY(TouchInput.y) - skill.collider.height / 2;
+      skill.picture.move(x, y);
+    }
+    QABSManager.addPicture(skill.picture);
   };
 })();

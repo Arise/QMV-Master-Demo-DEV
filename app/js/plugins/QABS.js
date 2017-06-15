@@ -9,13 +9,13 @@ if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.3.1')) {
   throw new Error('Error: QABS requires QMovement 1.3.1 or newer to work.');
 }
 
-Imported.QABS = '1.0.0';
+Imported.QABS = '1.1.0';
 
 //=============================================================================
  /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @author Quxios  | Version 1.0.0
+ * @author Quxios  | Version 1.1.0
  *
  * @development
  *
@@ -123,63 +123,218 @@ Imported.QABS = '1.0.0';
  * ============================================================================
  * ## About
  * ============================================================================
- * A collider based action battle system for QMovement.
+ * A collider based action battle system for QMovement. *Note* This is not
+ * your simple rpg maker action battle system. Using this plugin you can
+ * create more advance like action games.
  * ============================================================================
- * ## How to use
+ * ## Is this for you?
  * ============================================================================
- * TODO
+ * First, this is a very complex action battle system. If you're looking for
+ * something that you can spend less than an hour to set up then this plugin
+ * is not for you.
+ *
+ * To make full use of this plugin you need to know how to properly use and
+ * setup QMovement. If you don't know what that plugin is or what colliders
+ * are then again, this plugin is not for you.
+ *
+ * There are a lot of actions for skill sequences so you can create some pretty
+ * crazy skills. Learning how to use the actions may take awhile since there
+ * are a lot of actions, and maybe more to come.
+ *
+ * Enemies have a very basic AI. If you want to create more AI styles, you
+ * will need to know how to JS and create a plugin / extend this plugin.
+ * ============================================================================
+ * ## Skill Keys
+ * ============================================================================
+ * **Default Skill keys**
  * ----------------------------------------------------------------------------
- * **Sub section**
+ * For the player to be able to use a skill from a hotkey, you will first need
+ * to create a skill key in the plugin parameter `Default Skills`.
+ *
+ * ![Skill Keys](https://quxios.github.io/imgs/qabs/skillKeys.png)
+ *
+ * When creating a skill key you have 4 parameters:
+ *
+ * - Keyboard Input: The keyboard input that will trigger this skill, set this
+ *  to `mouse1` for left click, and `mouse2` for right click.
+ * - Gamepad Input: The gamepad input that will trigger this skill.
+ * - Rebind: If this is true, the skill that's assigned to this skill key can
+ *  be reassigned.
+ * - Skill Id: The skill that this skill key will use when triggered.
+ *
+ * Note for input values, those are the button values; `ok`, 'cancel', ect. Or
+ * if you're using an input plugin, use their value, for example in QInput you can
+ * use the `#A` for the a key or `#tab` for tab, ect.
+ *
+ * Note that rebind doesn't do much as this doesn't have a rebinding feature.
+ * But the ground work is there so it can easily be created for an addon.
+ *
+ * Note that the `Skill Key Number` is the number next to the skill key you created.
+ * `Skill Key Number` will referenced later.
+ *
+ * ![Skill Keys](https://quxios.github.io/imgs/qabs/skillKeysNumber.png)
+ *
  * ----------------------------------------------------------------------------
+ * **Class Skill keys**
+ * ----------------------------------------------------------------------------
+ * You can change the players skill keys based on their class by adding the notetag:
+ * ~~~
+ *  <skillKeys>
+ *  [SKILL KEY NUMBER]: [SKILL ID] [REBIND?]
+ *  </skillKeys>
+ * ~~~
+ * - SKILL KEY NUMBER: The skill key that you want to change
+ * - SKILL ID: The skill to assign to this skill key number
+ * - REBIND?: Set to true or false if this can be reassigned
  *
- * ============================================================================
- * ## Skill Sequences
- * ============================================================================
- * user ---
- * user casting [true|false]
- * user lock
- * user unlock
- * user speed [inc|dec] [amt]
- * user move [forward|backward] [dist] [wait? true|false]
- * user moveHere [wait? true|false]
- * user jump [forward|backward] [dist] [wait? true|false]
- * user jumpHere [wait? true|false]
- * user teleport
- * user setDirection [dir]
- * user directionFix [true|false]
- * user pose [pose] [wait? true|false]
- * user forceSkill [skillId] [angleOffset in degrees]
- * user animation [animationId]
- * store
- * move [forward|backward] [dist] [duration] [wait? true|false]
- * moveToStored [duration] [wait? true|false]
- * wave [forward|backward] [amplitude] [harm] [dist] [duration] [wait? true|false]
- * waveToStored [amplitude] [harm] [duration] [wait? true|false]
- * trigger
- * wait [duration]
- * picture [fileName] [rotatable? true|false] [base direction]
- * trail [fileName] [rotatable? true|false] [base direction]
- * collider
- * animation [animationId]
- * se [name] [volume] [pitch] [pan]
- * qaudio TODO
- * globalLock
- * globalUnlock
+ * *Important!* make sure the skill key you are trying to set is created in the
+ * plugin parameters `Default Skills`. If it's not, the game will have an error.
  *
- * ============================================================================
- * ## Skill OnDamage
- * ============================================================================
- * target ---
- * target move [towards|away] [dist]
- * target jump [towards|away] [dist]
- * target pose [pose]
- * target cancel
- * user
- * user forceSkill
- * animationTarget
+ * Example:
+ * ~~~
+ *  <skillKeys>
+ *  1: 2
+ *  3: 15
+ *  4: 16
+ *  </skillKeys>
+ * ~~~
+ * Class Skill keys will replace the default skill keys. So if you set up skill
+ * keys 1 through 9 in the parameters and a class changes the skills for skill
+ * keys 1, 3, 4. The over all skill keys will be, 1, 3, 4 from the class and
+ * the rest are from the default values.
+ * ----------------------------------------------------------------------------
+ * **Weapon Skill keys**
+ * ----------------------------------------------------------------------------
+ * Weapons can also change the skill keys. For example you might want to change
+ * the main attack to use a range skill if the player has a bow on! To do this
+ * you use a similar tag as the class:
+ * ~~~
+ *  <skillKeys>
+ *  [SKILL KEY NUMBER]: [SKILL ID]
+ *  </skillKeys>
+ * ~~~
+ * - SKILL KEY NUMBER: The skill key that you want to change
+ * - SKILL ID: The skill to assign to this skill key number
  *
+ * *Important!* make sure the skill key you are trying to set is created in the
+ * plugin parameters `Default Skills`. If it's not, the game will have an error.
+ *
+ * Example:
+ * ~~~
+ *  <skillKeys>
+ *  1: 3
+ *  </skillKeys>
+ * ~~~
+ * Weapon skill keys take top priority, so they will replace both class keys
+ * and teh default keys! This example will replace skill key 1 with the skill
+ * id 3
  * ============================================================================
- * ## Enemy Notetags
+ * ## Skills
+ * ============================================================================
+ * **Skill Settings**
+ * ----------------------------------------------------------------------------
+ * Each skill should have a skill settings tag. This tag can change the settings
+ * for the skills cooldown, through, and other effects. The tag is:
+ * ~~~
+ *  <absSettings>
+ *  [SETTINGS]: [VALUE]
+ *  </absSettings>
+ * ~~~
+ * Here's a list of all the settings:
+ * ~~~
+ *  collider: [SHAPE], [WIDTH], [HEIGHT]
+ *  cooldown: [NUMBER]
+ *  infront: [TRUE or FALSE]
+ *  rotate: [TRUE or FALSE]
+ *  through: [0, 1, 2 or 3]
+ *  groundtarget: [NUMBER]
+ *  selecttarget: [NUMBER]
+ * ~~~
+ * - collider: Set this to the collider this skill will use. See QMovement help
+ * for details on colliders. Default: The users collider
+ *   - format is `shape, width, height`
+ * - cooldown: Set to the number of frames until you can use this skill again.
+ * Default: 0
+ * - infront: Set to true or false. When true, the collider will appear in front
+ * of the user. When false the collider will be centered on the user. Default: false
+ * - rotate: Set to true or false. When true, the collider will rotate based on
+ * the users direction. Default: false
+ * - through: Set to 0, 1, 2, or 3. Default: 0
+ *   - 0: Goes through events and tiles
+ *   - 1: Goes through tiles but stops when it hits an event
+ *   - 2: Goes through events but stops when it hits a tile
+ *   - 3: Stops when it hits an event or tile
+ * - groundtarget: Set to the max distance for the ground target. If value is
+ * 0 ground targeting will not be used. Default: 0
+ * - selecttarget: Set to the max distance for the select target. If value is
+ * 0 select targeting will not be used. Default: 0
+ * ----------------------------------------------------------------------------
+ * **Skill Sequence**
+ * ----------------------------------------------------------------------------
+ * When a skill is used, it's sequence will run. You will need to configure
+ * a sequence to tell the skill what it should do or it won't do anything.
+ * This is done with the notetag:
+ * ~~~
+ *  <absSequence>
+ *  [ACTION]
+ *  </absSequence>
+ * ~~~
+ * There are a bunch of actions. Each action should be on a different line.
+ * Here's a list of all the actions:
+ * ~~~
+ *  user casting [TRUE or FALSE]
+ *  user lock
+ *  user unlock
+ *  user speed [INC or DEC] [VALUE]
+ *  user move [FORWARD or BACKWARD] [DIST] [WAIT? TRUE or FALSE]
+ *  user moveHere [WAIT? TRUE or FALSE]
+ *  user jump [FORWARD or BACKWARD] [DIST] [WAIT? TRUE or FALSE]
+ *  user jumpHere [WAIT? TRUE or FALSE]
+ *  user teleport
+ *  user setDirection [DIR]
+ *  user directionFix [TRUE or FALSE]
+ *  user pose [POSE NAME] [WAIT? TRUE or FALSE]
+ *  user forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
+ *  user animation [ANIMATION ID]
+ *  store
+ *  move [FORWARD or BACKWARD] [DIST] [DURATION] [WAIT? TRUE or FALSE]
+ *  moveToStored [DURATION] [WAIT? TRUE or FALSE]
+ *  wave [FORWARD or BACKWARD] [AMPLITUDE] [HARM] [DIST] [DURATION] [WAIT? TRUE or FALSE]
+ *  waveToStored [AMPLITUDE] [HARM] [DURATION] [WAIT? TRUE or FALSE]
+ *  trigger
+ *  wait [DURATION]
+ *  picture [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
+ *  trail [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
+ *  collider [SHOW or HIDE]
+ *  animation [ANIMATION ID]
+ *  se [NAME] [VOLUME] [PITCH] [PAN]
+ *  qaudio [NAME] [QAUDIO OPTIONS]
+ *  globalLock
+ *  globalUnlock
+ * ~~~
+ * more info~ TODO
+ * ----------------------------------------------------------------------------
+ * **Skill On Damage**
+ * ----------------------------------------------------------------------------
+ * Whenever a skill hits a target you can run another sequence. This is done
+ * by using the notetag:
+ * ~~~
+ *  <absOnDamage>
+ *  [ACTION]
+ *  </absOnDamage>
+ * ~~~
+ * There are a few actions you can add here:
+ * ~~~
+ *  target move [TOWARDS or AWAY] [DIST]
+ *  target jump [TOWARDS or AWAY] [DIST]
+ *  target pose [POSE]
+ *  target cancel
+ *  user forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
+ *  animationTarget [0 or 1]
+ * ~~~
+ * more info~ TODO
+ * ============================================================================
+ * ## Enemies
  * ============================================================================
  * **Event**
  * ----------------------------------------------------------------------------
@@ -191,15 +346,33 @@ Imported.QABS = '1.0.0';
  * ----------------------------------------------------------------------------
  * **Enemy Database**
  * ----------------------------------------------------------------------------
+ * To set the enemies respawn
+ * ~~~
+ *  <respawn: X>
+ * ~~~
+ * - X: How long until it respawns, in frames.
+ *
  * To disable the enemy AI, add this notetag
  * ~~~
  *  <noAI>
  * ~~~
  *
+ * To set it's AI range
+ * ~~~
+ *  <range: X>
+ * ~~~
+ * - X: The range in pixels
+ *
  * To disable damage popups on this enemy, add this notetag
  * ~~~
  *  <noPopup>
  * ~~~
+ *
+ * To add an offset to the popup's y use:
+ * ~~~
+ *  <popupOY:Y>
+ * ~~~
+ * - Y: The y offset in pixels, can be negative
  *
  * To keep the event around after it dies, add this notetag
  * ~~~
@@ -211,7 +384,7 @@ Imported.QABS = '1.0.0';
  *  <onDeath>
  *  javascript code
  *  </onDeath>
- * ~~~~
+ * ~~~
  *
  * To change the team of the enemy, use this notetag
  * ~~~
@@ -224,7 +397,7 @@ Imported.QABS = '1.0.0';
  * - 3+ can also be used
  * *Note teams don't do much because there is no team based AI*
  * ============================================================================
- * ## State Notetags
+ * ## States
  * ============================================================================
  * To have a state affect the characters move speed use:
  * ~~~
@@ -328,7 +501,7 @@ function QABS() {
         return i !== '';
       }).map(function(i) {
         return i.trim();
-      })
+      });
       var skillId = Number(data[0]) || 0;
       var rebind = data[1] === 'true';
       if (!QABS.skillKey[key]) {
@@ -339,13 +512,10 @@ function QABS() {
         delete obj[key];
         continue;
       }
-      var input = QABS.skillKey[key].input.clone();
-      if (input) {
-        obj[key] = {
-          input: input,
-          skillId: skillId,
-          rebind: rebind
-        }
+      obj[key] = {
+        input: QABS.skillKey[key].input.clone(),
+        skillId: skillId,
+        rebind: rebind
       }
     }
     return obj;
@@ -422,7 +592,7 @@ function QABS() {
   QABS._weaponSkills = {};
   QABS.weaponSkills = function(id) {
     if (!this._weaponSkills[id]) {
-      var skills = $dataWeapons[id].qmeta.absSkills;
+      var skills = $dataWeapons[id].qmeta.skillKeys || $dataWeapons[id].qmeta.absSkills;
       this._weaponSkills[id] = {};
       if (skills) {
         this._weaponSkills[id] = this.stringToSkillKeyObj(skills);
@@ -491,18 +661,16 @@ function QABSManager() {
     var chara = QPlus.getCharacter(userId);
     if (!chara.battler()) return null;
     var targets;
-    var action = {};
     var skills = chara.usableSkills().filter(function(skillId) {
       if (!skillId) return false;
       targets = QABSManager.skillWillHit(skillId, userId);
       if (targets && targets.length > 0) {
-        action[skillId] = targets;
         return true;
       }
       return false;
     })
     if (skills.length === 0) return null;
-    return skills[Math.floor(Math.random() * skills.length)]
+    return skills[Math.floor(Math.random() * skills.length)];
   };
 
   QABSManager.skillWillHit = function(skillId, userId) {
@@ -557,10 +725,10 @@ function QABSManager() {
     if (!Imported.QPopup) return;
     var preset = $gameSystem.qPopupPreset(type);
     Object.assign(options, {
-      duration: 80,
       style: preset.style,
       transitions: preset.transitions
     })
+    if (!options.duration) options.duration = 80;
     if (!options.transitions) {
       var start = options.duration - 30;
       var end = start + 30;
@@ -568,10 +736,8 @@ function QABSManager() {
       var slideup = '0 ' + end + ' slideup 24';
       options.transitions = [fadeout, slideup];
     }
-    QPopup.start(options);
+    return QPopup.start(options);
   };
-
-  // TODO QABSManager.startNotification
 
   QABSManager._animations = [];
   QABSManager.startAnimation = function(id, x, y) {
@@ -1000,13 +1166,13 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.userForceSkill = function(action) {
     var id = Number(action[0]);
     var angleOffset = Number(action[1]);
+    var oldRadian = this._character._radian;
     if (angleOffset) {
       var radOffset = angleOffset * Math.PI / 180;
-      this._character._radian = this._character.directionToRadian(this._character._direction);
-      this._character._radian += radOffset;
-      this._character._radian += this._character._radian < 0 ? Math.PI * 2 : 0;
+      this._character.setRadian(this._character._radian + radOffset);
     }
     this._character.forceSkill(id, true);
+    this._character.setRadian(oldRadian);
   };
 
   Skill_Sequencer.prototype.userAnimation = function(action) {
@@ -1014,94 +1180,6 @@ function Skill_Sequencer() {
     var x = this._character.cx();
     var y = this._character.cy();
     QABSManager.startAnimation(id, x, y);
-  };
-
-  Skill_Sequencer.prototype.targetMove = function(action, targets) {
-    var dist = Number(action[1]) || this._character.moveTiles();
-    for (var i = 0; i < targets.length; i++) {
-      var dist2 = dist - dist * eval('targets[i].battler().' + QABS.mrst);
-      if (dist2 <= 0) return;
-      var dx = targets[i].cx() - this._character.cx();
-      var dy = targets[i].cy() - this._character.cy();
-      var radian = Math.atan2(dy, dx);
-      radian += radian < 0 ? Math.PI * 2 : 0;
-      var dir = this._character.radianToDirection(radian);
-      if (action[0] === 'towards') {
-        dir = this._character.reverseDir(dir);
-        radian += Math.PI;
-      } else if (action[0] === 'into') {
-        var dxi = this._skill.collider.center.x - targets[i].cx();
-        var dyi = this._skill.collider.center.y - targets[i].cy();
-        radian = Math.atan2(dyi, dxi);
-        dist2 = Math.min(dist2, Math.sqrt(dxi * dxi + dyi * dyi));
-      }
-      var route = {
-        list: [],
-        repeat: false,
-        skippable: true,
-        wait: false
-      }
-      route.list.push({ code: 35 });
-      route.list.push({
-        code: Game_Character.ROUTE_SCRIPT,
-        parameters: ['qmove2(' + radian + ',' + dist + ')']
-      })
-      if (!targets[i].isDirectionFixed()) {
-        route.list.push({ code: 36 });
-      }
-      route.list.push({
-        code: 0
-      })
-      targets[i].forceMoveRoute(route);
-      targets[i].updateRoutineMove();
-    }
-  };
-
-  Skill_Sequencer.prototype.targetJump = function(action, targets) {
-    var dist = Number(action[1]) || 0;
-    for (var i = 0; i < targets.length; i++) {
-      var dist2 = dist - dist * eval('targets[i].battler().' + QABS.mrst);
-      if (dist2 <= 0) return;
-      var radian = this._skill.radian;
-      if (action[0] === 'towards') {
-        radian += Math.PI;
-      } else if (action[0] === 'into') {
-        var dxi = this._skill.collider.center.x - targets[i].cx();
-        var dyi = this._skill.collider.center.y - targets[i].cy();
-        radian = Math.atan2(dyi, dxi);
-        dist2 = Math.min(dist2, Math.sqrt(dxi * dxi + dyi * dyi));
-      }
-      var dx = Math.round(dist2 * Math.cos(radian));
-      var dy = Math.round(dist2 * Math.sin(radian));
-      var x1 = targets[i].px;
-      var y1 = targets[i].py;
-      var x2 = x1 + dx;
-      var y2 = y1 + dy;
-      var final = targets[i].adjustPosition(x2, y2);
-      dx = final.x - x1;
-      dy = final.y - y1;
-      var lastDirectionFix = targets[i].isDirectionFixed();
-      targets[i].setDirectionFix(true);
-      targets[i].pixelJump(dx, dy);
-      targets[i].setDirectionFix(lastDirectionFix);
-    }
-  };
-
-  Skill_Sequencer.prototype.targetPose = function(action, targets) {
-    var pose = action[0];
-    if (Imported.QSprite) {
-      for (var i = 0; i < targets.length; i++) {
-        targets[i].playPose(pose);
-      }
-    }
-  };
-
-  Skill_Sequencer.prototype.targetCancel = function(action, targets) {
-    for (var i = 0; i < targets.length; i++) {
-      if (targets[i]._casting) {
-        targets[i]._casting.break = true;
-      }
-    }
   };
 
   Skill_Sequencer.prototype.actionStore = function() {
@@ -1182,20 +1260,9 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.actionPicture = function(action) {
-    var animated = /%\[(.*)\]/i.exec(action[0]);
-    if (animated) {
-      var settings = animated[1].split('-');
-      this._skill.picture = new AnimatedSprite();
-      this._skill.picture.bitmap = ImageManager.loadPicture(action[0]);
-      this._skill.picture._frames = Number(settings[0]) || 1;
-      this._skill.picture._speed = Number(settings[1]) || 15;
-      this._skill.picture.bitmap.addLoadListener(function() {
-        this._skill.picture.setFramePosition();
-      }.bind(this));
-    } else {
-      this._skill.picture = new Sprite();
-      this._skill.picture.bitmap = ImageManager.loadPicture(action[0]);
-    }
+    // TODO add animated
+    this._skill.picture = new Sprite();
+    this._skill.picture.bitmap = ImageManager.loadPicture(action[0]);
     this._skill.picture.rotatable = action[1] === 'true';
     this._skill.picture.originDirection = Number(action[2]);
     this._skill.picture.z = 3;
@@ -1291,6 +1358,94 @@ function Skill_Sequencer() {
       doPan: !dontPan,
       fadeIn: Number(fadein) || 0
     })
+  };
+
+  Skill_Sequencer.prototype.targetMove = function(action, targets) {
+    var dist = Number(action[1]) || this._character.moveTiles();
+    for (var i = 0; i < targets.length; i++) {
+      var dist2 = dist - dist * eval('targets[i].battler().' + QABS.mrst);
+      if (dist2 <= 0) return;
+      var dx = targets[i].cx() - this._character.cx();
+      var dy = targets[i].cy() - this._character.cy();
+      var radian = Math.atan2(dy, dx);
+      radian += radian < 0 ? Math.PI * 2 : 0;
+      var dir = this._character.radianToDirection(radian);
+      if (action[0] === 'towards') {
+        dir = this._character.reverseDir(dir);
+        radian += Math.PI;
+      } else if (action[0] === 'into') {
+        var dxi = this._skill.collider.center.x - targets[i].cx();
+        var dyi = this._skill.collider.center.y - targets[i].cy();
+        radian = Math.atan2(dyi, dxi);
+        dist2 = Math.min(dist2, Math.sqrt(dxi * dxi + dyi * dyi));
+      }
+      var route = {
+        list: [],
+        repeat: false,
+        skippable: true,
+        wait: false
+      }
+      route.list.push({ code: 35 });
+      route.list.push({
+        code: Game_Character.ROUTE_SCRIPT,
+        parameters: ['qmove2(' + radian + ',' + dist + ')']
+      })
+      if (!targets[i].isDirectionFixed()) {
+        route.list.push({ code: 36 });
+      }
+      route.list.push({
+        code: 0
+      })
+      targets[i].forceMoveRoute(route);
+      targets[i].updateRoutineMove();
+    }
+  };
+
+  Skill_Sequencer.prototype.targetJump = function(action, targets) {
+    var dist = Number(action[1]) || 0;
+    for (var i = 0; i < targets.length; i++) {
+      var dist2 = dist - dist * eval('targets[i].battler().' + QABS.mrst);
+      if (dist2 <= 0) return;
+      var radian = this._skill.radian;
+      if (action[0] === 'towards') {
+        radian += Math.PI;
+      } else if (action[0] === 'into') {
+        var dxi = this._skill.collider.center.x - targets[i].cx();
+        var dyi = this._skill.collider.center.y - targets[i].cy();
+        radian = Math.atan2(dyi, dxi);
+        dist2 = Math.min(dist2, Math.sqrt(dxi * dxi + dyi * dyi));
+      }
+      var dx = Math.round(dist2 * Math.cos(radian));
+      var dy = Math.round(dist2 * Math.sin(radian));
+      var x1 = targets[i].px;
+      var y1 = targets[i].py;
+      var x2 = x1 + dx;
+      var y2 = y1 + dy;
+      var final = targets[i].adjustPosition(x2, y2);
+      dx = final.x - x1;
+      dy = final.y - y1;
+      var lastDirectionFix = targets[i].isDirectionFixed();
+      targets[i].setDirectionFix(true);
+      targets[i].pixelJump(dx, dy);
+      targets[i].setDirectionFix(lastDirectionFix);
+    }
+  };
+
+  Skill_Sequencer.prototype.targetPose = function(action, targets) {
+    var pose = action[0];
+    if (Imported.QSprite) {
+      for (var i = 0; i < targets.length; i++) {
+        targets[i].playPose(pose);
+      }
+    }
+  };
+
+  Skill_Sequencer.prototype.targetCancel = function(action, targets) {
+    for (var i = 0; i < targets.length; i++) {
+      if (targets[i]._casting) {
+        targets[i]._casting.break = true;
+      }
+    }
   };
 
   Skill_Sequencer.prototype.actionMoveSkill = function(distance, duration) {
@@ -1940,6 +2095,13 @@ function Skill_Sequencer() {
 // Game_Actor
 
 (function() {
+  var Alias_Game_Actor_setup = Game_Actor.prototype.setup;
+  Game_Actor.prototype.setup = function(actorId) {
+    Alias_Game_Actor_setup.call(this, actorId);
+    var meta = this.actor().qmeta;
+    this._popupOY = meta.popupOY;
+  };
+
   var Alias_Game_Actor_changeClass = Game_Actor.prototype.changeClass;
   Game_Actor.prototype.changeClass = function(classId, keepExp) {
     Alias_Game_Actor_changeClass.call(this, classId, keepExp);
@@ -1993,13 +2155,12 @@ function Skill_Sequencer() {
   };
 
   Game_Actor.prototype.displayLevelUp = function(newSkills) {
-    QABSManager.startPopup('level', {
+    QABSManager.startPopup('QABS-LEVEL', {
       x: $gamePlayer.cx(),
       y: $gamePlayer.cy(),
       string: 'Level Up!'
     })
     QABSManager.startAnimation(QABS.levelAnimation, $gamePlayer.cx(), $gamePlayer.cy());
-    //$gamePlayer.requestAnimation(QABS.levelAnimation);
   };
 
   Game_Actor.prototype.onPlayerWalk = function() {
@@ -2039,6 +2200,7 @@ function Skill_Sequencer() {
     this._noAI = meta.noAI;
     this._aiRange = Number(meta.range) || 0;
     this._noPopup = !!meta.noPopup;
+    this._popupOY = Number(meta.popupOY) || 0;
     this._onDeath = meta.onDeath || '';
     this._dontErase = !!meta.dontErase;
     this._team = Number(meta.team || 2);
@@ -2318,33 +2480,6 @@ function Skill_Sequencer() {
     ColliderManager.draw(skill.collider, skill.sequence.length + 60);
   };
 
-  Game_CharacterBase.prototype.makeTargetingSkill = function(skill) {
-    this._groundTargeting = skill;
-    this._selectTargeting = this.constructor === Game_Event ? true : skill.settings.selectTarget;
-    var collider = skill.collider;
-    var diameter = skill.settings.range * 2;
-    skill.targeting = new Circle_Collider(diameter, diameter);
-    skill.targeting.moveTo(this.cx() - diameter / 2, this.cy() - diameter / 2);
-    ColliderManager.draw(skill.targeting, -1);
-    skill.collider = skill.targeting;
-    skill.targets = QABSManager.getTargets(skill, this);
-    skill.collider = collider;
-    skill.picture = new Sprite_SkillCollider(skill.collider);
-    if (this._selectTargeting) {
-      if (skill.targets.length === 0 ) {
-        return this.onTargetingCancel();
-      }
-      skill.collider.color = '#00ff00';
-      skill.index = 0;
-      this.updateSkillTarget();
-    } else {
-      var x = $gameMap.canvasToMapPX(TouchInput.x) - skill.collider.width / 2;
-      var y = $gameMap.canvasToMapPY(TouchInput.y) - skill.collider.height / 2;
-      skill.picture.move(x, y);
-    }
-    QABSManager.addPicture(skill.picture);
-  };
-
   Game_CharacterBase.prototype.makeSkillCollider = function(settings) {
     var w1 = this.collider('collision').width;
     var h1 = this.collider('collision').height;
@@ -2377,6 +2512,33 @@ function Skill_Sequencer() {
     }
     collider.moveTo(x1, y1);
     return collider;
+  };
+
+  Game_CharacterBase.prototype.makeTargetingSkill = function(skill) {
+    this._groundTargeting = skill;
+    this._selectTargeting = this.constructor === Game_Event ? true : skill.settings.selectTarget;
+    var collider = skill.collider;
+    var diameter = skill.settings.range * 2;
+    skill.targeting = new Circle_Collider(diameter, diameter);
+    skill.targeting.moveTo(this.cx() - diameter / 2, this.cy() - diameter / 2);
+    ColliderManager.draw(skill.targeting, -1);
+    skill.collider = skill.targeting;
+    skill.targets = QABSManager.getTargets(skill, this);
+    skill.collider = collider;
+    skill.picture = new Sprite_SkillCollider(skill.collider);
+    if (this._selectTargeting) {
+      if (skill.targets.length === 0 ) {
+        return this.onTargetingCancel();
+      }
+      skill.collider.color = '#00ff00';
+      skill.index = 0;
+      this.updateSkillTarget();
+    } else {
+      var x = $gameMap.canvasToMapPX(TouchInput.x) - skill.collider.width / 2;
+      var y = $gameMap.canvasToMapPY(TouchInput.y) - skill.collider.height / 2;
+      skill.picture.move(x, y);
+    }
+    QABSManager.addPicture(skill.picture);
   };
 })();
 
@@ -2654,7 +2816,7 @@ function Skill_Sequencer() {
           range: this._aiRange / QMovement.tileSize,
           handler: 'AI',
           targetId: '0'
-        })
+        });
       }
       var actions = this._battler.enemy().actions;
       for (var i = 0; i < actions.length; i++) {
@@ -2712,6 +2874,12 @@ function Skill_Sequencer() {
     var bestTarget = this.bestTarget();
     if (!bestTarget) return;
     var targetId = bestTarget.charaId();
+    if (this.updateAIRange(bestTarget)) return;
+    this.updateAIAction(bestTarget, this.updateAIGetAction(bestTarget));
+  };
+
+  Game_Event.prototype.updateAIRange = function(bestTarget) {
+    var targetId = bestTarget.charaId();
     if (this.isTargetInRange(bestTarget)) {
       if (!this._agroList.hasOwnProperty(targetId)) {
         this._aiWait = QABS.aiWait;
@@ -2727,23 +2895,21 @@ function Skill_Sequencer() {
         if (this._aiPathfind) {
           this.clearPathfind();
         }
-        // TODO maybe move randomly to search for
-        // target again before ending its combat
         this._endWait = this.wait(120).then(function() {
           this._endWait = null;
           this.endCombat();
         }.bind(this))
       }
-      return;
+      return true;
     }
+    return false;
+  };
+
+  Game_Event.prototype.updateAIGetAction = function(bestTarget, dx, dy) {
     var bestAction = null;
-    var x1 = bestTarget.cx();
-    var y1 = bestTarget.cy();
-    var x2 = this.cx();
-    var y2 = this.cy();
-    var dx = x1 - x2;
-    var dy = y1 - y2;
     if (this._aiWait >= QABS.aiWait) {
+      var dx = bestTarget.cx() - this.cx();
+      var dy = bestTarget.cy() - this.cy();
       this._radian = Math.atan2(dy, dx);
       this._radian += this._radian < 0 ? Math.PI * 2 : 0;
       bestAction = QABSManager.bestAction(this.charaId());
@@ -2751,23 +2917,26 @@ function Skill_Sequencer() {
     } else {
       this._aiWait++;
     }
+    return bestAction;
+  };
+
+  Game_Event.prototype.updateAIAction = function(bestTarget, bestAction) {
     if (bestAction) {
       this.useSkill(bestAction);
-    } else if (this.canMove()) {
-      // TODO add a how far away to stay away from target property
-      if (this._freqCount < this.freqThreshold()) {
-        if (this._aiPathfind) {
-          var mw = this.collider('collision').width + bestTarget.collider('collision').width;
-          var mh = this.collider('collision').height + bestTarget.collider('collision').height;
-          if (Math.abs(dx) <= mw && Math.abs(dy) <= mh) {
-            this.clearPathfind();
-            this.moveTowardCharacter(bestTarget);
-          } else {
-            this.initChase(bestTarget.charaId());
-          }
-        } else {
+    } else if (this.canMove() && this._freqCount < this.freqThreshold()) {
+      if (this._aiPathfind) {
+        var dx = bestTarget.cx() - this.cx();
+        var dy = bestTarget.cy() - this.cy();
+        var mw = this.collider('collision').width + bestTarget.collider('collision').width;
+        var mh = this.collider('collision').height + bestTarget.collider('collision').height;
+        if (Math.abs(dx) <= mw && Math.abs(dy) <= mh) {
+          this.clearPathfind();
           this.moveTowardCharacter(bestTarget);
+        } else {
+          this.initChase(bestTarget.charaId());
         }
+      } else {
+        this.moveTowardCharacter(bestTarget);
       }
     }
   };
@@ -2872,7 +3041,7 @@ function Skill_Sequencer() {
       var exp = this.battler().exp();
       $gamePlayer.battler().gainExp(exp);
       if (exp > 0) {
-        QABSManager.startPopup('exp', {
+        QABSManager.startPopup('QABS-EXP', {
           x: $gamePlayer.cx(), y: $gamePlayer.cy(),
           string: 'Exp: ' + exp
         });
@@ -3029,16 +3198,16 @@ function Game_Loot() {
     QABSManager.startPopup('QABS-ITEM', {
       x: this.cx(), y: this.cy(),
       string: string
-    })
+    });
     this.erase();
     QABSManager.removeEvent(this);
     QABSManager.removePicture(this._itemIcon);
   };
 
   Game_Loot.prototype.aoeCollect = function() {
-    // TODO add aoe collider
-    var loot = ColliderManager.getCharactersNear(this.collider('aoe'), function(chara) {
-      return chara.constructor === Game_Loot && chara.collider().intersects(this.collider('aoe'));
+    var loot = ColliderManager.getCharactersNear(this.collider(), function(chara) {
+      return chara.constructor === Game_Loot
+        && chara.collider().intersects(this.collider());
     }.bind(this));
     var x = this.cx();
     var y = this.cy();
@@ -3095,7 +3264,7 @@ function Game_Loot() {
   };
 
   Game_Loot.prototype.defaultColliderConfig = function() {
-    return 'box,32,32,0,0';
+    return 'box,48,48,-8,-8';
   };
 
   Game_Loot.prototype.castsShadow = function() {
@@ -3127,7 +3296,6 @@ function Game_Loot() {
   var Alias_Sprite_Character_initMembers = Sprite_Character.prototype.initMembers;
   Sprite_Character.prototype.initMembers = function() {
     Alias_Sprite_Character_initMembers.call(this);
-    this._damages = [];
     this.createStateSprite();
   };
 
@@ -3164,42 +3332,36 @@ function Game_Loot() {
       var string;
       var fill = '#ffffff';
       var result = this._battler._damageQueue.shift();
+      var type = 'DMG';
       if (result.missed || result.evaded) {
         string = 'Missed';
+        type = 'MISSED';
       } else if (result.hpAffected) {
         var dmg = result.hpDamage;
+        string = String(Math.abs(dmg));
         if (dmg >= 0) {
-          string = String(dmg);
-          fill = '#ffffff';
+          type = 'DMG';
         } else {
-          string = String(Math.abs(dmg));
-          fill = '#00ff00';
+          type = 'HEAL';
         }
       } else if (result.mpDamage) {
         string = String(result.mpDamage);
-        fill = '#0000ff';
+        type = 'MP';
       }
       if (!string && string !== '0') return;
       var iconIndex = result.damageIcon;
       if (iconIndex) {
         string = '\\I[' + iconIndex + ']' + string;
       }
-      if (result.critical) fill = '#FF8C00';
-      var fadeout = '50 30 fadeout';
-      var slideup = '0 80 slideup 24';
-      var preset = $gameSystem.qPopupPreset('QABS-DMG');
-      var sprite = QPopup.start({
+      if (result.critical) {
+        type += '-CRIT';
+      }
+      QABSManager.startPopup('QABS-' + type, {
         string: string,
-        //oy: -(this.patternHeight() - 20), TODO add an OY meta?
+        oy: this._battler._popupOY,
         bindTo: this._character.charaId(),
-        duration: 80,
-        transitions: preset.transitions || [fadeout, slideup],
-        style: Object.assign({},
-          preset.style,
-          { fill: fill }
-        )
-      })
-      this._damages.push(sprite);
+        duration: 80
+      });
       this._battler.clearDamagePopup();
       this._battler.clearResult();
     }

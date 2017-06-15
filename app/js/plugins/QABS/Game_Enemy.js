@@ -9,6 +9,7 @@
     this._noAI = meta.noAI;
     this._aiRange = Number(meta.range) || 0;
     this._noPopup = !!meta.noPopup;
+    this._popupOY = Number(meta.popupOY) || 0;
     this._onDeath = meta.onDeath || '';
     this._dontErase = !!meta.dontErase;
     this._team = Number(meta.team || 2);

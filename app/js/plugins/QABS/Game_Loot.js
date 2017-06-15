@@ -112,16 +112,16 @@ function Game_Loot() {
     QABSManager.startPopup('QABS-ITEM', {
       x: this.cx(), y: this.cy(),
       string: string
-    })
+    });
     this.erase();
     QABSManager.removeEvent(this);
     QABSManager.removePicture(this._itemIcon);
   };
 
   Game_Loot.prototype.aoeCollect = function() {
-    // TODO add aoe collider
-    var loot = ColliderManager.getCharactersNear(this.collider('aoe'), function(chara) {
-      return chara.constructor === Game_Loot && chara.collider().intersects(this.collider('aoe'));
+    var loot = ColliderManager.getCharactersNear(this.collider(), function(chara) {
+      return chara.constructor === Game_Loot
+        && chara.collider().intersects(this.collider());
     }.bind(this));
     var x = this.cx();
     var y = this.cy();
@@ -178,7 +178,7 @@ function Game_Loot() {
   };
 
   Game_Loot.prototype.defaultColliderConfig = function() {
-    return 'box,32,32,0,0';
+    return 'box,48,48,-8,-8';
   };
 
   Game_Loot.prototype.castsShadow = function() {

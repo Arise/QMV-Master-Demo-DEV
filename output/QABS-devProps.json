@@ -50,6 +50,7 @@
       "prototype - isStunned - undefined"
     ],
     "Game_Actor": [
+      "alias - prototype - setup - actorId",
       "alias - prototype - changeClass - classId, keepExp",
       "alias - prototype - initEquips - equips",
       "prototype - initWeaponSkills - undefined",
@@ -104,8 +105,8 @@
       "prototype - useSkill - skillId",
       "prototype - beforeSkill - skill",
       "prototype - forceSkill - skillId, forced",
-      "prototype - makeTargetingSkill - skill",
-      "prototype - makeSkillCollider - settings"
+      "prototype - makeSkillCollider - settings",
+      "prototype - makeTargetingSkill - skill"
     ],
     "Game_Player": [
       "alias - prototype - refresh - undefined",
@@ -139,6 +140,9 @@
       "alias - prototype - bestTarget - undefined",
       "prototype - updateABS - undefined",
       "prototype - updateAI - undefined",
+      "prototype - updateAIRange - bestTarget",
+      "prototype - updateAIGetAction - bestTarget, dx, dy",
+      "prototype - updateAIAction - bestTarget, bestAction",
       "prototype - updateRespawn - undefined",
       "prototype - isTargetInRange - target",
       "prototype - respawn - undefined",
@@ -220,10 +224,6 @@
       "prototype - userPose - action",
       "prototype - userForceSkill - action",
       "prototype - userAnimation - action",
-      "prototype - targetMove - action, targets",
-      "prototype - targetJump - action, targets",
-      "prototype - targetPose - action, targets",
-      "prototype - targetCancel - action, targets",
       "prototype - actionStore - undefined",
       "prototype - actionMove - action",
       "prototype - actionMoveToStored - action",
@@ -237,6 +237,10 @@
       "prototype - actionAnimation - action",
       "prototype - actionSE - action",
       "prototype - actionQAudio - action",
+      "prototype - targetMove - action, targets",
+      "prototype - targetJump - action, targets",
+      "prototype - targetPose - action, targets",
+      "prototype - targetCancel - action, targets",
       "prototype - actionMoveSkill - distance, duration",
       "prototype - actionWaveSkill - amp, harmonics, distance, duration",
       "prototype - setSkillRadian - radian",
