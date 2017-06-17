@@ -4,18 +4,18 @@
 
 var Imported = Imported || {};
 
-if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.3.1')) {
-  alert('Error: QABS requires QMovement 1.3.1 or newer to work.');
-  throw new Error('Error: QABS requires QMovement 1.3.1 or newer to work.');
+if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.4.0')) {
+  alert('Error: QABS requires QMovement 1.4.0 or newer to work.');
+  throw new Error('Error: QABS requires QMovement 1.4.0 or newer to work.');
 }
 
-Imported.QABS = '1.1.0';
+Imported.QABS = '1.2.0';
 
 //=============================================================================
  /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @author Quxios  | Version 1.1.0
+ * @author Quxios  | Version 1.2.0
  *
  * @development
  *
@@ -296,12 +296,14 @@ Imported.QABS = '1.1.0';
  *  user pose [POSE NAME] [WAIT? TRUE or FALSE]
  *  user forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
  *  user animation [ANIMATION ID]
+ *  user qaudio [NAME] [QAUDIO OPTIONS]
  *  store
  *  move [FORWARD or BACKWARD] [DIST] [DURATION] [WAIT? TRUE or FALSE]
  *  moveToStored [DURATION] [WAIT? TRUE or FALSE]
  *  wave [FORWARD or BACKWARD] [AMPLITUDE] [HARM] [DIST] [DURATION] [WAIT? TRUE or FALSE]
  *  waveToStored [AMPLITUDE] [HARM] [DURATION] [WAIT? TRUE or FALSE]
  *  trigger
+ *  adjustAim
  *  wait [DURATION]
  *  picture [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
  *  trail [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
@@ -309,6 +311,7 @@ Imported.QABS = '1.1.0';
  *  animation [ANIMATION ID]
  *  se [NAME] [VOLUME] [PITCH] [PAN]
  *  qaudio [NAME] [QAUDIO OPTIONS]
+ *  forceSkill [SKILL ID] [ANGLE OFFSER IN DEGREES]
  *  globalLock
  *  globalUnlock
  * ~~~
@@ -325,10 +328,11 @@ Imported.QABS = '1.1.0';
  * ~~~
  * There are a few actions you can add here:
  * ~~~
- *  target move [TOWARDS or AWAY] [DIST]
- *  target jump [TOWARDS or AWAY] [DIST]
+ *  target move [TOWARDS or AWAY or INTO] [DIST]
+ *  target jump [TOWARDS or AWAY or INTO] [DIST]
  *  target pose [POSE]
  *  target cancel
+ *  target qaudio [NAME] [QAUDIO OPTIONS]
  *  user forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
  *  animationTarget [0 or 1]
  * ~~~
@@ -348,18 +352,21 @@ Imported.QABS = '1.1.0';
  * ----------------------------------------------------------------------------
  * To set the enemies respawn
  * ~~~
- *  <respawn: X>
+ *  <respawn:X>
  * ~~~
  * - X: How long until it respawns, in frames.
  *
- * To disable the enemy AI, add this notetag
+ * To set an Enemies AI
  * ~~~
- *  <noAI>
+ * <AIType:TYPE>
  * ~~~
+ * -TYPE: The AI type, set this to none to disable AI.
+ *
+ * There's only 1 type of AI, so for now that AI is only to disable AI
  *
  * To set it's AI range
  * ~~~
- *  <range: X>
+ *  <range:X>
  * ~~~
  * - X: The range in pixels
  *
@@ -529,16 +536,22 @@ function QABS() {
         cooldown: 0,
         through: 0,
         groundTarget: false,
-        selectTarget: false
+        selectTarget: false,
+        throughTerrain: []
       }
       if (settings) {
+        // TODO change this, hate how it looks
         settings = QPlus.stringToObj(settings);
         Object.assign(settings, {
           cooldown: Number(settings.cooldown) || 0,
           through: Number(settings.through) || 0,
           groundTarget: settings.groundtarget && !settings.selecttarget,
-          selectTarget: !settings.groundtarget && settings.selecttarget
-        })
+          selectTarget: !settings.groundtarget && settings.selecttarget,
+          throughTerrain: settings.throughTerrain || ''
+        });
+        if (settings.throughTerrain.constructor !== Array) {
+          settings.throughTerrain = [settings.throughTerrain];
+        }
         if (settings.groundtarget) var range = Number(settings.groundtarget);
         if (settings.selecttarget) var range = Number(settings.selecttarget);
         settings.range = range || 0;
@@ -604,32 +617,57 @@ function QABS() {
   QABS._aiRange = {};
   QABS.getAIRange = function(skill) {
     if (!this._aiRange.hasOwnProperty(skill.id)) {
-      var actions = this.getSkillSequence(skill);
-      var dist = 0;
-      var maxDist = 0;
-      actions.forEach(function(action) {
-        // TODO calc for moveToStored / waveToStored
-        var match = /^[move|wave](.*)/i.exec(action);
-        if (match) {
-          match = match[1].trim();
-          match = match.split(' ');
-          if (match[0] === 'forward') {
-            dist += Number(match[1]) || 0;
-          } else {
-            dist -= Number(match[1]) || 0;
-          }
-          maxDist = Math.max(dist, maxDist);
-        }
-      })
-      this._aiRange[skill.id] = maxDist;
+      this._aiRange[skill.id] = this.calcAIRange(skill);
     }
     return this._aiRange[skill.id];
+  };
+
+  QABS.calcAIRange = function(skill) {
+    var actions = this.getSkillSequence(skill);
+    var currDist = 0;
+    var stored = 0;
+    var maxDist = 0;
+    actions.forEach(function(action) {
+      var move = /^(?:move|wave) (.*)/i.exec(action);
+      if (move) {
+        move = move[1].trim().split(' ');
+        if (move[0] === 'forward') {
+          currDist += Number(move[1]) || 0;
+        } else {
+          currDist -= Number(move[1]) || 0;
+        }
+        maxDist = Math.max(currDist, maxDist);
+      }
+      var store = /^store/i.exec(action);
+      if (store) {
+        stored = currDist;
+      }
+      var toStore = /^(?:move|wave)ToStored/i.exec(action);
+      if (toStore) {
+        currDist = stored;
+        maxDist = Math.max(currDist, maxDist);
+      }
+      var userForce = /^user forceSkill (.*)/i.exec(action);
+      if (userForce) {
+        userForce = Number(userForce[1].trim().split(' ')[0]);
+        var dist2 = QABS.getAIRange($dataSkills[userForce]);
+        maxDist = Math.max(dist2, maxDist);
+      }
+      var skillForce = /^forceSkill (.*)/i.exec(action);
+      if (skillForce) {
+        skillForce = Number(skillForce[1].trim().split(' ')[0]);
+        var dist3 = QABS.getAIRange($dataSkills[skillForce]);
+        dist3 += currDist;
+        maxDist = Math.max(dist3, maxDist);
+      }
+    });
+    return maxDist;
   };
 
 })();
 
 //-----------------------------------------------------------------------------
-// QABS Static Class
+// QABS Manager Static Class
 
 function QABSManager() {
   throw new Error('This is a static class');
@@ -693,13 +731,13 @@ function QABSManager() {
         data: skill,
         collider: range
       }, chara);
-      ColliderManager.draw(range, 60);
+      ColliderManager.draw(range, QABS.aiWait / 2);
     } else {
       targets = QABSManager.getTargets({
         data: skill,
         collider: skillCollider
       }, chara);
-      ColliderManager.draw(skillCollider, 60);
+      ColliderManager.draw(skillCollider, QABS.aiWait / 2);
     }
     return targets;
   };
@@ -877,6 +915,10 @@ function Skill_Sequencer() {
         this.actionTrigger(action);
         break;
       }
+      case 'adjustaim': {
+        this.actionAdjustAim(action);
+        break;
+      }
       case 'wait': {
         this.actionWait(action);
         break;
@@ -903,6 +945,10 @@ function Skill_Sequencer() {
       }
       case 'qaudio': {
         this.actionQAudio(action);
+        break;
+      }
+      case 'forceskill': {
+        this.actionForceSkill(action);
         break;
       }
       case 'globallock': {
@@ -975,6 +1021,10 @@ function Skill_Sequencer() {
         this.userAnimation(action);
         break;
       }
+      case 'qaudio': {
+        this.userQAudio(action);
+        break;
+      }
     }
   };
 
@@ -1015,10 +1065,14 @@ function Skill_Sequencer() {
         this.targetCancel(action, targets);
         break;
       }
+      case 'qaudio': {
+        this.targetQAudio(action, targets);
+        break;
+      }
     }
   };
 
-  Skill_Sequencer.prototype.startDamageUserAction = function(action, targets) {
+  Skill_Sequencer.prototype.startOnDamageUserAction = function(action, targets) {
     var cmd = action.shift().toLowerCase();
     switch (cmd) {
       case 'forceskill': {
@@ -1166,13 +1220,13 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.userForceSkill = function(action) {
     var id = Number(action[0]);
     var angleOffset = Number(action[1]);
-    var oldRadian = this._character._radian;
+    var radian = this._character._radian;
     if (angleOffset) {
-      var radOffset = angleOffset * Math.PI / 180;
-      this._character.setRadian(this._character._radian + radOffset);
+      radian += angleOffset * Math.PI / 180;
     }
-    this._character.forceSkill(id, true);
-    this._character.setRadian(oldRadian);
+    var skill = this._character.forceSkill(id, true);
+    skill.radian = radian;
+    skill._target = this._skill._target;
   };
 
   Skill_Sequencer.prototype.userAnimation = function(action) {
@@ -1180,6 +1234,41 @@ function Skill_Sequencer() {
     var x = this._character.cx();
     var y = this._character.cy();
     QABSManager.startAnimation(id, x, y);
+  };
+
+  Skill_Sequencer.prototype.userQAudio = function(action) {
+    if (!Imported.QAudio) return;
+    var id = Game_Interpreter.prototype.getUniqueQAudioId.call();
+    var name = action[0];
+    var loop = !!QPlus.getArg(action, /^loop$/i);
+    var dontPan = !!QPlus.getArg(action, /^noPan$/i);
+    var fadein = QPlus.getArg(action, /^fadein(\d+)/i);
+    var type = QPlus.getArg(action, /^(bgm|bgs|me|se)$/i) || 'bgm';
+    type = type.toLowerCase();
+    var max = QPlus.getArg(action, /^max(\d+)/i);
+    if (max === null) {
+      max = 90;
+    }
+    max = Number(max) / 100;
+    var radius = QPlus.getArg(action, /^radius(\d+)/i);
+    if (radius === null) {
+      radius = 5;
+    }
+    var audio = {
+      name: name,
+      volume: 100,
+      pitch: 0,
+      pan: 0
+    }
+    AudioManager.playQAudio(id, audio, {
+      type: type,
+      loop: loop,
+      maxVolume: Number(max),
+      radius: Number(radius),
+      bindTo: this._character,
+      doPan: !dontPan,
+      fadeIn: Number(fadein) || 0
+    });
   };
 
   Skill_Sequencer.prototype.actionStore = function() {
@@ -1242,8 +1331,7 @@ function Skill_Sequencer() {
       var dx = x2 - x1;
       var dy = y2 - y1;
       var dist = Math.sqrt(dx * dx + dy * dy);
-      this._skill.radian = Math.atan2(y2 - y1, x2 - x1);
-      this._skill.radian += this._skill.radian < 0 ? Math.PI * 2 : 0;
+      this._skill.radian = Math.atan2(dy, dx);
       this.actionWave(['forward', action[0], action[1], dist, action[2], action[3]]);
     }
   };
@@ -1251,6 +1339,19 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.actionTrigger = function() {
     this._skill.targets = QABSManager.getTargets(this._skill, this._character);
     this.updateSkillDamage();
+  };
+
+  Skill_Sequencer.prototype.actionAdjustAim = function() {
+    if (!this._skill._target) return;
+    var x1 = this._skill.collider.x;
+    var y1 = this._skill.collider.y;
+    var forward = this._skill._target.forwardV();
+    var dt = Math.randomInt(5) || 1;
+    var x2 = this._skill._target.px + forward.x * dt;
+    var y2 = this._skill._target.py + forward.y * dt;
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    this._skill.radian = Math.atan2(dy, dx);
   };
 
   Skill_Sequencer.prototype.actionWait = function(action) {
@@ -1337,7 +1438,7 @@ function Skill_Sequencer() {
     if (max === null) {
       max = 90;
     }
-    max /= 100;
+    max = Number(max) / 100;
     var radius = QPlus.getArg(action, /^radius(\d+)/i);
     if (radius === null) {
       radius = 5;
@@ -1357,7 +1458,51 @@ function Skill_Sequencer() {
       y: y / QMovement.tileSize,
       doPan: !dontPan,
       fadeIn: Number(fadein) || 0
-    })
+    });
+  };
+
+  Skill_Sequencer.prototype.actionForceSkill = function(action) {
+    var id = Number(action[0]);
+    var angleOffset = Number(action[1]);
+    var radian = this._skill.radian;
+    if (angleOffset) {
+      radian += angleOffset * Math.PI / 180;
+    }
+    var center = this._skill.collider.center;
+    var skill = this._character.makeSkill(id);
+    var w = skill.collider.width;
+    var h = skill.collider.height;
+    skill.collider.moveTo(center.x - w / 2, center.y - w / 2);
+    skill.radian = radian;
+    skill._target = this._skill._target;
+    this._character._activeSkills.push(skill);
+    this._character._skillCooldowns[id] = skill.settings.cooldown;
+  };
+
+  Skill_Sequencer.prototype.actionMoveSkill = function(distance, duration) {
+    var instant = duration === 0;
+    if (duration <= 0) duration = 1;
+    this._skill.newX = this._skill.collider.x + Math.round(distance * Math.cos(this._skill.radian));
+    this._skill.newY = this._skill.collider.y + Math.round(distance * Math.sin(this._skill.radian));
+    this._skill.speed = Math.abs(distance / duration);
+    this._skill.speedX = Math.abs(this._skill.speed * Math.cos(this._skill.radian));
+    this._skill.speedY = Math.abs(this._skill.speed * Math.sin(this._skill.radian));
+    this._skill.moving = true;
+    if (instant) {
+      this.updateSkillPosition();
+    }
+  };
+
+  Skill_Sequencer.prototype.actionWaveSkill = function(amp, harmonics, distance, duration) {
+    this._skill.amp = amp;
+    this._skill.distance = distance;
+    this._skill.waveLength = harmonics * Math.PI;
+    this._skill.waveSpeed = this._skill.waveLength / duration;
+    this._skill.theta = 0;
+    this._skill.xi = this._skill.collider.x;
+    this._skill.yi = this._skill.collider.y;
+    this._skill.waving = true;
+    this._skill.moving = true;
   };
 
   Skill_Sequencer.prototype.targetMove = function(action, targets) {
@@ -1389,13 +1534,13 @@ function Skill_Sequencer() {
       route.list.push({
         code: Game_Character.ROUTE_SCRIPT,
         parameters: ['qmove2(' + radian + ',' + dist + ')']
-      })
+      });
       if (!targets[i].isDirectionFixed()) {
         route.list.push({ code: 36 });
       }
       route.list.push({
         code: 0
-      })
+      });
       targets[i].forceMoveRoute(route);
       targets[i].updateRoutineMove();
     }
@@ -1448,30 +1593,41 @@ function Skill_Sequencer() {
     }
   };
 
-  Skill_Sequencer.prototype.actionMoveSkill = function(distance, duration) {
-    var instant = duration === 0;
-    if (duration <= 0) duration = 1;
-    this._skill.newX = this._skill.collider.x + Math.round(distance * Math.cos(this._skill.radian));
-    this._skill.newY = this._skill.collider.y + Math.round(distance * Math.sin(this._skill.radian));
-    this._skill.speed = Math.abs(distance / duration);
-    this._skill.speedX = Math.abs(this._skill.speed * Math.cos(this._skill.radian));
-    this._skill.speedY = Math.abs(this._skill.speed * Math.sin(this._skill.radian));
-    this._skill.moving = true;
-    if (instant) {
-      this.updateSkillPosition();
+  Skill_Sequencer.prototype.targetQAudio = function(action, targets) {
+    if (!Imported.QAudio) return;
+    var id = Game_Interpreter.prototype.getUniqueQAudioId.call();
+    var name = action[0];
+    var loop = !!QPlus.getArg(action, /^loop$/i);
+    var dontPan = !!QPlus.getArg(action, /^noPan$/i);
+    var fadein = QPlus.getArg(action, /^fadein(\d+)/i);
+    var type = QPlus.getArg(action, /^(bgm|bgs|me|se)$/i) || 'bgm';
+    type = type.toLowerCase();
+    var max = QPlus.getArg(action, /^max(\d+)/i);
+    if (max === null) {
+      max = 90;
     }
-  };
-
-  Skill_Sequencer.prototype.actionWaveSkill = function(amp, harmonics, distance, duration) {
-    this._skill.amp = amp;
-    this._skill.distance = distance;
-    this._skill.waveLength = harmonics * Math.PI;
-    this._skill.waveSpeed = this._skill.waveLength / duration;
-    this._skill.theta = 0;
-    this._skill.xi = this._skill.collider.x;
-    this._skill.yi = this._skill.collider.y;
-    this._skill.waving = true;
-    this._skill.moving = true;
+    max = Number(max) / 100;
+    var radius = QPlus.getArg(action, /^radius(\d+)/i);
+    if (radius === null) {
+      radius = 5;
+    }
+    var audio = {
+      name: name,
+      volume: 100,
+      pitch: 0,
+      pan: 0
+    }
+    for (var i = 0; i < targets.length; i++) {
+      AudioManager.playQAudio(id, audio, {
+        type: type,
+        loop: loop,
+        maxVolume: Number(max),
+        radius: Number(radius),
+        bindTo: targets[i],
+        doPan: !dontPan,
+        fadeIn: Number(fadein) || 0
+      });
+    };
   };
 
   Skill_Sequencer.prototype.setSkillRadian = function(radian) {
@@ -1524,13 +1680,15 @@ function Skill_Sequencer() {
     }
     if (through === 2 || through === 3) {
       ColliderManager.getCollidersNear(this._skill.collider, function(collider) {
-        if (collider === this._skill.collider) return false;
-        // TODO add ignorable terrains
-        if (this._skill.collider.intersects(collider)) {
+        if (collider === this.collider) return false;
+        if (this.settings.throughTerrain.contains(collider.terrain)) {
+          return false;
+        }
+        if (this.collider.intersects(collider)) {
           collided = true;
           return 'break';
         }
-      }.bind(this));
+      }.bind(this._skill));
     }
     return !collided;
   };
@@ -2197,7 +2355,7 @@ function Skill_Sequencer() {
   Game_Enemy.prototype.setup = function(enemyId, x, y) {
     Alias_Game_Enemy_setup.call(this, enemyId, x, y);
     var meta = this.enemy().qmeta;
-    this._noAI = meta.noAI;
+    this._aiType = (meta.AIType || 'simple').toLowerCase();
     this._aiRange = Number(meta.range) || 0;
     this._noPopup = !!meta.noPopup;
     this._popupOY = Number(meta.popupOY) || 0;
@@ -2319,7 +2477,7 @@ function Skill_Sequencer() {
     var chara = QPlus.getCharacter(charaId);
     if (!chara || chara === this || this.isFriendly(chara)) return;
     this._agroList[charaId] = this._agroList[charaId] || 0;
-    this._agroList[charaId] += skill && skill.agroPoints ? skill.agroPoints : 1;
+    this._agroList[charaId] += (skill && skill.agroPoints) ? skill.agroPoints : 1;
     if (!chara._agrodList.contains(this.charaId())) {
       chara._agrodList.push(this.charaId());
     }
@@ -2423,7 +2581,7 @@ function Skill_Sequencer() {
     var skill = this._groundTargeting;
     this.battler().paySkillCost(skill.data);
     this._activeSkills.push(skill);
-    this._skillCooldowns[skill.data.id] = skill.settings.cooldown;
+    this._skillCooldowns[skill.id] = skill.settings.cooldown;
     ColliderManager.draw(skill.collider, skill.sequence.length + 60);
     this.onTargetingCancel();
   };
@@ -2436,18 +2594,20 @@ function Skill_Sequencer() {
   };
 
   Game_CharacterBase.prototype.useSkill = function(skillId) {
-    if (!this.canInputSkill()) return;
-    if (!this.canUseSkill(skillId)) return;
+    if (!this.canInputSkill()) return null;
+    if (!this.canUseSkill(skillId)) return null;
     if (this._groundTargeting) {
       this.onTargetingCancel();
     }
-    this.forceSkill(skillId);
+    var skill = this.forceSkill(skillId);
     if (!this._groundTargeting) {
       this.battler().paySkillCost($dataSkills[skillId]);
     }
+    return skill;
   };
 
   Game_CharacterBase.prototype.beforeSkill = function(skill) {
+    // Runs before the skills sequence and collider are made
     var before = skill.data.qmeta.beforeSkill || '';
     if (before !== '') {
       try {
@@ -2459,8 +2619,20 @@ function Skill_Sequencer() {
   };
 
   Game_CharacterBase.prototype.forceSkill = function(skillId, forced) {
+    var skill = this.makeSkill(skillId, forced);
+    if (skill.settings.groundTarget || skill.settings.selectTarget) {
+      return this.makeTargetingSkill(skill);
+    }
+    this._activeSkills.push(skill);
+    this._skillCooldowns[skillId] = skill.settings.cooldown;
+    ColliderManager.draw(skill.collider, skill.sequence.length + 60);
+    return skill;
+  };
+
+  Game_CharacterBase.prototype.makeSkill = function(skillId, forced) {
     var data = $dataSkills[skillId];
     var skill = {
+      id: skillId,
       data: data,
       settings: QABS.getSkillSettings(data),
       sequence: QABS.getSkillSequence(data),
@@ -2472,12 +2644,7 @@ function Skill_Sequencer() {
     this.beforeSkill(skill);
     skill.sequencer = new Skill_Sequencer(this, skill);
     skill.collider = this.makeSkillCollider(skill.settings);
-    if (skill.settings.groundTarget || skill.settings.selectTarget) {
-      return this.makeTargetingSkill(skill);
-    }
-    this._activeSkills.push(skill);
-    this._skillCooldowns[skillId] = skill.settings.cooldown;
-    ColliderManager.draw(skill.collider, skill.sequence.length + 60);
+    return skill;
   };
 
   Game_CharacterBase.prototype.makeSkillCollider = function(settings) {
@@ -2539,6 +2706,7 @@ function Skill_Sequencer() {
       skill.picture.move(x, y);
     }
     QABSManager.addPicture(skill.picture);
+    return skill;
   };
 })();
 
@@ -2728,6 +2896,7 @@ function Skill_Sequencer() {
     var x2 = x1 - w / 2;
     var y2 = y1 - h / 2;
     this.setRadian(Math.atan2(y1 - this.cy(), x1 - this.cx()));
+    skill.radian = this._radian;
     skill.collider.moveTo(x2, y2);
     skill.picture.move(x2 + w / 2, y2 + h / 2);
     var dx = Math.abs(this.cx() - x2 - w / 2);
@@ -2806,11 +2975,12 @@ function Skill_Sequencer() {
       this._battler = new Game_Enemy(this._battlerId, 0, 0);
       this._battler._charaId = this.charaId();
       this._skillList = [];
+      this._aiType = this._battler._aiType;
       this._aiRange = this._battler._aiRange || QABS.aiLength;
       this._aiWait = 0;
       this._aiPathfind = Imported.QPathfind && QABS.aiPathfind;
       this._aiSight = Imported.QSight && QABS.aiSight;
-      if (this._aiSight && this.hasAI()) {
+      if (this._aiSight) {
         this.setupSight({
           shape: 'circle',
           range: this._aiRange / QMovement.tileSize,
@@ -2841,15 +3011,11 @@ function Skill_Sequencer() {
     return this._battler ? this._team : 0;
   };
 
-  Game_Event.prototype.hasAI = function() {
-    return !this._battler._noAI;
-  };
-
   Game_Event.prototype.usableSkills = function() {
     if (!this._battler) return [];
     return this._skillList.filter(function(skillId) {
       return !this._skillCooldowns[skillId];
-    }, this)
+    }, this);
   };
 
   var Alias_Game_Event_bestTarget = Game_Event.prototype.bestTarget;
@@ -2861,29 +3027,54 @@ function Skill_Sequencer() {
     return best;
   };
 
+  Game_Event.prototype.addAgro = function(charaId, skill) {
+    var isNew = !this._agroList[charaId];
+    Game_CharacterBase.prototype.addAgro.call(this, charaId, skill);
+    if (isNew) {
+      if (this._aiPathfind) {
+        this.clearPathfind();
+      }
+      if (this._endWait) {
+        this.removeWaitListener(this._endWait);
+        this._endWait = null;
+      }
+    }
+  };
+
   Game_Event.prototype.updateABS = function() {
     Game_CharacterBase.prototype.updateABS.call(this);
-    if (!this._isDead && this.hasAI() && this.isNearTheScreen()) {
-      this.updateAI();
+    if (!this._isDead && this.isNearTheScreen()) {
+      this.updateAI(this._aiType);
     } else if (this._respawn >= 0) {
       this.updateRespawn();
     }
   };
 
-  Game_Event.prototype.updateAI = function() {
+  Game_Event.prototype.updateAI = function(type) {
+    if (type === 'simple') {
+      return this.updateAISimple();
+    }
+    // to add more AI types, alias this function
+    // and do something similar to above
+  };
+
+  Game_Event.prototype.updateAISimple = function() {
     var bestTarget = this.bestTarget();
     if (!bestTarget) return;
     var targetId = bestTarget.charaId();
-    if (this.updateAIRange(bestTarget)) return;
-    this.updateAIAction(bestTarget, this.updateAIGetAction(bestTarget));
+    if (this.AISimpleRange(bestTarget)) return;
+    this.AISimpleAction(bestTarget, this.AISimpleGetAction(bestTarget));
   };
 
-  Game_Event.prototype.updateAIRange = function(bestTarget) {
+  Game_Event.prototype.AISimpleRange = function(bestTarget) {
     var targetId = bestTarget.charaId();
     if (this.isTargetInRange(bestTarget)) {
       if (!this._agroList.hasOwnProperty(targetId)) {
         this._aiWait = QABS.aiWait;
         this.addAgro(targetId);
+        if (this._aiPathfind) {
+          this.clearPathfind();
+        }
       }
       if (this._endWait) {
         this.removeWaitListener(this._endWait);
@@ -2898,20 +3089,20 @@ function Skill_Sequencer() {
         this._endWait = this.wait(120).then(function() {
           this._endWait = null;
           this.endCombat();
-        }.bind(this))
+        }.bind(this));
+      }
+      if (this._endWait && this.canMove()) {
+        this.moveTowardCharacter(bestTarget);
       }
       return true;
     }
     return false;
   };
 
-  Game_Event.prototype.updateAIGetAction = function(bestTarget, dx, dy) {
+  Game_Event.prototype.AISimpleGetAction = function(bestTarget) {
     var bestAction = null;
     if (this._aiWait >= QABS.aiWait) {
-      var dx = bestTarget.cx() - this.cx();
-      var dy = bestTarget.cy() - this.cy();
-      this._radian = Math.atan2(dy, dx);
-      this._radian += this._radian < 0 ? Math.PI * 2 : 0;
+      this.turnTowardCharacter(bestTarget);
       bestAction = QABSManager.bestAction(this.charaId());
       this._aiWait = 0;
     } else {
@@ -2920,10 +3111,11 @@ function Skill_Sequencer() {
     return bestAction;
   };
 
-  Game_Event.prototype.updateAIAction = function(bestTarget, bestAction) {
+  Game_Event.prototype.AISimpleAction = function(bestTarget, bestAction) {
     if (bestAction) {
-      this.useSkill(bestAction);
-    } else if (this.canMove() && this._freqCount < this.freqThreshold()) {
+      var skill = this.useSkill(bestAction);
+      if (skill) skill._target = bestTarget;
+    } else if (this.canMove()) {
       if (this._aiPathfind) {
         var dx = bestTarget.cx() - this.cx();
         var dy = bestTarget.cy() - this.cy();
@@ -2995,7 +3187,8 @@ function Skill_Sequencer() {
       var x = this.event().x * QMovement.tileSize;
       var y = this.event().y * QMovement.tileSize;
       this.initPathfind(x, y, {
-        smart: 1
+        smart: 1,
+        adjustEnd: true
       });
     } else {
       this.findRespawnLocation();
@@ -3006,21 +3199,38 @@ function Skill_Sequencer() {
   Game_Event.prototype.findRespawnLocation = function() {
     var x = this.event().x * QMovement.tileSize;
     var y = this.event().y * QMovement.tileSize;
-    var dist = this.moveTiles();
-    // TODO change this to a Dijkstra's algorithm
-    while (true) {
-      var stop;
+    if (this.canPixelPass(x, y, 5)) {
+      this.setPixelPosition(x, y);
+      this.straighten();
+      this.refreshBushDepth();
+      return;
+    }
+    var dist = Math.min(this.collider('collision').width, this.collider('collision').height);
+    dist = Math.max(dist / 2, this.moveTiles());
+    var open = [x + ',' + y];
+    var closed = [];
+    var current;
+    var x2;
+    var y2;
+    while (open.length) {
+      current = open.shift();
+      closed.push(current);
+      current = current.split(',').map(Number);
+      var passed;
       for (var i = 1; i < 5; i++) {
         var dir = i * 2;
-        var x2 = $gameMap.roundPXWithDirection(x, dir, dist);
-        var y2 = $gameMap.roundPYWithDirection(y, dir, dist);
+        x2 = Math.round($gameMap.roundPXWithDirection(current[0], dir, dist));
+        y2 = Math.round($gameMap.roundPYWithDirection(current[1], dir, dist));
         if (this.canPixelPass(x2, y2, 5)) {
-          stop = true;
+          passed = true;
           break;
         }
+        var key = x2 + ',' + y2;
+        if (!closed.contains(key) && !open.contains(key)) {
+          open.push(key);
+        }
       }
-      if (stop) break;
-      dist += this.moveTiles();
+      if (passed) break;
     }
     this.setPixelPosition(x2, y2);
     this.straighten();
