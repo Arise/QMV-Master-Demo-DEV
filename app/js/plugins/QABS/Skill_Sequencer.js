@@ -44,6 +44,10 @@ function Skill_Sequencer() {
         this.actionTrigger(action);
         break;
       }
+      case 'adjustaim': {
+        this.actionAdjustAim(action);
+        break;
+      }
       case 'wait': {
         this.actionWait(action);
         break;
@@ -70,6 +74,10 @@ function Skill_Sequencer() {
       }
       case 'qaudio': {
         this.actionQAudio(action);
+        break;
+      }
+      case 'forceskill': {
+        this.actionForceSkill(action);
         break;
       }
       case 'globallock': {
@@ -142,6 +150,10 @@ function Skill_Sequencer() {
         this.userAnimation(action);
         break;
       }
+      case 'qaudio': {
+        this.userQAudio(action);
+        break;
+      }
     }
   };
 
@@ -182,10 +194,14 @@ function Skill_Sequencer() {
         this.targetCancel(action, targets);
         break;
       }
+      case 'qaudio': {
+        this.targetQAudio(action, targets);
+        break;
+      }
     }
   };
 
-  Skill_Sequencer.prototype.startDamageUserAction = function(action, targets) {
+  Skill_Sequencer.prototype.startOnDamageUserAction = function(action, targets) {
     var cmd = action.shift().toLowerCase();
     switch (cmd) {
       case 'forceskill': {
@@ -333,13 +349,13 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.userForceSkill = function(action) {
     var id = Number(action[0]);
     var angleOffset = Number(action[1]);
-    var oldRadian = this._character._radian;
+    var radian = this._character._radian;
     if (angleOffset) {
-      var radOffset = angleOffset * Math.PI / 180;
-      this._character.setRadian(this._character._radian + radOffset);
+      radian += angleOffset * Math.PI / 180;
     }
-    this._character.forceSkill(id, true);
-    this._character.setRadian(oldRadian);
+    var skill = this._character.forceSkill(id, true);
+    skill.radian = radian;
+    skill._target = this._skill._target;
   };
 
   Skill_Sequencer.prototype.userAnimation = function(action) {
@@ -347,6 +363,41 @@ function Skill_Sequencer() {
     var x = this._character.cx();
     var y = this._character.cy();
     QABSManager.startAnimation(id, x, y);
+  };
+
+  Skill_Sequencer.prototype.userQAudio = function(action) {
+    if (!Imported.QAudio) return;
+    var id = Game_Interpreter.prototype.getUniqueQAudioId.call();
+    var name = action[0];
+    var loop = !!QPlus.getArg(action, /^loop$/i);
+    var dontPan = !!QPlus.getArg(action, /^noPan$/i);
+    var fadein = QPlus.getArg(action, /^fadein(\d+)/i);
+    var type = QPlus.getArg(action, /^(bgm|bgs|me|se)$/i) || 'bgm';
+    type = type.toLowerCase();
+    var max = QPlus.getArg(action, /^max(\d+)/i);
+    if (max === null) {
+      max = 90;
+    }
+    max = Number(max) / 100;
+    var radius = QPlus.getArg(action, /^radius(\d+)/i);
+    if (radius === null) {
+      radius = 5;
+    }
+    var audio = {
+      name: name,
+      volume: 100,
+      pitch: 0,
+      pan: 0
+    }
+    AudioManager.playQAudio(id, audio, {
+      type: type,
+      loop: loop,
+      maxVolume: Number(max),
+      radius: Number(radius),
+      bindTo: this._character,
+      doPan: !dontPan,
+      fadeIn: Number(fadein) || 0
+    });
   };
 
   Skill_Sequencer.prototype.actionStore = function() {
@@ -409,8 +460,7 @@ function Skill_Sequencer() {
       var dx = x2 - x1;
       var dy = y2 - y1;
       var dist = Math.sqrt(dx * dx + dy * dy);
-      this._skill.radian = Math.atan2(y2 - y1, x2 - x1);
-      this._skill.radian += this._skill.radian < 0 ? Math.PI * 2 : 0;
+      this._skill.radian = Math.atan2(dy, dx);
       this.actionWave(['forward', action[0], action[1], dist, action[2], action[3]]);
     }
   };
@@ -418,6 +468,19 @@ function Skill_Sequencer() {
   Skill_Sequencer.prototype.actionTrigger = function() {
     this._skill.targets = QABSManager.getTargets(this._skill, this._character);
     this.updateSkillDamage();
+  };
+
+  Skill_Sequencer.prototype.actionAdjustAim = function() {
+    if (!this._skill._target) return;
+    var x1 = this._skill.collider.x;
+    var y1 = this._skill.collider.y;
+    var forward = this._skill._target.forwardV();
+    var dt = Math.randomInt(5) || 1;
+    var x2 = this._skill._target.px + forward.x * dt;
+    var y2 = this._skill._target.py + forward.y * dt;
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    this._skill.radian = Math.atan2(dy, dx);
   };
 
   Skill_Sequencer.prototype.actionWait = function(action) {
@@ -504,7 +567,7 @@ function Skill_Sequencer() {
     if (max === null) {
       max = 90;
     }
-    max /= 100;
+    max = Number(max) / 100;
     var radius = QPlus.getArg(action, /^radius(\d+)/i);
     if (radius === null) {
       radius = 5;
@@ -524,7 +587,51 @@ function Skill_Sequencer() {
       y: y / QMovement.tileSize,
       doPan: !dontPan,
       fadeIn: Number(fadein) || 0
-    })
+    });
+  };
+
+  Skill_Sequencer.prototype.actionForceSkill = function(action) {
+    var id = Number(action[0]);
+    var angleOffset = Number(action[1]);
+    var radian = this._skill.radian;
+    if (angleOffset) {
+      radian += angleOffset * Math.PI / 180;
+    }
+    var center = this._skill.collider.center;
+    var skill = this._character.makeSkill(id);
+    var w = skill.collider.width;
+    var h = skill.collider.height;
+    skill.collider.moveTo(center.x - w / 2, center.y - w / 2);
+    skill.radian = radian;
+    skill._target = this._skill._target;
+    this._character._activeSkills.push(skill);
+    this._character._skillCooldowns[id] = skill.settings.cooldown;
+  };
+
+  Skill_Sequencer.prototype.actionMoveSkill = function(distance, duration) {
+    var instant = duration === 0;
+    if (duration <= 0) duration = 1;
+    this._skill.newX = this._skill.collider.x + Math.round(distance * Math.cos(this._skill.radian));
+    this._skill.newY = this._skill.collider.y + Math.round(distance * Math.sin(this._skill.radian));
+    this._skill.speed = Math.abs(distance / duration);
+    this._skill.speedX = Math.abs(this._skill.speed * Math.cos(this._skill.radian));
+    this._skill.speedY = Math.abs(this._skill.speed * Math.sin(this._skill.radian));
+    this._skill.moving = true;
+    if (instant) {
+      this.updateSkillPosition();
+    }
+  };
+
+  Skill_Sequencer.prototype.actionWaveSkill = function(amp, harmonics, distance, duration) {
+    this._skill.amp = amp;
+    this._skill.distance = distance;
+    this._skill.waveLength = harmonics * Math.PI;
+    this._skill.waveSpeed = this._skill.waveLength / duration;
+    this._skill.theta = 0;
+    this._skill.xi = this._skill.collider.x;
+    this._skill.yi = this._skill.collider.y;
+    this._skill.waving = true;
+    this._skill.moving = true;
   };
 
   Skill_Sequencer.prototype.targetMove = function(action, targets) {
@@ -556,13 +663,13 @@ function Skill_Sequencer() {
       route.list.push({
         code: Game_Character.ROUTE_SCRIPT,
         parameters: ['qmove2(' + radian + ',' + dist + ')']
-      })
+      });
       if (!targets[i].isDirectionFixed()) {
         route.list.push({ code: 36 });
       }
       route.list.push({
         code: 0
-      })
+      });
       targets[i].forceMoveRoute(route);
       targets[i].updateRoutineMove();
     }
@@ -615,30 +722,41 @@ function Skill_Sequencer() {
     }
   };
 
-  Skill_Sequencer.prototype.actionMoveSkill = function(distance, duration) {
-    var instant = duration === 0;
-    if (duration <= 0) duration = 1;
-    this._skill.newX = this._skill.collider.x + Math.round(distance * Math.cos(this._skill.radian));
-    this._skill.newY = this._skill.collider.y + Math.round(distance * Math.sin(this._skill.radian));
-    this._skill.speed = Math.abs(distance / duration);
-    this._skill.speedX = Math.abs(this._skill.speed * Math.cos(this._skill.radian));
-    this._skill.speedY = Math.abs(this._skill.speed * Math.sin(this._skill.radian));
-    this._skill.moving = true;
-    if (instant) {
-      this.updateSkillPosition();
+  Skill_Sequencer.prototype.targetQAudio = function(action, targets) {
+    if (!Imported.QAudio) return;
+    var id = Game_Interpreter.prototype.getUniqueQAudioId.call();
+    var name = action[0];
+    var loop = !!QPlus.getArg(action, /^loop$/i);
+    var dontPan = !!QPlus.getArg(action, /^noPan$/i);
+    var fadein = QPlus.getArg(action, /^fadein(\d+)/i);
+    var type = QPlus.getArg(action, /^(bgm|bgs|me|se)$/i) || 'bgm';
+    type = type.toLowerCase();
+    var max = QPlus.getArg(action, /^max(\d+)/i);
+    if (max === null) {
+      max = 90;
     }
-  };
-
-  Skill_Sequencer.prototype.actionWaveSkill = function(amp, harmonics, distance, duration) {
-    this._skill.amp = amp;
-    this._skill.distance = distance;
-    this._skill.waveLength = harmonics * Math.PI;
-    this._skill.waveSpeed = this._skill.waveLength / duration;
-    this._skill.theta = 0;
-    this._skill.xi = this._skill.collider.x;
-    this._skill.yi = this._skill.collider.y;
-    this._skill.waving = true;
-    this._skill.moving = true;
+    max = Number(max) / 100;
+    var radius = QPlus.getArg(action, /^radius(\d+)/i);
+    if (radius === null) {
+      radius = 5;
+    }
+    var audio = {
+      name: name,
+      volume: 100,
+      pitch: 0,
+      pan: 0
+    }
+    for (var i = 0; i < targets.length; i++) {
+      AudioManager.playQAudio(id, audio, {
+        type: type,
+        loop: loop,
+        maxVolume: Number(max),
+        radius: Number(radius),
+        bindTo: targets[i],
+        doPan: !dontPan,
+        fadeIn: Number(fadein) || 0
+      });
+    };
   };
 
   Skill_Sequencer.prototype.setSkillRadian = function(radian) {
@@ -691,13 +809,15 @@ function Skill_Sequencer() {
     }
     if (through === 2 || through === 3) {
       ColliderManager.getCollidersNear(this._skill.collider, function(collider) {
-        if (collider === this._skill.collider) return false;
-        // TODO add ignorable terrains
-        if (this._skill.collider.intersects(collider)) {
+        if (collider === this.collider) return false;
+        if (this.settings.throughTerrain.contains(collider.terrain)) {
+          return false;
+        }
+        if (this.collider.intersects(collider)) {
           collided = true;
           return 'break';
         }
-      }.bind(this));
+      }.bind(this._skill));
     }
     return !collided;
   };

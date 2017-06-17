@@ -184,6 +184,7 @@
     var x2 = x1 - w / 2;
     var y2 = y1 - h / 2;
     this.setRadian(Math.atan2(y1 - this.cy(), x1 - this.cx()));
+    skill.radian = this._radian;
     skill.collider.moveTo(x2, y2);
     skill.picture.move(x2 + w / 2, y2 + h / 2);
     var dx = Math.abs(this.cx() - x2 - w / 2);

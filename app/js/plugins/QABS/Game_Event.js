@@ -24,11 +24,12 @@
       this._battler = new Game_Enemy(this._battlerId, 0, 0);
       this._battler._charaId = this.charaId();
       this._skillList = [];
+      this._aiType = this._battler._aiType;
       this._aiRange = this._battler._aiRange || QABS.aiLength;
       this._aiWait = 0;
       this._aiPathfind = Imported.QPathfind && QABS.aiPathfind;
       this._aiSight = Imported.QSight && QABS.aiSight;
-      if (this._aiSight && this.hasAI()) {
+      if (this._aiSight) {
         this.setupSight({
           shape: 'circle',
           range: this._aiRange / QMovement.tileSize,
@@ -59,15 +60,11 @@
     return this._battler ? this._team : 0;
   };
 
-  Game_Event.prototype.hasAI = function() {
-    return !this._battler._noAI;
-  };
-
   Game_Event.prototype.usableSkills = function() {
     if (!this._battler) return [];
     return this._skillList.filter(function(skillId) {
       return !this._skillCooldowns[skillId];
-    }, this)
+    }, this);
   };
 
   var Alias_Game_Event_bestTarget = Game_Event.prototype.bestTarget;
@@ -79,29 +76,54 @@
     return best;
   };
 
+  Game_Event.prototype.addAgro = function(charaId, skill) {
+    var isNew = !this._agroList[charaId];
+    Game_CharacterBase.prototype.addAgro.call(this, charaId, skill);
+    if (isNew) {
+      if (this._aiPathfind) {
+        this.clearPathfind();
+      }
+      if (this._endWait) {
+        this.removeWaitListener(this._endWait);
+        this._endWait = null;
+      }
+    }
+  };
+
   Game_Event.prototype.updateABS = function() {
     Game_CharacterBase.prototype.updateABS.call(this);
-    if (!this._isDead && this.hasAI() && this.isNearTheScreen()) {
-      this.updateAI();
+    if (!this._isDead && this.isNearTheScreen()) {
+      this.updateAI(this._aiType);
     } else if (this._respawn >= 0) {
       this.updateRespawn();
     }
   };
 
-  Game_Event.prototype.updateAI = function() {
+  Game_Event.prototype.updateAI = function(type) {
+    if (type === 'simple') {
+      return this.updateAISimple();
+    }
+    // to add more AI types, alias this function
+    // and do something similar to above
+  };
+
+  Game_Event.prototype.updateAISimple = function() {
     var bestTarget = this.bestTarget();
     if (!bestTarget) return;
     var targetId = bestTarget.charaId();
-    if (this.updateAIRange(bestTarget)) return;
-    this.updateAIAction(bestTarget, this.updateAIGetAction(bestTarget));
+    if (this.AISimpleRange(bestTarget)) return;
+    this.AISimpleAction(bestTarget, this.AISimpleGetAction(bestTarget));
   };
 
-  Game_Event.prototype.updateAIRange = function(bestTarget) {
+  Game_Event.prototype.AISimpleRange = function(bestTarget) {
     var targetId = bestTarget.charaId();
     if (this.isTargetInRange(bestTarget)) {
       if (!this._agroList.hasOwnProperty(targetId)) {
         this._aiWait = QABS.aiWait;
         this.addAgro(targetId);
+        if (this._aiPathfind) {
+          this.clearPathfind();
+        }
       }
       if (this._endWait) {
         this.removeWaitListener(this._endWait);
@@ -116,20 +138,20 @@
         this._endWait = this.wait(120).then(function() {
           this._endWait = null;
           this.endCombat();
-        }.bind(this))
+        }.bind(this));
+      }
+      if (this._endWait && this.canMove()) {
+        this.moveTowardCharacter(bestTarget);
       }
       return true;
     }
     return false;
   };
 
-  Game_Event.prototype.updateAIGetAction = function(bestTarget, dx, dy) {
+  Game_Event.prototype.AISimpleGetAction = function(bestTarget) {
     var bestAction = null;
     if (this._aiWait >= QABS.aiWait) {
-      var dx = bestTarget.cx() - this.cx();
-      var dy = bestTarget.cy() - this.cy();
-      this._radian = Math.atan2(dy, dx);
-      this._radian += this._radian < 0 ? Math.PI * 2 : 0;
+      this.turnTowardCharacter(bestTarget);
       bestAction = QABSManager.bestAction(this.charaId());
       this._aiWait = 0;
     } else {
@@ -138,10 +160,11 @@
     return bestAction;
   };
 
-  Game_Event.prototype.updateAIAction = function(bestTarget, bestAction) {
+  Game_Event.prototype.AISimpleAction = function(bestTarget, bestAction) {
     if (bestAction) {
-      this.useSkill(bestAction);
-    } else if (this.canMove() && this._freqCount < this.freqThreshold()) {
+      var skill = this.useSkill(bestAction);
+      if (skill) skill._target = bestTarget;
+    } else if (this.canMove()) {
       if (this._aiPathfind) {
         var dx = bestTarget.cx() - this.cx();
         var dy = bestTarget.cy() - this.cy();
@@ -213,7 +236,8 @@
       var x = this.event().x * QMovement.tileSize;
       var y = this.event().y * QMovement.tileSize;
       this.initPathfind(x, y, {
-        smart: 1
+        smart: 1,
+        adjustEnd: true
       });
     } else {
       this.findRespawnLocation();
@@ -224,21 +248,38 @@
   Game_Event.prototype.findRespawnLocation = function() {
     var x = this.event().x * QMovement.tileSize;
     var y = this.event().y * QMovement.tileSize;
-    var dist = this.moveTiles();
-    // TODO change this to a Dijkstra's algorithm
-    while (true) {
-      var stop;
+    if (this.canPixelPass(x, y, 5)) {
+      this.setPixelPosition(x, y);
+      this.straighten();
+      this.refreshBushDepth();
+      return;
+    }
+    var dist = Math.min(this.collider('collision').width, this.collider('collision').height);
+    dist = Math.max(dist / 2, this.moveTiles());
+    var open = [x + ',' + y];
+    var closed = [];
+    var current;
+    var x2;
+    var y2;
+    while (open.length) {
+      current = open.shift();
+      closed.push(current);
+      current = current.split(',').map(Number);
+      var passed;
       for (var i = 1; i < 5; i++) {
         var dir = i * 2;
-        var x2 = $gameMap.roundPXWithDirection(x, dir, dist);
-        var y2 = $gameMap.roundPYWithDirection(y, dir, dist);
+        x2 = Math.round($gameMap.roundPXWithDirection(current[0], dir, dist));
+        y2 = Math.round($gameMap.roundPYWithDirection(current[1], dir, dist));
         if (this.canPixelPass(x2, y2, 5)) {
-          stop = true;
+          passed = true;
           break;
         }
+        var key = x2 + ',' + y2;
+        if (!closed.contains(key) && !open.contains(key)) {
+          open.push(key);
+        }
       }
-      if (stop) break;
-      dist += this.moveTiles();
+      if (passed) break;
     }
     this.setPixelPosition(x2, y2);
     this.straighten();

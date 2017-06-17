@@ -6,7 +6,7 @@
   Game_Enemy.prototype.setup = function(enemyId, x, y) {
     Alias_Game_Enemy_setup.call(this, enemyId, x, y);
     var meta = this.enemy().qmeta;
-    this._noAI = meta.noAI;
+    this._aiType = (meta.AIType || 'simple').toLowerCase();
     this._aiRange = Number(meta.range) || 0;
     this._noPopup = !!meta.noPopup;
     this._popupOY = Number(meta.popupOY) || 0;

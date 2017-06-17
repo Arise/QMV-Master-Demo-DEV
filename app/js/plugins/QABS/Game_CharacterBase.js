@@ -100,7 +100,7 @@
     var chara = QPlus.getCharacter(charaId);
     if (!chara || chara === this || this.isFriendly(chara)) return;
     this._agroList[charaId] = this._agroList[charaId] || 0;
-    this._agroList[charaId] += skill && skill.agroPoints ? skill.agroPoints : 1;
+    this._agroList[charaId] += (skill && skill.agroPoints) ? skill.agroPoints : 1;
     if (!chara._agrodList.contains(this.charaId())) {
       chara._agrodList.push(this.charaId());
     }
@@ -204,7 +204,7 @@
     var skill = this._groundTargeting;
     this.battler().paySkillCost(skill.data);
     this._activeSkills.push(skill);
-    this._skillCooldowns[skill.data.id] = skill.settings.cooldown;
+    this._skillCooldowns[skill.id] = skill.settings.cooldown;
     ColliderManager.draw(skill.collider, skill.sequence.length + 60);
     this.onTargetingCancel();
   };
@@ -217,18 +217,20 @@
   };
 
   Game_CharacterBase.prototype.useSkill = function(skillId) {
-    if (!this.canInputSkill()) return;
-    if (!this.canUseSkill(skillId)) return;
+    if (!this.canInputSkill()) return null;
+    if (!this.canUseSkill(skillId)) return null;
     if (this._groundTargeting) {
       this.onTargetingCancel();
     }
-    this.forceSkill(skillId);
+    var skill = this.forceSkill(skillId);
     if (!this._groundTargeting) {
       this.battler().paySkillCost($dataSkills[skillId]);
     }
+    return skill;
   };
 
   Game_CharacterBase.prototype.beforeSkill = function(skill) {
+    // Runs before the skills sequence and collider are made
     var before = skill.data.qmeta.beforeSkill || '';
     if (before !== '') {
       try {
@@ -240,8 +242,20 @@
   };
 
   Game_CharacterBase.prototype.forceSkill = function(skillId, forced) {
+    var skill = this.makeSkill(skillId, forced);
+    if (skill.settings.groundTarget || skill.settings.selectTarget) {
+      return this.makeTargetingSkill(skill);
+    }
+    this._activeSkills.push(skill);
+    this._skillCooldowns[skillId] = skill.settings.cooldown;
+    ColliderManager.draw(skill.collider, skill.sequence.length + 60);
+    return skill;
+  };
+
+  Game_CharacterBase.prototype.makeSkill = function(skillId, forced) {
     var data = $dataSkills[skillId];
     var skill = {
+      id: skillId,
       data: data,
       settings: QABS.getSkillSettings(data),
       sequence: QABS.getSkillSequence(data),
@@ -253,12 +267,7 @@
     this.beforeSkill(skill);
     skill.sequencer = new Skill_Sequencer(this, skill);
     skill.collider = this.makeSkillCollider(skill.settings);
-    if (skill.settings.groundTarget || skill.settings.selectTarget) {
-      return this.makeTargetingSkill(skill);
-    }
-    this._activeSkills.push(skill);
-    this._skillCooldowns[skillId] = skill.settings.cooldown;
-    ColliderManager.draw(skill.collider, skill.sequence.length + 60);
+    return skill;
   };
 
   Game_CharacterBase.prototype.makeSkillCollider = function(settings) {
@@ -320,5 +329,6 @@
       skill.picture.move(x, y);
     }
     QABSManager.addPicture(skill.picture);
+    return skill;
   };
 })();

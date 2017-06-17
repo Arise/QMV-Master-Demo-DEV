@@ -78,16 +78,22 @@ function QABS() {
         cooldown: 0,
         through: 0,
         groundTarget: false,
-        selectTarget: false
+        selectTarget: false,
+        throughTerrain: []
       }
       if (settings) {
+        // TODO change this, hate how it looks
         settings = QPlus.stringToObj(settings);
         Object.assign(settings, {
           cooldown: Number(settings.cooldown) || 0,
           through: Number(settings.through) || 0,
           groundTarget: settings.groundtarget && !settings.selecttarget,
-          selectTarget: !settings.groundtarget && settings.selecttarget
-        })
+          selectTarget: !settings.groundtarget && settings.selecttarget,
+          throughTerrain: settings.throughTerrain || ''
+        });
+        if (settings.throughTerrain.constructor !== Array) {
+          settings.throughTerrain = [settings.throughTerrain];
+        }
         if (settings.groundtarget) var range = Number(settings.groundtarget);
         if (settings.selecttarget) var range = Number(settings.selecttarget);
         settings.range = range || 0;
@@ -153,26 +159,51 @@ function QABS() {
   QABS._aiRange = {};
   QABS.getAIRange = function(skill) {
     if (!this._aiRange.hasOwnProperty(skill.id)) {
-      var actions = this.getSkillSequence(skill);
-      var dist = 0;
-      var maxDist = 0;
-      actions.forEach(function(action) {
-        // TODO calc for moveToStored / waveToStored
-        var match = /^[move|wave](.*)/i.exec(action);
-        if (match) {
-          match = match[1].trim();
-          match = match.split(' ');
-          if (match[0] === 'forward') {
-            dist += Number(match[1]) || 0;
-          } else {
-            dist -= Number(match[1]) || 0;
-          }
-          maxDist = Math.max(dist, maxDist);
-        }
-      })
-      this._aiRange[skill.id] = maxDist;
+      this._aiRange[skill.id] = this.calcAIRange(skill);
     }
     return this._aiRange[skill.id];
+  };
+
+  QABS.calcAIRange = function(skill) {
+    var actions = this.getSkillSequence(skill);
+    var currDist = 0;
+    var stored = 0;
+    var maxDist = 0;
+    actions.forEach(function(action) {
+      var move = /^(?:move|wave) (.*)/i.exec(action);
+      if (move) {
+        move = move[1].trim().split(' ');
+        if (move[0] === 'forward') {
+          currDist += Number(move[1]) || 0;
+        } else {
+          currDist -= Number(move[1]) || 0;
+        }
+        maxDist = Math.max(currDist, maxDist);
+      }
+      var store = /^store/i.exec(action);
+      if (store) {
+        stored = currDist;
+      }
+      var toStore = /^(?:move|wave)ToStored/i.exec(action);
+      if (toStore) {
+        currDist = stored;
+        maxDist = Math.max(currDist, maxDist);
+      }
+      var userForce = /^user forceSkill (.*)/i.exec(action);
+      if (userForce) {
+        userForce = Number(userForce[1].trim().split(' ')[0]);
+        var dist2 = QABS.getAIRange($dataSkills[userForce]);
+        maxDist = Math.max(dist2, maxDist);
+      }
+      var skillForce = /^forceSkill (.*)/i.exec(action);
+      if (skillForce) {
+        skillForce = Number(skillForce[1].trim().split(' ')[0]);
+        var dist3 = QABS.getAIRange($dataSkills[skillForce]);
+        dist3 += currDist;
+        maxDist = Math.max(dist3, maxDist);
+      }
+    });
+    return maxDist;
   };
 
 })();

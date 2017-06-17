@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// QABS Static Class
+// QABS Manager Static Class
 
 function QABSManager() {
   throw new Error('This is a static class');
@@ -63,13 +63,13 @@ function QABSManager() {
         data: skill,
         collider: range
       }, chara);
-      ColliderManager.draw(range, 60);
+      ColliderManager.draw(range, QABS.aiWait / 2);
     } else {
       targets = QABSManager.getTargets({
         data: skill,
         collider: skillCollider
       }, chara);
-      ColliderManager.draw(skillCollider, 60);
+      ColliderManager.draw(skillCollider, QABS.aiWait / 2);
     }
     return targets;
   };

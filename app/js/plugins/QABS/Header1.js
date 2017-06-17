@@ -4,18 +4,18 @@
 
 var Imported = Imported || {};
 
-if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.3.1')) {
-  alert('Error: QABS requires QMovement 1.3.1 or newer to work.');
-  throw new Error('Error: QABS requires QMovement 1.3.1 or newer to work.');
+if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.4.0')) {
+  alert('Error: QABS requires QMovement 1.4.0 or newer to work.');
+  throw new Error('Error: QABS requires QMovement 1.4.0 or newer to work.');
 }
 
-Imported.QABS = '1.1.0';
+Imported.QABS = '1.2.0';
 
 //=============================================================================
  /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @author Quxios  | Version 1.1.0
+ * @author Quxios  | Version 1.2.0
  *
  * @development
  *
@@ -296,12 +296,14 @@ Imported.QABS = '1.1.0';
  *  user pose [POSE NAME] [WAIT? TRUE or FALSE]
  *  user forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
  *  user animation [ANIMATION ID]
+ *  user qaudio [NAME] [QAUDIO OPTIONS]
  *  store
  *  move [FORWARD or BACKWARD] [DIST] [DURATION] [WAIT? TRUE or FALSE]
  *  moveToStored [DURATION] [WAIT? TRUE or FALSE]
  *  wave [FORWARD or BACKWARD] [AMPLITUDE] [HARM] [DIST] [DURATION] [WAIT? TRUE or FALSE]
  *  waveToStored [AMPLITUDE] [HARM] [DURATION] [WAIT? TRUE or FALSE]
  *  trigger
+ *  adjustAim
  *  wait [DURATION]
  *  picture [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
  *  trail [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
@@ -309,6 +311,7 @@ Imported.QABS = '1.1.0';
  *  animation [ANIMATION ID]
  *  se [NAME] [VOLUME] [PITCH] [PAN]
  *  qaudio [NAME] [QAUDIO OPTIONS]
+ *  forceSkill [SKILL ID] [ANGLE OFFSER IN DEGREES]
  *  globalLock
  *  globalUnlock
  * ~~~
@@ -325,10 +328,11 @@ Imported.QABS = '1.1.0';
  * ~~~
  * There are a few actions you can add here:
  * ~~~
- *  target move [TOWARDS or AWAY] [DIST]
- *  target jump [TOWARDS or AWAY] [DIST]
+ *  target move [TOWARDS or AWAY or INTO] [DIST]
+ *  target jump [TOWARDS or AWAY or INTO] [DIST]
  *  target pose [POSE]
  *  target cancel
+ *  target qaudio [NAME] [QAUDIO OPTIONS]
  *  user forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
  *  animationTarget [0 or 1]
  * ~~~
@@ -348,18 +352,21 @@ Imported.QABS = '1.1.0';
  * ----------------------------------------------------------------------------
  * To set the enemies respawn
  * ~~~
- *  <respawn: X>
+ *  <respawn:X>
  * ~~~
  * - X: How long until it respawns, in frames.
  *
- * To disable the enemy AI, add this notetag
+ * To set an Enemies AI
  * ~~~
- *  <noAI>
+ * <AIType:TYPE>
  * ~~~
+ * -TYPE: The AI type, set this to none to disable AI.
+ *
+ * There's only 1 type of AI, so for now that AI is only to disable AI
  *
  * To set it's AI range
  * ~~~
- *  <range: X>
+ *  <range:X>
  * ~~~
  * - X: The range in pixels
  *
