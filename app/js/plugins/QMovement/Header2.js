@@ -6,7 +6,15 @@ function QMovement() {
 }
 
 (function() {
-  var _PARAMS = QPlus.getParams('<QMovement>', true);
+  var _PARAMS = QPlus.getParams('<QMovement>', {
+    'Player Collider': {
+      "Type": "box", "Width": 36,"Height":24 ,"Offset X": 6,"Offset Y": 24
+    },
+    'Event Collider': {
+      "Type": "box", "Width": 36,"Height":24 ,"Offset X": 6,"Offset Y": 24
+    },
+    'Presets': []
+  });
 
   QMovement.grid = _PARAMS['Grid'];
   QMovement.tileSize = _PARAMS['Tile Size'];

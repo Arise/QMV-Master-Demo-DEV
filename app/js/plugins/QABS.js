@@ -118,6 +118,7 @@ Imported.QABS = '1.2.0';
  *
  * @param Default Skills
  * @type Struct<SkillKey>[]
+ * @default []
  *
  * @help
  * ============================================================================
@@ -464,7 +465,9 @@ function QABS() {
 }
 
 (function() {
-  var _PARAMS = QPlus.getParams('<QABS>', true);
+  var _PARAMS = QPlus.getParams('<QABS>', {
+    'Default Skills': []
+  });
 
   QABS.quickTarget = _PARAMS['Quick Target'];
   QABS.lockTargeting = _PARAMS['Lock when Targeting'];
@@ -682,7 +685,7 @@ function QABSManager() {
 
   QABSManager.getTargets = function(item, self) {
     return ColliderManager.getCharactersNear(item.collider, function(chara) {
-      if (!chara.battler()) return false;
+      if (typeof chara.battler !== 'function' || !chara.battler()) return false;
       if (chara.battler().isDeathStateAffected()) return false;
       if (chara.isFriendly(self) && [1, 2, 3, 4, 5, 6].contains(item.data.scope)) {
         return false;
@@ -1265,7 +1268,7 @@ function Skill_Sequencer() {
       loop: loop,
       maxVolume: Number(max),
       radius: Number(radius),
-      bindTo: this._character,
+      bindTo: this._character.charaId(),
       doPan: !dontPan,
       fadeIn: Number(fadein) || 0
     });
@@ -1623,7 +1626,7 @@ function Skill_Sequencer() {
         loop: loop,
         maxVolume: Number(max),
         radius: Number(radius),
-        bindTo: targets[i],
+        bindTo: targets[i].charaId(),
         doPan: !dontPan,
         fadeIn: Number(fadein) || 0
       });
@@ -1689,6 +1692,15 @@ function Skill_Sequencer() {
           return 'break';
         }
       }.bind(this._skill));
+    }
+    if (through === 1 || through === 3) {
+      ColliderManager.getCharactersNear(this._skill.collider, function(chara) {
+        if (chara === this._character) return false;
+        if (this._skill.collider.intersects(chara.collider('collision'))) {
+          collided = true;
+          return 'break';
+        }
+      }.bind(this));
     }
     return !collided;
   };

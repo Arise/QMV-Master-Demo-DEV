@@ -141,6 +141,7 @@ Imported.QABS = '1.2.0';
  *
  * @param Default Skills
  * @type Struct<SkillKey>[]
+ * @default []
  *
  * @help
  * ============================================================================

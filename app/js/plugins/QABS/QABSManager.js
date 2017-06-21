@@ -14,7 +14,7 @@ function QABSManager() {
 
   QABSManager.getTargets = function(item, self) {
     return ColliderManager.getCharactersNear(item.collider, function(chara) {
-      if (!chara.battler()) return false;
+      if (typeof chara.battler !== 'function' || !chara.battler()) return false;
       if (chara.battler().isDeathStateAffected()) return false;
       if (chara.isFriendly(self) && [1, 2, 3, 4, 5, 6].contains(item.data.scope)) {
         return false;

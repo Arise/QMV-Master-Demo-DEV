@@ -394,7 +394,7 @@ function Skill_Sequencer() {
       loop: loop,
       maxVolume: Number(max),
       radius: Number(radius),
-      bindTo: this._character,
+      bindTo: this._character.charaId(),
       doPan: !dontPan,
       fadeIn: Number(fadein) || 0
     });
@@ -752,7 +752,7 @@ function Skill_Sequencer() {
         loop: loop,
         maxVolume: Number(max),
         radius: Number(radius),
-        bindTo: targets[i],
+        bindTo: targets[i].charaId(),
         doPan: !dontPan,
         fadeIn: Number(fadein) || 0
       });
@@ -818,6 +818,15 @@ function Skill_Sequencer() {
           return 'break';
         }
       }.bind(this._skill));
+    }
+    if (through === 1 || through === 3) {
+      ColliderManager.getCharactersNear(this._skill.collider, function(chara) {
+        if (chara === this._character) return false;
+        if (this._skill.collider.intersects(chara.collider('collision'))) {
+          collided = true;
+          return 'break';
+        }
+      }.bind(this));
     }
     return !collided;
   };

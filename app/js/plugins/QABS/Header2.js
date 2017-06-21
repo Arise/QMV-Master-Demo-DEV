@@ -6,7 +6,9 @@ function QABS() {
 }
 
 (function() {
-  var _PARAMS = QPlus.getParams('<QABS>', true);
+  var _PARAMS = QPlus.getParams('<QABS>', {
+    'Default Skills': []
+  });
 
   QABS.quickTarget = _PARAMS['Quick Target'];
   QABS.lockTargeting = _PARAMS['Lock when Targeting'];
