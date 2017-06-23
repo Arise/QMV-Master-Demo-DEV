@@ -32,13 +32,13 @@ if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.4.0')) {
   throw new Error('Error: QABS requires QMovement 1.4.0 or newer to work.');
 }
 
-Imported.QABS = '1.2.0';
+Imported.QABS = '1.2.1';
 
 //=============================================================================
  /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @author Quxios  | Version 1.2.0
+ * @author Quxios  | Version 1.2.1
  *
  * @development
  *
@@ -150,6 +150,9 @@ Imported.QABS = '1.2.0';
  * A collider based action battle system for QMovement. *Note* This is not
  * your simple rpg maker action battle system. Using this plugin you can
  * create more advance like action games.
+ *
+ * **Note that the help section is still in development and may be missing
+ * some info! Sorry!**
  * ============================================================================
  * ## Is this for you?
  * ============================================================================
@@ -271,6 +274,7 @@ Imported.QABS = '1.2.0';
  *  infront: [TRUE or FALSE]
  *  rotate: [TRUE or FALSE]
  *  through: [0, 1, 2 or 3]
+ *  throughTerrain: [LIST OF TERRAINS IT CAN GO THROUGH]
  *  groundtarget: [NUMBER]
  *  selecttarget: [NUMBER]
  * ~~~
@@ -288,6 +292,8 @@ Imported.QABS = '1.2.0';
  *   - 1: Goes through tiles but stops when it hits an event
  *   - 2: Goes through events but stops when it hits a tile
  *   - 3: Stops when it hits an event or tile
+ * - throughTerrain: Set to a list of terrains it can go through, separate each
+ * terrain with a comma
  * - groundtarget: Set to the max distance for the ground target. If value is
  * 0 ground targeting will not be used. Default: 0
  * - selecttarget: Set to the max distance for the select target. If value is
@@ -384,7 +390,7 @@ Imported.QABS = '1.2.0';
  * ~~~
  * <AIType:TYPE>
  * ~~~
- * -TYPE: The AI type, set this to none to disable AI.
+ * - TYPE: The AI type, set this to none to disable AI.
  *
  * There's only 1 type of AI, so for now that AI is only to disable AI
  *
@@ -441,6 +447,24 @@ Imported.QABS = '1.2.0';
  * ~~~
  *  <stun>
  * ~~~
+ * ============================================================================
+ * ## Popups
+ * ============================================================================
+ * All of the popups are powered with the QPopup plugin. If you want to change
+ * any styles of the popups you can edit their presets in that plugins parameters
+ * or using the plugin commands in QPopup plugin.
+ *
+ * The following a the qPopup presets this ABS uses:
+ * - QABS-LEVEL
+ * - QABS-EXP
+ * - QABS-ITEM
+ * - QABS-MISSED
+ * - QABS-DMG
+ * - QABS-DMG-CRIT
+ * - QABS-HEAL
+ * - QABS-HEAL-CRIT
+ * - QABS-MP
+ * - QABS-MP-CRIT
  * ============================================================================
  * ## Links
  * ============================================================================
