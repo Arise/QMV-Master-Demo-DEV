@@ -197,14 +197,22 @@
   Game_Player.prototype.beforeSkill = function(skill) {
     var meta = skill.data.qmeta;
     var isGamepad = Imported.QInput && Input.preferGamepad();
-    var towardsMouse = QABS.towardsMouse && !isGamepad;
-    if (towardsMouse && !meta.dontTurn) {
-      var x1 = $gameMap.canvasToMapPX(TouchInput.x);
-      var y1 = $gameMap.canvasToMapPY(TouchInput.y);
-      var x2 = this.cx();
-      var y2 = this.cy();
-      this.setRadian(Math.atan2(y1 - y2, x1 - x2));
-      skill.radian = this._radian;
+    if (!meta.dontTurn) {
+      if (isGamepad && QABS.towardsAnalog) {
+        var horz = Input._dirAxesB.x;
+        var vert = Input._dirAxesB.y;
+        if (horz !== 0 || vert !== 0) {
+          this.setRadian(Math.atan2(vert, horz));
+          skill.radian = this._radian;
+        }
+      } else if (!isGamepad && QABS.towardsMouse) {
+        var x1 = $gameMap.canvasToMapPX(TouchInput.x);
+        var y1 = $gameMap.canvasToMapPY(TouchInput.y);
+        var x2 = this.cx();
+        var y2 = this.cy();
+        this.setRadian(Math.atan2(y1 - y2, x1 - x2));
+        skill.radian = this._radian;
+      }
     }
     if (meta.towardsMove) {
       var radian;

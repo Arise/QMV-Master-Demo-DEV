@@ -39,10 +39,21 @@ Imported.QABS = '1.2.1';
  * @off Can't Move
  * @default false
  *
- * @param Attack Towards Mouse
+ * @param Aim with Mouse
  * @parent Attack Settings
  * @desc All actions will be used towards your mouse location
- * Default: false   Set to true or false
+ * @type Boolean
+ * @on Towards mouse
+ * @off Towards player direction
+ * @default false
+ *
+ * @param Aim with Analog
+ * @parent Attack Settings
+ * @desc All actions will be used towards right analog stick when using a
+ * gamepad.
+ * @type Boolean
+ * @on Towards right analog
+ * @off Towards player direction
  * @default false
  *
  * @param Move Resistance Rate Stat
@@ -322,7 +333,87 @@ Imported.QABS = '1.2.1';
  *  globalLock
  *  globalUnlock
  * ~~~
- * more info~ TODO
+ * - #### user casting [TRUE or FALSE]
+ *  - Set the user casting state. If the user is casting this skill can be
+ *   ended early if they get hit with a skill that has `user cancel` in it's
+ *   `absOnDamage`
+ *
+ * - #### user lock
+ *  - Locks the users movement. The user can't move or use any actions until
+ *  `user unlock` is called. `user unlock` is called automatically after every
+ *  skill ends to ensure the user can move again if the skill ended.
+ *
+ * - #### user unlock
+ *  - Unlocks the users movement. The user is unlocked if it was locked and can
+ *   move and use actions again. `user unlock` is called automatically after
+ *   every skill ends to ensure that user can move again if the skill ended.
+ *
+ * - #### user speed [INC or DEC] [VALUE]
+ *  - Changes the users move speed.
+ *  - INC or DEC: Set to `inc` to increase movespeed, set to `dec` to decrease
+ *   move speed
+ *  - VALUE: Set to a number to inc or dec the movespeed by.
+ *
+ * - #### user move [FORWARD or BACKWARD] [DIST] [WAIT? TRUE or FALSE]
+ *  - The user will move forward or backwards by X distance.
+ *  - FORWARD or BACKWARD: Set to forward or backwards depending on which direction
+ *   you want the user to move.
+ *  - DIST: Set to the distance the user should move, in pixels
+ *  - WAIT: Set to true or false. If true the sequencer will wait until the move
+ *   is complete before moving to the next action
+ *
+ * - #### user moveHere [WAIT? TRUE or FALSE]
+ *  - The user will move to the skills current location
+ *  - WAIT: Set to true or false. If true the sequencer will wait until the move
+ *   is complete before moving to the next action
+ *
+ * - #### user jump [FORWARD or BACKWARD] [DIST] [WAIT? TRUE or FALSE]
+ *  - The user will jump forward or backwards by X distance.
+ *  - FORWARD or BACKWARD: Set to forward or backwards depending on which direction
+ *   you want the user to jump.
+ *  - DIST: Set to the distance the user should jump, in pixels
+ *  - WAIT: Set to true or false. If true the sequencer will wait until the jump
+ *   is complete before moving to the next action
+ *
+ * - #### user jumpHere [WAIT? TRUE or FALSE]
+ *  - The user will jump to the skills current location
+ *  - WAIT: Set to true or false. If true the sequencer will wait until the jump
+ *   is complete before moving to the next action
+ *
+ * - #### user teleport
+ *  - The user will instantly move to the skills current location
+ *
+ * - #### user setDirection [DIR]
+ *  - Sets the users direction
+ *  - DIR: Set to; 2, 4, 6 or 8. For diagonals; 1, 3, 7, or 9
+ *
+ * - #### user directionFix [TRUE or FALSE]
+ *  - Sets the users direction fix.
+ *  - TRUE or FALSE: When true the users direction can't change
+ *
+ * - #### user pose [POSE NAME] [WAIT? TRUE or FALSE]
+ *  - Requires QSprite plugin
+ *  - If the user is a QSprite, it will play the pose set
+ *  - POSE NAME: The pose to play
+ *  - WAIT: Set to true or false. If true the sequencer will wait until the pose
+ *   is done playing before moving to the next action
+ *
+ * - #### user forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
+ *  - Forces the user to use a skill.
+ *  - SKILL ID: The ID of the skill to use
+ *  - ANGLE OFFSET: Lets you offset the angle this skill be used towards.
+ *   This is optional and can be left out.
+ *
+ * - #### user aniamtion [ANIMATION ID]
+ *  - Plays an animation on the user
+ *  - ANIMATION ID: The ID of the animation to play
+ *
+ * - #### user qaudio [NAME] [QAUDIO OPTIONS]
+ *  - Requires QAudio plugin
+ *  - Binds a QAudio to the users
+ *  - NAME: The name of the audio file to use
+ *  - QAUDIO OPTIONS: any of the QAudio options besides; xX, yY, bindToCHARAID.
+ *   View QAudio help for more details
  * ----------------------------------------------------------------------------
  * **Skill On Damage**
  * ----------------------------------------------------------------------------

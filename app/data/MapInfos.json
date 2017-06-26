@@ -4,7 +4,7 @@ null,
 {"id":2,"expanded":false,"name":"QMap","order":2,"parentId":0,"scrollX":899.3333333333334,"scrollY":611.3333333333334},
 {"id":3,"expanded":false,"name":"QScale","order":3,"parentId":0,"scrollX":899.3333333333334,"scrollY":611.3333333333334},
 {"id":4,"expanded":true,"name":"QMovement","order":6,"parentId":0,"scrollX":899.3333333333334,"scrollY":611.3333333333334},
-{"id":5,"expanded":true,"name":"test 2","order":5,"parentId":8,"scrollX":666.5,"scrollY":549.5},
+{"id":5,"expanded":true,"name":"test 2","order":5,"parentId":8,"scrollX":899.3333333333334,"scrollY":611.3333333333334},
 {"id":6,"expanded":false,"name":"MAP006","order":7,"parentId":0,"scrollX":899.3333333333334,"scrollY":611.3333333333334},
 null,
 {"id":8,"expanded":true,"name":"test","order":4,"parentId":0,"scrollX":674.5,"scrollY":450.5}
