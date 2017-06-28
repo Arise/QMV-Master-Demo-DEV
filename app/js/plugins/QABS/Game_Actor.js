@@ -6,7 +6,7 @@
   Game_Actor.prototype.setup = function(actorId) {
     Alias_Game_Actor_setup.call(this, actorId);
     var meta = this.actor().qmeta;
-    this._popupOY = meta.popupOY;
+    this._popupOY = Number(meta.popupOY) || 0;
   };
 
   var Alias_Game_Actor_changeClass = Game_Actor.prototype.changeClass;
@@ -39,18 +39,18 @@
       return Alias_Game_Actor_changeEquip.call(this, slotId, item);
     }
     var equips = this._equips;
-    var oldId, equipId = 0;
+    var oldId, newId = 0;
     var wasWeapon;
     if (equips[slotId] && equips[slotId].object()) {
       oldId = equips[slotId].object().baseItemId || equips[slotId].object().id;
-      wasWeapon = equips[i].isWeapon();
+      wasWeapon = equips[slotId].isWeapon();
     }
     Alias_Game_Actor_changeEquip.call(this, slotId, item);
     if (equips[slotId] && equips[slotId].object()) {
-      equipId = equips[slotId].object().baseItemId || equips[slotId].object().id;
+      newId = equips[slotId].object().baseItemId || equips[slotId].object().id;
     }
-    if (equipId && equipId !== oldId && equips[slotId].isWeapon()) {
-      this.changeWeaponSkill(equipId);
+    if (newId && newId !== oldId && equips[slotId].isWeapon()) {
+      this.changeWeaponSkill(newId);
     } else if (wasWeapon) {
       this.changeWeaponSkill(0);
     }
@@ -58,7 +58,13 @@
 
   Game_Actor.prototype.changeWeaponSkill = function(id) {
     if (this !== $gameParty.leader()) return;
-    $gameSystem.changeABSWeaponSkills(QABS.weaponSkills(id));
+    var weaponSkills;
+    if (!$dataWeapons[id]) {
+      weaponSkills = {};
+    } else {
+      weaponSkills = QABS.weaponSkills(id);
+    }
+    $gameSystem.changeABSWeaponSkills(weaponSkills);
   };
 
   Game_Actor.prototype.displayLevelUp = function(newSkills) {

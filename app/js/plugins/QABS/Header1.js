@@ -17,7 +17,7 @@ Imported.QABS = '1.2.1';
  * Action Battle System for QMovement
  * @author Quxios  | Version 1.2.1
  *
- * @development
+ * @repo https://github.com/quxios/QABS
  *
  * @requires QMovement
  *
@@ -141,6 +141,10 @@ Imported.QABS = '1.2.1';
  *
  * **Note that the help section is still in development and may be missing
  * some info! Sorry!**
+ *
+ * For a demo visit the steamwork shop:
+ *
+ * http://steamcommunity.com/sharedfiles/filedetails/?id=952886994
  * ============================================================================
  * ## Is this for you?
  * ============================================================================
@@ -170,12 +174,16 @@ Imported.QABS = '1.2.1';
  *
  * When creating a skill key you have 4 parameters:
  *
- * - Keyboard Input: The keyboard input that will trigger this skill, set this
- *  to `mouse1` for left click, and `mouse2` for right click.
- * - Gamepad Input: The gamepad input that will trigger this skill.
- * - Rebind: If this is true, the skill that's assigned to this skill key can
- *  be reassigned.
- * - Skill Id: The skill that this skill key will use when triggered.
+ * - #### Keyboard Input:
+ *  - The keyboard input that will trigger this skill, set this to `mouse1` for
+ *  left click, and `mouse2` for right click.
+ * - #### Gamepad Input:
+ *  - The gamepad input that will trigger this skill.
+ * - #### Rebind:
+ *  - If this is true, the skill that's assigned to this skill key can be
+ *  reassigned.
+ * - #### Skill Id:
+ *  - The skill that this skill key will use when triggered.
  *
  * Note for input values, those are the button values; `ok`, 'cancel', ect. Or
  * if you're using an input plugin, use their value, for example in QInput you can
@@ -198,9 +206,15 @@ Imported.QABS = '1.2.1';
  *  [SKILL KEY NUMBER]: [SKILL ID] [REBIND?]
  *  </skillKeys>
  * ~~~
- * - SKILL KEY NUMBER: The skill key that you want to change
- * - SKILL ID: The skill to assign to this skill key number
- * - REBIND?: Set to true or false if this can be reassigned
+ * - #### SKILL KEY NUMBER:
+ *  - The skill key that you want to change
+ * - #### SKILL ID:
+ *  - The skill to assign to this skill key number
+ * - #### REBIND?:
+ *  - Set to true or false if this can be reassigned
+ *
+ * If the skill key that you're trying to change has its `Rebind` value set to false,
+ * nothing will happen since it can't be reassigned.
  *
  * *Important!* make sure the skill key you are trying to set is created in the
  * plugin parameters `Default Skills`. If it's not, the game will have an error.
@@ -228,8 +242,10 @@ Imported.QABS = '1.2.1';
  *  [SKILL KEY NUMBER]: [SKILL ID]
  *  </skillKeys>
  * ~~~
- * - SKILL KEY NUMBER: The skill key that you want to change
- * - SKILL ID: The skill to assign to this skill key number
+ * - #### SKILL KEY NUMBER:
+ *  - The skill key that you want to change
+ * - #### SKILL ID:
+ *  - The skill to assign to this skill key number
  *
  * *Important!* make sure the skill key you are trying to set is created in the
  * plugin parameters `Default Skills`. If it's not, the game will have an error.
@@ -241,7 +257,7 @@ Imported.QABS = '1.2.1';
  *  </skillKeys>
  * ~~~
  * Weapon skill keys take top priority, so they will replace both class keys
- * and teh default keys! This example will replace skill key 1 with the skill
+ * and the default keys! This example will replace skill key 1 with the skill
  * id 3
  * ============================================================================
  * ## Skills
@@ -266,26 +282,32 @@ Imported.QABS = '1.2.1';
  *  groundtarget: [NUMBER]
  *  selecttarget: [NUMBER]
  * ~~~
- * - collider: Set this to the collider this skill will use. See QMovement help
- * for details on colliders. Default: The users collider
- *   - format is `shape, width, height`
- * - cooldown: Set to the number of frames until you can use this skill again.
- * Default: 0
- * - infront: Set to true or false. When true, the collider will appear in front
- * of the user. When false the collider will be centered on the user. Default: false
- * - rotate: Set to true or false. When true, the collider will rotate based on
- * the users direction. Default: false
- * - through: Set to 0, 1, 2, or 3. Default: 0
+ * - #### collider:
+ *  - Set this to the collider this skill will use. See QMovement help for details
+ *   on colliders. Default: The users collider
+ *  - format is `shape, width, height`
+ * - #### cooldown:
+ *  - Set to the number of frames until you can use this skill again. Default: 0
+ * - #### infront:
+ *  - Set to true or false. When true, the collider will appear in front of the user.
+ *   When false the collider will be centered on the user. Default: false
+ * - #### rotate:
+ *  - Set to true or false. When true, the collider will rotate based on the users
+ *   direction when skill is starting. Default: false
+ * - #### through:
+ *  - Set to 0, 1, 2, or 3. Default: 0
  *   - 0: Goes through events and tiles
  *   - 1: Goes through tiles but stops when it hits an event
  *   - 2: Goes through events but stops when it hits a tile
  *   - 3: Stops when it hits an event or tile
- * - throughTerrain: Set to a list of terrains it can go through, separate each
- * terrain with a comma
- * - groundtarget: Set to the max distance for the ground target. If value is
- * 0 ground targeting will not be used. Default: 0
- * - selecttarget: Set to the max distance for the select target. If value is
- * 0 select targeting will not be used. Default: 0
+ * - #### throughTerrain:
+ *  - Set to a list of terrains it can go through, separate each terrain with a comma
+ * - #### groundtarget:
+ *  - Set to the max distance for the ground target. If value is 0 ground targeting
+ *   will not be used. Default: 0
+ * - #### selecttarget:
+ *  - Set to the max distance for the select target. If value is 0 select targeting
+ *   will not be used. Default: 0
  * ----------------------------------------------------------------------------
  * **Skill Sequence**
  * ----------------------------------------------------------------------------
@@ -329,7 +351,7 @@ Imported.QABS = '1.2.1';
  *  animation [ANIMATION ID]
  *  se [NAME] [VOLUME] [PITCH] [PAN]
  *  qaudio [NAME] [QAUDIO OPTIONS]
- *  forceSkill [SKILL ID] [ANGLE OFFSER IN DEGREES]
+ *  forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
  *  globalLock
  *  globalUnlock
  * ~~~
@@ -360,12 +382,12 @@ Imported.QABS = '1.2.1';
  *   you want the user to move.
  *  - DIST: Set to the distance the user should move, in pixels
  *  - WAIT: Set to true or false. If true the sequencer will wait until the move
- *   is complete before moving to the next action
+ *   is complete before going to the next action
  *
  * - #### user moveHere [WAIT? TRUE or FALSE]
  *  - The user will move to the skills current location
  *  - WAIT: Set to true or false. If true the sequencer will wait until the move
- *   is complete before moving to the next action
+ *   is complete before going to the next action
  *
  * - #### user jump [FORWARD or BACKWARD] [DIST] [WAIT? TRUE or FALSE]
  *  - The user will jump forward or backwards by X distance.
@@ -373,12 +395,12 @@ Imported.QABS = '1.2.1';
  *   you want the user to jump.
  *  - DIST: Set to the distance the user should jump, in pixels
  *  - WAIT: Set to true or false. If true the sequencer will wait until the jump
- *   is complete before moving to the next action
+ *   is complete before going to the next action
  *
  * - #### user jumpHere [WAIT? TRUE or FALSE]
  *  - The user will jump to the skills current location
  *  - WAIT: Set to true or false. If true the sequencer will wait until the jump
- *   is complete before moving to the next action
+ *   is complete before going to the next action
  *
  * - #### user teleport
  *  - The user will instantly move to the skills current location
@@ -396,7 +418,7 @@ Imported.QABS = '1.2.1';
  *  - If the user is a QSprite, it will play the pose set
  *  - POSE NAME: The pose to play
  *  - WAIT: Set to true or false. If true the sequencer will wait until the pose
- *   is done playing before moving to the next action
+ *   is done playing before going to the next action
  *
  * - #### user forceSkill [SKILL ID] [ANGLE OFFSET IN DEGREES]
  *  - Forces the user to use a skill.
@@ -404,7 +426,7 @@ Imported.QABS = '1.2.1';
  *  - ANGLE OFFSET: Lets you offset the angle this skill be used towards.
  *   This is optional and can be left out.
  *
- * - #### user aniamtion [ANIMATION ID]
+ * - #### user animation [ANIMATION ID]
  *  - Plays an animation on the user
  *  - ANIMATION ID: The ID of the animation to play
  *
@@ -414,6 +436,49 @@ Imported.QABS = '1.2.1';
  *  - NAME: The name of the audio file to use
  *  - QAUDIO OPTIONS: any of the QAudio options besides; xX, yY, bindToCHARAID.
  *   View QAudio help for more details
+ *
+ * - #### store
+ *  - Stores the skills current location. This location value is used when
+ *  the actions `moveToStored` or 'waveToStored' are used.
+ *
+ * - #### move [FORWARD or BACKWARD] [DIST] [DURATION] [WAIT? TRUE or FALSE]
+ *  - Moves the skill forward or backwards by X dist in Y frames
+ *  - FORWARD or BACKWARD: Set to forward or backwards depending on which direction
+ *   you want the skill to move.
+ *  - DIST: The distance you want the skill to move, in pixels.
+ *  - DURATION: How long should it take to complete this move, in frames.
+ *  - WAIT: Set to true or false. If true the sequencer will wait until the skill
+ *   is done moving before going to the next action
+ *
+ * - #### moveToStored [DURATION] [WAIT? TRUE or FALSE]
+ *
+ * - #### wave [FORWARD or BACKWARD] [AMPLITUDE] [HARM] [DIST] [DURATION] [WAIT? TRUE or FALSE]
+ *
+ * - #### waveToStored [AMPLITUDE] [HARM] [DURATION] [WAIT? TRUE or FALSE]
+ *
+ * - #### trigger
+ *
+ * - #### adjustAim
+ *
+ * - #### wait [DURATION]
+ *
+ * - #### picture [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
+ *
+ * - #### trail [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
+ *
+ * - #### collider [SHOW or HIDE]
+ *
+ * - #### animation [ANIMAITON ID]
+ *
+ * - #### se [NAME] [VOLUME] [PITCH] [PAN]
+ *
+ * - #### qaudio [NAME] [QAUDIO OPTIONS]
+ *
+ * - #### forceSkill [SKILL ID] [ANGLE OFFSET]
+ *
+ * - #### globalLock
+ *
+ * - #### globalUnlock
  * ----------------------------------------------------------------------------
  * **Skill On Damage**
  * ----------------------------------------------------------------------------

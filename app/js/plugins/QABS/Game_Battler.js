@@ -12,8 +12,7 @@
 
   var Alias_Game_Battler_startDamagePopup = Game_Battler.prototype.startDamagePopup;
   Game_Battler.prototype.startDamagePopup = function() {
-    var result = Object.assign({}, this._result);
-    this._damageQueue.push(result);
+    this._damageQueue.push(Object.assign({}, this._result));
     Alias_Game_Battler_startDamagePopup.call(this);
   };
 
