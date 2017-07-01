@@ -13,15 +13,12 @@
 
   Game_Interpreter.prototype.qMovementCommand = function(args) {
     var cmd = args.shift().toLowerCase();
-    if (cmd === 'setcollider') {
+    if (cmd === 'changecollider') {
       var chara = QPlus.getCharacter(args[0]);
       if (!chara) return;
       var type = args[1];
-      var width  = Number(args[2]) || 0;
-      var height = Number(args[3]) || 0;
-      var ox = Number(args[4]) || 0;
-      var oy = Number(args[5]) || 0;
-      // TODO
+      var data = args.slice(2).map(QPlus.stringToType);
+      chara.changeCollider(type, data);
       return;
     }
     if (cmd === 'transfer') {

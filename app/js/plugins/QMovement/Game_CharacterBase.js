@@ -47,6 +47,8 @@
     this._passabilityLevel = 0; // TODO
     this._isMoving = false;
     this._smartMove = 0;
+    this._colliders = null;
+    this._overrideColliders = {};
   };
 
   Game_CharacterBase.prototype.direction8 = function(horz, vert) {
@@ -784,19 +786,24 @@
     } else if (!configs.default) {
       configs.default = QPlus.stringToAry(defaultCollider);
     }
+    Object.assign(configs, this._overrideColliders);
     for (var collider in configs) {
-      if (!configs.hasOwnProperty(collider)) continue;
       this.makeCollider(collider, configs[collider]);
     }
     this.makeBounds();
     this.moveColliders();
   };
 
-  Game_CharacterBase.prototype.makeCollider = function(name, settings) {
-    this._colliders[name] = ColliderManager.convertToCollider(settings);
-    this._colliders[name].oy -= this.shiftY();
-    this._colliders[name]._charaId = this.charaId();
-    ColliderManager.addCollider(this._colliders[name], -1, true);
+  Game_CharacterBase.prototype.makeCollider = function(type, settings) {
+    this._colliders[type] = ColliderManager.convertToCollider(settings);
+    this._colliders[type].oy -= this.shiftY();
+    this._colliders[type]._charaId = this.charaId();
+    ColliderManager.addCollider(this._colliders[type], -1, true);
+  };
+
+  Game_CharacterBase.prototype.changeCollider = function(type, settings) {
+    this._overrideColliders[type] = settings;
+    this.reloadColliders();
   };
 
   Game_CharacterBase.prototype.makeBounds = function() {
