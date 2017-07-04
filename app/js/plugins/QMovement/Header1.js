@@ -9,13 +9,13 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
   throw new Error('Error: QMovement requires QPlus 1.4.0 or newer to work.');
 }
 
-Imported.QMovement = '1.4.1';
+Imported.QMovement = '1.4.2';
 
 //=============================================================================
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.4.1
+ * @author Quxios  | Version 1.4.2
  *
  * @repo https://github.com/quxios/QMovement
  *
@@ -399,8 +399,8 @@ Imported.QMovement = '1.4.1';
  *  qMovement setPos [CHARAID] [X] [Y] [OPTIONS]
  * ~~~
  * - CHARAID: The character identifier.
- *   - For player: 0, p, or player
- *   - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this (replace EVENTID with a number)
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this (replace EVENTID with a number)
  * - X: The x position to set to, in pixels
  * - Y: The y position to set to, in pixels
  *
@@ -408,6 +408,34 @@ Imported.QMovement = '1.4.1';
  *
  * - dirX: Set X to the dir to face after the transfer.
  *   - Can be 2, 4, 6, 8, or for diagonals 1, 3, 7, 9
+ *
+ * ----------------------------------------------------------------------------
+ * **Change Collider**
+ * ----------------------------------------------------------------------------
+ * This command will let you change a collider for a character. Note that you
+ * should use this carefully. If you don't you can get that character stuck.
+ * ~~~
+ *  qMovement changeCollider [CHARAID] [TYPE] [SHAPE] [WIDTH] [HEIGHT] [OX] [OY]
+ * ~~~
+ * - CHARAID: The character identifier.
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this (replace EVENTID with a number)
+ * - TYPE: The type of collider, set to default, collision or interaction
+ * - SHAPE: Set to box or circle
+ * - WIDTH: The width of the collider, in pixels
+ * - HEIGHT: The height of the collider, in pixels
+ * - OX: The X Offset of the collider, in pixels
+ * - OY: The Y Offset of the collider, in pixels
+ *
+ * You can also set it to a preset by using the format:
+ * ~~~
+ *  qMovement changeCollider [CHARAID] [TYPE] preset [PRESETID]
+ * ~~~
+ * - CHARAID: The character identifier.
+ *  - For player: 0, p, or player
+ *  - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this (replace EVENTID with a number)
+ * - TYPE: The type of collider, set to default, collision or interaction
+ * - PRESETID: The PresetID you set in the preset parameter.
  * ============================================================================
  * ## Tips
  * ============================================================================

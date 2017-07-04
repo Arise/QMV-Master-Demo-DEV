@@ -91,6 +91,7 @@
   };
 
   Game_Event.prototype.updateABS = function() {
+    if (!this.page() || $gameSystem.isDisabled(this._mapId, this._eventId)) return;
     Game_CharacterBase.prototype.updateABS.call(this);
     if (!this._isDead && this.isNearTheScreen()) {
       this.updateAI(this._aiType);
