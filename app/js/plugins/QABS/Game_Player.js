@@ -51,7 +51,6 @@
   };
 
   Game_Player.prototype.onDeath = function() {
-    if (this._isDead) return;
     this.clearABS();
     this._isDead = true;
     SceneManager.goto(Scene_Gameover);

@@ -56,9 +56,17 @@ function QABS() {
       });
       var skillId = Number(data[0]) || 0;
       var rebind = data[1] === 'true';
+      var msg;
+      if (skillId && !$dataSkills[skillId]) {
+        msg = 'ERROR: Attempted to apply a Skill Id that does not exist in database.\n';
+        msg += 'Skill Key Number: ' + key;
+        alert(msg);
+        delete obj[key];
+        continue;
+      }
       if (!QABS.skillKey[key]) {
-        var msg = 'ERROR: Attempted to apply a skill key that has not been setup';
-        msg += ' in the plugin parameters.\n';
+        msg = 'ERROR: Attempted to apply a skill key that has not been setup ';
+        msg += 'in the plugin parameters.\n';
         msg += 'Skill Key Number: ' + key;
         alert(msg);
         delete obj[key];

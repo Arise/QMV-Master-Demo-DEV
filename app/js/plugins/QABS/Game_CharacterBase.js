@@ -165,7 +165,12 @@
   };
 
   Game_CharacterBase.prototype.updateABS = function() {
-    if (this.battler().hp <= 0) return this.onDeath();
+    if (this.battler().isDead()) {
+      if (!this._isDead) {
+        this.onDeath();
+      }
+      return;
+    }
     this.updateSkills();
     this.battler().updateABS();
   };
