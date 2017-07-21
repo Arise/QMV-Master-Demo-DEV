@@ -9,13 +9,14 @@
   };
 
   Game_Event.prototype.battler = function() {
+    if ($gameSystem.isDisabled(this._mapId, this._eventId)) return null;
+    if (!this.page() || this._isDead) return null;
     return this._battler;
   };
 
   Game_Event.prototype.setupBattler = function() {
     var foe = /<enemy:([0-9]*?)>/i.exec(this.notes());
-    var disabled = $gameSystem.isDisabled(this._mapId, this._eventId);
-    if (foe && !disabled) {
+    if (foe) {
       this.clearABS();
       this._battlerId = Number(foe[1]);
       this._battler = new Game_Enemy(this._battlerId, 0, 0);
@@ -45,6 +46,14 @@
       this._team = this._battler._team;
       this._isDead = false;
     }
+  };
+
+  var Alias_Game_Event_comments = Game_Event.prototype.comments;
+  Game_Event.prototype.comments = function() {
+    var comments = Alias_Game_Event_comments.call(this);
+    if (!this._aiSight) return comments;
+    var range = this._aiRange / QMovement.tileSize;
+    return comments + '<sight:circle,' + range + ', AI, 0>';
   };
 
   Game_Event.prototype.disableEnemy = function() {
@@ -200,7 +209,10 @@
       }
       this._sight.range /= QMovement.tileSize;
       if (prev !== this._sight.range) {
-        if (this._sight.base) this._sight.base.kill = true;
+        if (this._sight.base) {
+          this._sight.base.kill = true;
+          this._sight.base.id = 'sightOld' + this.charaId();
+        }
         this._sight.base = null;
         this._sight.cache.dir = null;
       }

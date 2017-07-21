@@ -248,14 +248,22 @@ function Skill_Sequencer() {
       skippable: true,
       wait: false
     }
-    var radian = this._character._radian;
+    var radian = oldRadian = this._character._radian;
     if (action[0] === 'backward') {
-      radian -= Math.PI / 2;
+      radian -= Math.PI;
     }
     route.list.push({
       code: Game_Character.ROUTE_SCRIPT,
       parameters: ['qmove2(' + radian + ',' + dist + ')']
     });
+    if (action[0] === 'backward') {
+      route.list.unshift({
+        code: 35
+      });
+      route.list.push({
+        code: this._character.isDirectionFixed() ? 35 : 36
+      });
+    }
     route.list.push({
       code: 0
     });
@@ -291,25 +299,24 @@ function Skill_Sequencer() {
 
   Skill_Sequencer.prototype.userJump = function(action) {
     var dist = Number(action[1]) || 0;
-    var x1 = x2 = this._character.px;
-    var y1 = y2 = this._character.py;
-    var dir = this._character._direction;
+    var x1 = this._character.px;
+    var y1 = this._character.py;
+    var radian = oldRadian = this._character._radian;
     if (action[0] === 'backward') {
-      x2 -= dir === 6 ? dist : dir === 4 ? -dist : 0;
-      y2 -= dir === 2 ? dist : dir === 8 ? -dist : 0;
-    } else if (action[0] === 'forward') {
-      x2 += dir === 6 ? dist : dir === 4 ? -dist : 0;
-      y2 += dir === 2 ? dist : dir === 8 ? -dist : 0;
+      radian -= Math.PI;
     }
+    var x2 = x1 + Math.cos(radian) * dist;
+    var y2 = y1 + Math.sin(radian) * dist;
     var final = this._character.adjustPosition(x2, y2);
     var dx = final.x - x1;
     var dy = final.y - y1;
-    dist = Math.sqrt(dx * dx + dy * dy);
+    var lastDirectionFix = this._character.isDirectionFixed();
     if (action[0] === 'backward') {
-      this._character.pixelJumpBackward(dist);
-    } else if (action[0] === 'forward') {
-      this._character.pixelJumpForward(dist);
+      this._character.setDirectionFix(true);
     }
+    this._character.pixelJump(dx, dy);
+    this._character.setDirectionFix(lastDirectionFix);
+    this._character.setRadian(oldRadian);
     this._waitForUserJump = action[2] ? action[2] === 'true' : false;
   };
 
@@ -411,7 +418,7 @@ function Skill_Sequencer() {
     ColliderManager.draw(this._skill.collider, duration);
     var radian = this._skill.radian;
     if (dir === 'backward') {
-      radian -= Math.PI / 2;
+      radian -= Math.PI;
     }
     radian += radian < 0 ? Math.PI * 2 : 0;
     this._waitForMove = action[3] === 'true';
@@ -443,7 +450,7 @@ function Skill_Sequencer() {
     ColliderManager.draw(this._skill.collider, duration);
     var radian = this._skill.radian;
     if (dir === 'backward') {
-      radian -= Math.PI / 2;
+      radian -= Math.PI;
     }
     radian += radian < 0 ? Math.PI * 2 : 0;
     this.setSkillRadian(Number(radian));
