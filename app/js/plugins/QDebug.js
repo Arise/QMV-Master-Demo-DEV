@@ -7,6 +7,12 @@ var Imported = Imported || {};
 if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.4')) {
   alert('Error: QDebug requires QPlus 1.4.4 or newer to work.');
   throw new Error('Error: QDebug requires QPlus 1.4.4 or newer to work.');
+} else if (!Utils.isNwjs() || !Utils.isOptionValid('test')) {
+  alert('Error: QDebug only works on local test play.');
+  throw new Error('Error: QDebug only works on local test play.');
+} else if (Imported.QElectron) {
+  alert('Error: QDebug does not work with QElectron.');
+  throw new Error('Error: QDebug does not work with QElectron.');
 }
 
 Imported.QDebug = '1.0.0';
@@ -14,8 +20,10 @@ Imported.QDebug = '1.0.0';
 //=============================================================================
  /*/*:
  * @plugindesc <QDebug>
- * something
+ * A better debug for MV
  * @author Quxios  | Version 1.0.0
+ *
+ * @private
  *
  * @requires QPlus
  *
@@ -23,15 +31,19 @@ Imported.QDebug = '1.0.0';
  * ============================================================================
  * ## About
  * ============================================================================
- *
+ * A better debug menu for MV. This debugger opens an external window so
+ * you can do changes without leaving the map. This debugger lets you change
+ * switches, variables, event self switches, and gain items/weapons/armors/gold.
  * ============================================================================
  * ## How to use
  * ============================================================================
+ * Pushing F9 will open the QDebug instead of the Debug Menu.
+ * Left clicking on a switch / selfswitch will toggle it's value
+ * Change a variables value by changing the value in the input field
+ * Left clicking an item will give you 1 of that item. Right click on an item
+ * for a prompt to type in how much you want to gain of that item.
  *
- * ----------------------------------------------------------------------------
- * **Sub section**
- * ----------------------------------------------------------------------------
- *
+ * *Note* Does not work with Electron wrapped projects.
  * ============================================================================
  * ## Links
  * ============================================================================
@@ -225,6 +237,7 @@ function QDebug() {
     page = page || this._currentPage;
     var doc = this._win.window.document;
     var pageDiv = doc.getElementById('page');
+    pageDiv.scrollTop = 0;
     pageDiv.innerHTML = '';
     if (page === 'Switches') return this.drawSwitchesPage(pageDiv);
     if (page === 'Variables') return this.drawVariablesPage(pageDiv);
@@ -460,10 +473,32 @@ function QDebug() {
   //-----------------------------------------------------------------------------
   // SceneManager
 
-  var Alias_SceneManager_clearStack = SceneManager.clearStack;
-  SceneManager.clearStack = function() {
-    Alias_SceneManager_clearStack.call(this);
+  var Alias_Scene_Title_start = Scene_Title.prototype.start;
+  Scene_Title.prototype.start = function() {
+    Alias_Scene_Title_start.call(this);
     QDebug.close();
+  };
+
+  //-----------------------------------------------------------------------------
+  // Scene_Map
+
+  Scene_Map.prototype.updateCallDebug = function() {
+    if (this.isDebugCalled()) {
+      if (QDebug._win) {
+        QDebug.close();
+      } else {
+        QDebug.open();
+      }
+    }
+  };
+
+  //-----------------------------------------------------------------------------
+  // Game_Map
+
+  var Alias_Game_Map_setup = Game_Map.prototype.setup;
+  Game_Map.prototype.setup = function(mapId) {
+    Alias_Game_Map_setup.call(this, mapId);
+    QDebug.drawPage();
   };
 
   //-----------------------------------------------------------------------------
