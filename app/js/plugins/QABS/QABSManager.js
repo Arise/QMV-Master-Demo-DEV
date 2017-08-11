@@ -113,16 +113,23 @@ function QABSManager() {
   QABSManager.startAnimation = function(id, x, y) {
     var scene = SceneManager._scene;
     if (scene.constructor !== Scene_Map) return;
-    var temp = new Sprite_Base();
-    temp.realX = x;
-    temp.realY = y;
-    temp.z = 8;
     if (id < 0) id = 1;
     if (id <= 0) return;
     var animation = $dataAnimations[id];
+    var temp = new Sprite_MapAnimation(animation);
+    temp.move(x, y);
     this._animations.push(temp);
     scene._spriteset._tilemap.addChild(temp);
-    temp.startAnimation(animation, false, 0);
+  };
+
+  QABSManager.removeAnimation = function(sprite) {
+    var scene = SceneManager._scene;
+    if (scene.constructor !== Scene_Map) return;
+    var i = this._animations.indexOf(sprite);
+    if (i < 0) return;
+    this._animations[i] = null;
+    this._animations.splice(i, 1);
+    scene._spriteset._tilemap.removeChild(sprite);
   };
 
   QABSManager._pictures = [];
@@ -198,5 +205,38 @@ function QABSManager() {
     $gameMap._events[id].clearABS();
     $gameMap._events[id] = null;
     this._freeEventIds.push(id);
+  };
+
+  QABSManager.preloadSkill = function(skill) {
+    var aniId = skill.animationId;
+    aniId = aniId < 0 ? 1 : aniId;
+    var ani = $dataAnimations[aniId];
+    if (ani) {
+      ImageManager.loadAnimation(ani.animation1Name, ani.animation1Hue);
+      ImageManager.loadAnimation(ani.animation2Name, ani.animation2Hue);
+    }
+    var sequence = QABS.getSkillSequence(skill);
+    for (var i = 0; i < sequence.length; i++) {
+      var action = sequence[i];
+      var ani = /^animation (.*)/i.exec(action);
+      var pic = /^picture (.*)/i.exec(action);
+      var forced = /forceSkill (\d+)/i.exec(action);
+      if (ani) {
+        ani = ani[1].trim();
+        ani = $dataAnimations[ani];
+        if (ani) {
+          ImageManager.loadAnimation(ani.animation1Name, ani.animation1Hue);
+          ImageManager.loadAnimation(ani.animation2Name, ani.animation2Hue);
+        }
+      }
+      if (pic) {
+        pic = QPlus.makeArgs(pic[1])[0];
+        ImageManager.loadPicture(pic);
+      }
+      if (forced) {
+        var forcedSkill = $dataSkills[Number(forced[1])];
+        if (forcedSkill) this.preloadSkill(forcedSkill);
+      }
+    }
   };
 })();

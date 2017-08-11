@@ -497,20 +497,27 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.actionPicture = function(action) {
-    // TODO add animated
-    this._skill.picture = new Sprite();
+    this._skill.picture = new Sprite_SkillPicture();
     this._skill.picture.bitmap = ImageManager.loadPicture(action[0]);
     this._skill.picture.rotatable = action[1] === 'true';
     this._skill.picture.originDirection = Number(action[2]);
     this._skill.picture.z = 3;
     this._skill.picture.anchor.x = 0.5;
     this._skill.picture.anchor.y = 0.5;
+    var isAnimated = /%\[(\d+)-(\d+)\]/.exec(action[0]);
+    if (isAnimated) {
+      var frames = Number(isAnimated[1]);
+      var speed = Number(isAnimated[2]);
+      this._skill.picture.setupAnim(frames, speed);
+    }
     this.setSkillPictureRadian(this._skill.picture, this._skill.radian);
-    QABSManager.addPicture(this._skill.picture);
+    this._skill.picture.bitmap.addLoadListener(function() {
+      QABSManager.addPicture(this);
+    }.bind(this._skill.picture));
   };
 
   Skill_Sequencer.prototype.actionTrail = function(action) {
-    this._skill.trail = new TilingSprite();
+    this._skill.trail = new Sprite_SkillTrail();
     this._skill.trail.bitmap = ImageManager.loadPicture(action[0]);
     this._skill.trail.move(0, 0, Graphics.width, Graphics.height);
     this._skill.trail.rotatable = action[1] === 'true';
@@ -522,20 +529,17 @@ function Skill_Sequencer() {
     this._skill.trail.startX = x;
     this._skill.trail.startY = y;
     this._skill.trail.bitmap.addLoadListener(function() {
-      var w = this._skill.trail.bitmap.width;
-      var h = this._skill.trail.bitmap.height;
-      this._skill.trail.move(x, y, w, h);
-      QABSManager.addPicture(this._skill.trail);
-    }.bind(this));
+      var w = this.bitmap.width;
+      var h = this.bitmap.height;
+      this.move(x, y, w, h);
+      QABSManager.addPicture(this);
+    }.bind(this._skill.trail));
   };
 
   Skill_Sequencer.prototype.actionCollider = function(action) {
     var display = action[0];
     if (display === 'show') {
       this._skill.pictureCollider = new Sprite_SkillCollider(this._skill.collider);
-      var x = this._skill.collider.center.x;
-      var y = this._skill.collider.center.y;
-      this._skill.pictureCollider.move(x, y);
       QABSManager.addPicture(this._skill.pictureCollider);
     } else if (display === 'hide' && this._skill.pictureCollider) {
       QABSManager.removePicture(this._skill.pictureCollider);
@@ -828,7 +832,8 @@ function Skill_Sequencer() {
     }
     if (through === 1 || through === 3) {
       ColliderManager.getCharactersNear(this._skill.collider, function(chara) {
-        if (chara === this._character) return false;
+        if (chara === this._character || chara.isThrough() || !chara.isNormalPriority()) return false;
+        if (chara.isLoot || chara._erased || chara.isDead) return false;
         if (this._skill.collider.intersects(chara.collider('collision'))) {
           collided = true;
           return 'break';
@@ -932,9 +937,6 @@ function Skill_Sequencer() {
     var y3 = collider.center.y;
     if (this._skill.picture) {
       this._skill.picture.move(x3, y3);
-    }
-    if (this._skill.pictureCollider) {
-      this._skill.pictureCollider.move(x3, y3);
     }
     if (this._skill.trail) {
       var x4 = this._skill.trail.startX;

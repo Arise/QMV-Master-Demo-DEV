@@ -5,7 +5,7 @@
   var Alias_Scene_Map_initialize = Scene_Map.prototype.initialize;
   Scene_Map.prototype.initialize = function() {
     Alias_Scene_Map_initialize.call(this);
-    $gameSystem.preloadSkills();
+    $gameSystem.preloadAllSkills();
   };
 
   var Alias_Scene_Map_isMenuCalled = Scene_Map.prototype.isMenuCalled;

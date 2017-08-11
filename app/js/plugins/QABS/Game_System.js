@@ -50,7 +50,7 @@
       this._absClassKeys,
       this._absWeaponKeys
     );
-    this.preloadSkills();
+    this.preloadAllSkills();
     this.checkAbsMouse();
   };
 
@@ -94,33 +94,11 @@
     this.checkAbsMouse();
   };
 
-  Game_System.prototype.preloadSkills = function() {
+  Game_System.prototype.preloadAllSkills = function() {
     var absKeys = this.absKeys();
     for (var key in absKeys) {
       var skill = $dataSkills[absKeys[key].skillId];
-      if (skill) {
-        var aniId = skill.animationId;
-        aniId = aniId < 0 ? 1 : aniId;
-        var ani = $dataAnimations[aniId];
-        if (ani) {
-          ImageManager.loadAnimation(ani.animation1Name, ani.animation1Hue);
-          ImageManager.loadAnimation(ani.animation2Name, ani.animation2Hue);
-        }
-        var sequence = QABS.getSkillSequence(skill);
-        for (var i = 0; i < sequence.length; i++) {
-          var action = sequence[i];
-          var ani = /^animation(.*)/i.exec(action);
-          var pic = /^picture(.*)/i.exec(action);
-          if (ani) {
-            ani = ani[1].trim();
-            ani = $dataAnimations[ani];
-            if (ani) {
-              ImageManager.loadAnimation(ani.animation1Name, ani.animation1Hue);
-              ImageManager.loadAnimation(ani.animation2Name, ani.animation2Hue);
-            }
-          }
-        }
-      }
+      if (skill) QABSManager.preloadSkill(skill);
     }
   };
 

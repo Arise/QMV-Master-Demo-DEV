@@ -145,7 +145,6 @@
     var x = target.cx() - w / 2;
     var y = target.cy() - h / 2;
     skill.collider.moveTo(x, y);
-    skill.picture.move(x + w / 2, y + h / 2);
   };
 
   Game_Player.prototype.updateGroundTargeting = function() {
@@ -185,7 +184,6 @@
     this.setRadian(Math.atan2(y1 - this.cy(), x1 - this.cx()));
     skill.radian = this._radian;
     skill.collider.moveTo(x2, y2);
-    skill.picture.move(x2 + w / 2, y2 + h / 2);
     var dx = Math.abs(this.cx() - x2 - w / 2);
     var dy = Math.abs(this.cy() - y2 - h / 2);
     var distance = Math.sqrt(dx * dx + dy * dy);

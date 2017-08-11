@@ -9,13 +9,13 @@ if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.4.0')) {
   throw new Error('Error: QABS requires QMovement 1.4.0 or newer to work.');
 }
 
-Imported.QABS = '1.2.4';
+Imported.QABS = '1.3.0';
 
 //=============================================================================
  /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @author Quxios  | Version 1.2.4
+ * @author Quxios  | Version 1.3.0
  *
  * @repo https://github.com/quxios/QABS
  *
@@ -33,10 +33,10 @@ Imported.QABS = '1.2.4';
  *
  * @param Lock when Targeting
  * @parent Attack Settings
- * @desc Player can not move when using Ground / Select targeting skills
+ * @desc Player can't move when using Ground / Select targeting skills
  * @type Boolean
- * @on Can Move
- * @off Can't Move
+ * @on Can't Move
+ * @off Can Move
  * @default false
  *
  * @param Aim with Mouse
@@ -451,34 +451,81 @@ Imported.QABS = '1.2.4';
  *   is done moving before going to the next action
  *
  * - #### moveToStored [DURATION] [WAIT? TRUE or FALSE]
+ *  - Moves the skill to the stored position
+ *  - DURATION: How long should it take to complete this move, in frames.
+ *  - WAIT: Set to true or false. If true the sequencer will wait until the skill
+ *   is done moving before going to the next action
  *
  * - #### wave [FORWARD or BACKWARD] [AMPLITUDE] [HARM] [DIST] [DURATION] [WAIT? TRUE or FALSE]
  *
  * - #### waveToStored [AMPLITUDE] [HARM] [DURATION] [WAIT? TRUE or FALSE]
  *
  * - #### trigger
+ *  - Activates the skill at it's current location
  *
  * - #### adjustAim
+ *  - Recalculates the direction the skill should move. This is only works
+ *   when the skill is used from an enemy.
  *
  * - #### wait [DURATION]
+ *  - The sequencer will wait before moving to the next action
+ *  - DURATION: How long should the wait last, in frames
  *
  * - #### picture [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
+ *  - Bind a picture to the skill
+ *  - FILE NAME: The file name of the picture. Should be located in the
+ *   Pictures folder. For an animated picture it should have the format:
+ *   - %[COLS-SPEED]
+ *   - COLS: The number of slices in the picture
+ *   - SPEED: The time to wait between frames
+ *  - ROTATABLE: Set to true or false. If true the picture will rotate based
+ *   on the direction the skill is moving
+ *  - BASE DIRECTION: The direction the skill is facing by default. The directions
+ *   should be 2, 4, 6, or 8
  *
  * - #### trail [FILE NAME] [ROTATABLE? TRUE or FALSE] [BASE DIRECTION]
+ *  - Binds a picture that stretches from the user to the skills position
+ *  - FILE NAME: The file name of the picture. Should be located in the
+ *   Pictures folder.
+ *  - ROTATABLE: Set to true or false. If true the picture will rotate based
+ *   on the direction the skill is moving
+ *  - BASE DIRECTION: The direction the skill is facing by default. The directions
+ *   should be 2, 4, 6, or 8
  *
  * - #### collider [SHOW or HIDE]
+ *  - Shows the skills collider
+ *  - SHOW or HIDE: Set to show to show the collider.
+ *   Set to hide to hide the collider
  *
- * - #### animation [ANIMAITON ID]
+ * - #### animation [ANIMATION ID]
+ *  - Play an animation at the skills current location
+ *  - ANIMATION ID: The ID of the animation to play
  *
  * - #### se [NAME] [VOLUME] [PITCH] [PAN]
+ *  - Play an se
+ *  - NAME: The name of the SE to play
+ *  - VOLUME: The volume of the SE, default: 90
+ *  - PITCH: The pitch of the SE, default: 100
+ *  - PAN: The pan of the SE, default: 0
  *
  * - #### qaudio [NAME] [QAUDIO OPTIONS]
+ *  - Play a qAudio at the skills location
+ *  - NAME: The name of the audio file
+ *  - QAUDIO OPTIONS: Visit the QAudio help for information. The options
+ *   are the same from the plugin commands. x, y, bindTo options will not work.
  *
  * - #### forceSkill [SKILL ID] [ANGLE OFFSET]
+ *  - Force a skill at the skills current location
+ *  - SKILL ID: The ID of the skill to use
+ *  - ANGLE OFFSET: Lets you offset the angle this skill be used towards.
+ *   This is optional and can be left out.
  *
  * - #### globalLock
+ *  - Locks all characters movement
  *
  * - #### globalUnlock
+ *  - Unlocks all characters movement
+ *
  * ----------------------------------------------------------------------------
  * **Skill On Damage**
  * ----------------------------------------------------------------------------

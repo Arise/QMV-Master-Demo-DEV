@@ -328,10 +328,6 @@
       skill.collider.color = '#00ff00';
       skill.index = 0;
       this.updateSkillTarget();
-    } else {
-      var x = $gameMap.canvasToMapPX(TouchInput.x) - skill.collider.width / 2;
-      var y = $gameMap.canvasToMapPY(TouchInput.y) - skill.collider.height / 2;
-      skill.picture.move(x, y);
     }
     QABSManager.addPicture(skill.picture);
     return skill;
