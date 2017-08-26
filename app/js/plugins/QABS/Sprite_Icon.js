@@ -15,6 +15,9 @@ function Sprite_Icon() {
     this._iconSheet = sheet || 'IconSet';
     this._iconW = w || 32;
     this._iconH = h || 32;
+    this._realX = this.x;
+    this._realY = this.y;
+    this._isFixed = false;
     this.setBitmap();
   };
 
@@ -25,5 +28,24 @@ function Sprite_Icon() {
     var sx = this._iconIndex % 16 * pw;
     var sy = Math.floor(this._iconIndex / 16) * ph;
     this.setFrame(sx, sy, pw, ph);
+  };
+
+  Sprite_Icon.prototype.update = function() {
+    Sprite.prototype.update.call(this);
+    if (this._isFixed) this.updatePosition();
+  };
+
+  Sprite_Icon.prototype.updatePosition = function() {
+    this.x = this._realX;
+    this.x -= $gameMap.displayX() * QMovement.tileSize;
+    this.y = this._realY;
+    this.y -= $gameMap.displayY() * QMovement.tileSize;
+  };
+
+  Sprite_Icon.prototype.move = function(x, y) {
+    Sprite.prototype.move.call(this, x, y);
+    this._realX = x;
+    this._realY = y;
+    this.updatePosition();
   };
 })();

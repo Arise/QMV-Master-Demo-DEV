@@ -47,6 +47,7 @@ function Game_Loot() {
     this._itemIcon = new Sprite_Icon(iconIndex);
     this._itemIcon.move(this._px, this._py);
     this._itemIcon.z = 1;
+    this._itemIcon._isFixed = true;
     QABSManager.addPicture(this._itemIcon);
   };
 
