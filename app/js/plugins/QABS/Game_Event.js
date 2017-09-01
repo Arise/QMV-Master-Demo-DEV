@@ -9,8 +9,6 @@
   };
 
   Game_Event.prototype.battler = function() {
-    if ($gameSystem.isDisabled(this._mapId, this._eventId)) return null;
-    if (!this.page() || this._isDead) return null;
     return this._battler;
   };
 
