@@ -40,5 +40,6 @@ var $plugins =
 {"name":"QM+FaceMouse","status":false,"description":"<QMFaceMouse>\r\nQMovement Addon: Player will always face towards mouse position","parameters":{}},
 {"name":"YEP_RegionRestrictions","status":false,"description":"v1.03 Use regions to block out Events and/or the player from\nbeing able to venture into those spots.","parameters":{"Player Restrict":"0","Event Restrict":"0","All Restrict":"0","Player Allow":"0","Event Allow":"0","All Allow":"2"}},
 {"name":"QYanfly-patches","status":false,"description":"<QYanfly-patches>\r\nPatches for Yanfly plugins and QPlugins","parameters":{}},
-{"name":"QDebug","status":true,"description":"<QDebug>","parameters":{}}
+{"name":"QDebug","status":true,"description":"<QDebug>\r\nA better debug for MV","parameters":{}},
+{"name":"QPicture","status":true,"description":"<QPicture>\r\ndesc","parameters":{"":"","===========":""}}
 ];

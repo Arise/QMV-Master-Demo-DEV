@@ -8,6 +8,7 @@
     this._absKeys = QABS.getDefaultSkillKeys();
     this._absClassKeys = {};
     this._absWeaponKeys = {};
+    this._absOverrideKeys = {};
     this._absEnabled = true;
     this._disabledEnemies = {};
     this.checkAbsMouse();
@@ -45,11 +46,15 @@
   };
 
   Game_System.prototype.resetABSKeys = function() {
-    this._absKeys = Object.assign({},
-      QABS.getDefaultSkillKeys(),
-      this._absClassKeys,
-      this._absWeaponKeys
-    );
+    this._absKeys = QABS.getDefaultSkillKeys();
+    for (var key in this._absKeys) {
+      Object.assign(
+        this._absKeys[key],
+        this._absClassKeys[key] || {},
+        this._absWeaponKeys[key] || {},
+        this._absOverrideKeys[key] || {}
+      );
+    }
     this.preloadAllSkills();
     this.checkAbsMouse();
   };
@@ -57,20 +62,29 @@
   Game_System.prototype.absKeys = function() {
     return this._absKeys;
   };
-
-  Game_System.prototype.changeABSSkill = function(skillNumber, skillId, forced) {
+  Game_System.prototype.changeABSOverrideSkill = function(skillNumber, skillId, forced) {
     var absKeys = this.absKeys();
+    var override = this._absOverrideKeys;
     if (!absKeys[skillNumber]) return;
     if (!forced && !absKeys[skillNumber].rebind) return;
-    for (var key in absKeys) {
-      if (absKeys[key].skillId === skillId) {
-        if (absKeys[key].rebind) {
-          absKeys[key].skillId = null;
-        }
-        break;
-      }
+    if (!override[skillNumber]) {
+      override[skillNumber] = {};
     }
-    absKeys[skillNumber].skillId = skillId;
+    if (skillId !== null) {
+      if (skillId > 0) {
+        for (var key in absKeys) {
+          if (absKeys[key].skillId === skillId) {
+            if (!override[key]) {
+              override[key] = {};
+            }
+            override[key].skillId = null;
+          }
+        }
+      }
+      override[skillNumber].skillId = skillId;
+    } else {
+      delete override[skillNumber].skillId;
+    }
     this.resetABSKeys();
   };
 
@@ -81,16 +95,25 @@
 
   Game_System.prototype.changeABSSkillInput = function(skillNumber, input) {
     var absKeys = this.absKeys();
+    var override = this._absOverrideKeys;
     if (!absKeys[skillNumber]) return;
+    if (!override[skillNumber]) {
+      override[skillNumber] = {};
+    }
     for (var key in absKeys) {
       var i = absKeys[key].input.indexOf(input);
       if (i !== -1) {
-        absKeys[key].input.splice(i, 1);
+        if (!override[key]) {
+          override[key] = {
+            input: absKeys[key].input.clone()
+          };
+        }
+        override[key].input.splice(i, 1);
         break;
       }
     }
     var i = /^\$/.test(input) ? 1 : 0;
-    absKeys[skillNumber].input[i] = input;
+    override[skillNumber].input[i] = input;
     this.checkAbsMouse();
   };
 
