@@ -9,13 +9,13 @@ if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.4.0')) {
   throw new Error('Error: QABS requires QMovement 1.4.0 or newer to work.');
 }
 
-Imported.QABS = '1.3.3';
+Imported.QABS = '1.4.0';
 
 //=============================================================================
  /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @author Quxios  | Version 1.3.3
+ * @author Quxios  | Version 1.4.0
  *
  * @repo https://github.com/quxios/QABS
  *
@@ -259,6 +259,37 @@ Imported.QABS = '1.3.3';
  * Weapon skill keys take top priority, so they will replace both class keys
  * and the default keys! This example will replace skill key 1 with the skill
  * id 3
+ * ----------------------------------------------------------------------------
+ * **Override Skill keys**
+ * ----------------------------------------------------------------------------
+ * You can manually override a skill key with a plugin command. Override skill keys
+ * take priority over weapon, class and default skill keys.
+ *
+ * Plugin command:
+ * ~~~
+ *  qabs override SKILLKEYNUMBER SKILLID
+ * ~~~
+ * - #### SKILLKEYNUMBER:
+ *  - The skill key that you want to change
+ * - #### SKILLID:
+ *  - The skill to assign to this skill key number. Set to -1 if you want to
+ *  remove this override
+ *
+ * *Important!* make sure the skill key you are trying to set is created in the
+ * plugin parameters `Default Skills`. If it's not, the game will have an error.
+ *
+ * Also note that the player still needs to know the skill to be able to use it.
+ * Assign it won't let him use it if he doesn't know it.
+ *
+ * Example:
+ * ~~~
+ *  qabs override 1 3
+ * ~~~
+ * Will override skill key 1 and assign the skill with id 3. To remove this
+ * override later on use the plugin command:
+ * ~~~
+ *  qabs override 1 -1
+ * ~~~
  * ============================================================================
  * ## Skills
  * ============================================================================
@@ -613,6 +644,44 @@ Imported.QABS = '1.3.3';
  * - 2: Enemy team
  * - 3+ can also be used
  * *Note teams don't do much because there is no team based AI*
+ * ============================================================================
+ * ## Disabling QABS
+ * ============================================================================
+ * You can disable the QABS or disable certain events with a plugin command.
+ *
+ * To disable the QABS for everything use the plugin command
+ * ~~~
+ *  qabs disable
+ * ~~~
+ * To re-enable use the plugin command:
+ * ~~~
+ *  qabs enable
+ * ~~~
+ *
+ * To disable certain event(s) use the plugin command
+ * ~~~
+ *  qabs disable [LIST OF CHARAIDS TO DISABLE]
+ * ~~~
+ * CHARAID - The character identifier.
+ * - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that
+ *  called this (replace EVENTID with a number)
+ *
+ * Where each CHARAID is separated with a space. CHARAID can only be for events.
+ *
+ * Example:
+ * ~~~
+ *  qabs disable event1 e2 4
+ * ~~~
+ * Will disable events 1, 2 and 4. Used different types of CHARAIDs as an example
+ * but you can use whichever one you like
+ *
+ * To re-enable event(s) use the plugin command
+ * ~~~
+ *  qabs enable [LIST OF CHARAIDS TO DISABLE]
+ * ~~~
+ *
+ * *Note* that disabling ABS doesn't remove it from the event, it just "pauses"
+ * it until it's re-enabled.
  * ============================================================================
  * ## States
  * ============================================================================

@@ -161,7 +161,7 @@
   var Alias_Game_CharacterBase_update = Game_CharacterBase.prototype.update;
   Game_CharacterBase.prototype.update = function() {
     Alias_Game_CharacterBase_update.call(this);
-    if (this.battler()) this.updateABS();
+    if (this.battler() && $gameSystem._absEnabled) this.updateABS();
   };
 
   Game_CharacterBase.prototype.updateABS = function() {

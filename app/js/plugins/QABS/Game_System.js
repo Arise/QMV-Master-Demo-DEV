@@ -32,7 +32,7 @@
     if (!this._disabledEnemies[mapId]) {
       return false;
     }
-    return this._disabledEnemies[mapId][eventId];
+    return this._disabledEnemies[mapId][eventId] || !this._absEnabled;
   };
 
   Game_System.prototype.loadClassABSKeys = function() {

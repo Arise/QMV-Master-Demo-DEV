@@ -9,13 +9,13 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.4')) {
   throw new Error('Error: QPicture requires QPlus 1.4.4 or newer to work.');
 }
 
-Imported.QPicture = '1.0.0';
+Imported.QPicture = '1.0.2';
 
 //=============================================================================
  /*:
  * @plugindesc <QPicture>
  * Adds additional features to Pictures
- * @author Quxios  | Version 1.0.0
+ * @author Quxios  | Version 1.0.2
  *
  * @requires QPlus
  *
@@ -50,6 +50,7 @@ Imported.QPicture = '1.0.0';
  *  - switchX: Where X is the switch ID, changes a switchs value to what is set
  *  on ARG1
  *  - ceX: Where X is the common event ID, runs a common event
+ *  - clear: Removes the handler that assigned to this picture
  * ARG1 - Only used when handler is `switchX`, set this to:
  *  - true: Makes the switch true whenever this mouse event runs
  *  - false: Makes the switch false whenever this mouse event runs
@@ -287,12 +288,9 @@ var QEase;
   };
 
   Game_Interpreter.prototype.qPictureCommand = function(args) {
-    var pic = args.shift().toLowerCase();
-    var picId = /^pic(\d+)/.exec(pic);
-    if (picId) {
-      pic = $gameScreen.picture(Number(picId[1]));
-    }
-    if (!picId) return;
+    var picId = args.shift();
+    var pic = $gameScreen.picture(Number(picId));
+    if (!pic) return;
     var cmd = args.shift().toLowerCase();
     if (/^on/.test(cmd)) {
       if (args[0].toLowerCase() === 'clear') {
@@ -313,7 +311,7 @@ var QEase;
       } else if (ceId) {
         pic.setMouseHandler(cmd, function(id) {
           $gameTemp.reserveCommonEvent(id);
-        }.bind(what, Number(ceId[1])));
+        }.bind(pic, Number(ceId[1])));
       }
       return;
     }

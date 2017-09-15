@@ -31,5 +31,14 @@
       }
       return;
     }
+    if (cmd === 'override') {
+      var key = Number(args.shift());
+      var skillId = Number(args.shift());
+      if (skillId === -1) {
+        skillId = null;
+      }
+      $gameSystem.changeABSOverrideSkill(key, skillId);
+      return;
+    }
   };
 })();
