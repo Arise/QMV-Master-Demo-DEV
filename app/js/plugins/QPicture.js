@@ -9,13 +9,13 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.4')) {
   throw new Error('Error: QPicture requires QPlus 1.4.4 or newer to work.');
 }
 
-Imported.QPicture = '1.0.2';
+Imported.QPicture = '1.1.0';
 
 //=============================================================================
  /*:
  * @plugindesc <QPicture>
  * Adds additional features to Pictures
- * @author Quxios  | Version 1.0.2
+ * @author Quxios  | Version 1.1.0
  *
  * @requires QPlus
  *
@@ -57,6 +57,18 @@ Imported.QPicture = '1.0.2';
  *  - toggle: Toggles the switch value whenever this mouse event runs
  *
  * ----------------------------------------------------------------------------
+ * **Click Through Alpha**
+ * ----------------------------------------------------------------------------
+ * Some of your pictures may have alpha (transparent) areas and you don't want
+ * those areas to be able to trigger mouse events. So you can disable the alpha
+ * areas per picture. Note that enabling this can impact performance!
+ * ~~~
+ *  qPicture [PICID] alpha [TRUE or FALSE]
+ * ~~~
+  * PICID - The ID (Picture Number) of the picture to apply this to
+  * TRUE or FALSE - Set to true to click through alpha, set to false to
+  *  go back to default behavior.
+ * ----------------------------------------------------------------------------
  * **Ease**
  * ----------------------------------------------------------------------------
  * ~~~
@@ -79,6 +91,11 @@ Imported.QPicture = '1.0.2';
  *  qPicture 1 onClick ce1
  * ~~~
  * Runs common event 1 whenever you click on picture 1
+ *
+ * ~~~
+ *  qPicture 1 alpha true
+ * ~~~
+ * Will ignore the transparent areas in picture 1
  *
  * ~~~
  *  qPicture 2 onMouseEnter switch1 true
@@ -128,6 +145,7 @@ var QEase;
   // QButton
 
   QButton.initializeButton = function() {
+    this._throughAlpha = false;
     this._overTick = 0;
     this._doubleClickTimer = 0;
     this._clickHandler = null;
@@ -243,7 +261,16 @@ var QEase;
     var y1 = TouchInput.y;
     var x2 = this.x - w * this.anchor.x;
     var y2 = this.y - h * this.anchor.y;
-    return x1 >= x2 && y1 >= y2 && x1 < x2 + w && y1 < y2 + h;
+    var insideRect = x1 >= x2 && y1 >= y2 && x1 < x2 + w && y1 < y2 + h;
+    if (this._throughAlpha) {
+      if (!insideRect || !this.bitmap) {
+        return false;
+      }
+      var x3 = (x1 - x2) / this.scale.x;
+      var y3 = (y1 - y2) / this.scale.y;
+      return this.bitmap.getAlphaPixel(x3, y3) != 0;
+    }
+    return insideRect;
   };
 
   //-----------------------------------------------------------------------------
@@ -320,6 +347,9 @@ var QEase;
       var mode = args[1].toLowerCase();
       pic.setEase(type, mode);
     }
+    if (cmd === 'alpha') {
+      pic.setThroughAlpha(args[0].toLowerCase() === 'true');
+    }
   };
 
   //-----------------------------------------------------------------------------
@@ -333,6 +363,7 @@ var QEase;
       scale: 'linear',
       opacity: 'linear'
     }
+    this._throughAlpha = false;
   };
 
   Game_Picture.prototype.setMouseHandler = function(type, handler) {
@@ -366,6 +397,10 @@ var QEase;
 
   Game_Picture.prototype.setEase = function(type, easeMode) {
     this._ease[type] = easeMode;
+  };
+
+  Game_Picture.prototype.setThroughAlpha = function(bool) {
+    this._throughAlpha = bool;
   };
 
   var Alias_Game_Picture_move = Game_Picture.prototype.move;
@@ -417,6 +452,7 @@ var QEase;
 
   Sprite_Picture.prototype.updateQPicture = function() {
     var picture = this.picture();
+    this._throughAlpha = picture._throughAlpha;
     this.setClick(picture._clickHandler);
     this.setRightClick(picture._rightClickHandler);
     this.setMouseEnter(picture._mouseEnterHandler);
