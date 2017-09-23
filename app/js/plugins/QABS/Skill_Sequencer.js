@@ -511,6 +511,9 @@ function Skill_Sequencer() {
       this._skill.picture.setupAnim(frames, speed);
     }
     this.setSkillPictureRadian(this._skill.picture, this._skill.radian);
+    var x = this._skill.collider.center.x;
+    var y = this._skill.collider.center.y;
+    this._skill.picture.move(x, y);
     this._skill.picture.bitmap.addLoadListener(function() {
       QABSManager.addPicture(this);
     }.bind(this._skill.picture));

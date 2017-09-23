@@ -23,8 +23,8 @@
       this._aiType = this._battler._aiType;
       this._aiRange = this._battler._aiRange || QABS.aiLength;
       this._aiWait = 0;
-      this._aiPathfind = Imported.QPathfind && QABS.aiPathfind;
-      this._aiSight = Imported.QSight && QABS.aiSight;
+      this._aiPathfind = Imported.QPathfind && QABS.aiPathfind && this.validAI();
+      this._aiSight = Imported.QSight && QABS.aiSight && this.validAI();
       if (this._aiSight) {
         this.setupSight({
           shape: 'circle',
@@ -47,8 +47,8 @@
   };
 
   var Alias_Game_Event_comments = Game_Event.prototype.comments;
-  Game_Event.prototype.comments = function() {
-    var comments = Alias_Game_Event_comments.call(this);
+  Game_Event.prototype.comments = function(withNotes) {
+    var comments = Alias_Game_Event_comments.call(this, withNotes);
     if (!this._aiSight) return comments;
     var range = this._aiRange / QMovement.tileSize;
     return comments + '<sight:circle,' + range + ', AI, 0>';
@@ -97,12 +97,18 @@
   Game_Event.prototype.updateABS = function() {
     if ($gameSystem.isDisabled(this._mapId, this._eventId)) return;
     Game_CharacterBase.prototype.updateABS.call(this);
-    if (this.page() && !this._isDead && this.isNearTheScreen()) {
+    if (this.page() && !this._isDead && this.isNearTheScreen() && this.validAI()) {
       return this.updateAI(this._aiType);
     }
     if (this._respawn >= 0) {
       this.updateRespawn();
     }
+  };
+
+  Game_Event.prototype.validAI = function() {
+    // if added new AI types, expand here with its name so the
+    // updateAI will run
+    return this._aiType === "simple";
   };
 
   Game_Event.prototype.updateAI = function(type) {
@@ -212,12 +218,15 @@
           this._sight.base.id = 'sightOld' + this.charaId();
         }
         this._sight.base = null;
-        this._sight.cache.dir = null;
+        this._sight.reshape = true;
       }
       if (this._sight.targetId !== target.charaId()) {
         delete this._sight.cache.charas[this._sight.targetId];
         this._sight.targetId = target.charaId();
-        this._sight.cache.dir = null;
+        this._sight.reshape = true;
+      }
+      if (this._sight.reshape) {
+        this.updateSight();
       }
       var key = [this._mapId, this._eventId, this._sight.handler];
       return $gameSelfSwitches.value(key);
