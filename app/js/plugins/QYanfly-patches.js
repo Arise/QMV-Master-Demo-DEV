@@ -12,6 +12,8 @@ Imported.QYanflyPatches = '1.0.2';
  * @author Quxios  | Version 1.0.2
  *
  * @help
+ * This plugin should be below Yanfly and QPlugins
+ *
  * Patches for QMovement:
  * - YEP_RegionRestrictions
  * - YEP_SlipperyTiles
