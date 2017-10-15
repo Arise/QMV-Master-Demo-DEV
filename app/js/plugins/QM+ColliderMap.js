@@ -19,8 +19,6 @@ Imported.QMColliderMap = '1.0.0';
  *
  * @requires QMovement
  *
- * @development
- *
  * @help
  * ============================================================================
  * ## About

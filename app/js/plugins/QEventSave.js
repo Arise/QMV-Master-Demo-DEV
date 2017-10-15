@@ -16,7 +16,7 @@ Imported.QEventSave = '1.0.0';
  * @plugindesc <QEventSave>
  * Save Events position on Map change
  * @author Quxios  | Version 1.0.0
- *
+ * 
  * @requires QPlus
  *
  * @help
