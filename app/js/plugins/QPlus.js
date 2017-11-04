@@ -56,6 +56,55 @@ Imported.QPlus = '1.5.0';
 * the original tilemap class.*
 *
 * ============================================================================
+* ## Format Plugin Commands
+* ============================================================================
+* These formating options are only applied to QPlugins!
+* ----------------------------------------------------------------------------
+* **Spaces in arg**
+* ----------------------------------------------------------------------------
+* Each arg is separated with a space. But sometimes you may need a space, for
+* example when passing a file name. To do this you just need to wrap it in quotes
+* and it'll be passed as a single arg, ex:
+* ~~~
+*  qPlugin cmd arg1 "arg2 with a space" arg3
+* ~~~
+*
+* ----------------------------------------------------------------------------
+* **Variables**
+* ----------------------------------------------------------------------------
+* If you want to use a value of a variable in a plugin command you can do so 
+* with the following format:
+* ~~~
+* {vID}
+* ~~~
+* - ID: The id of the variable to use
+* 
+* Example:
+* ~~~
+*  qPlugin cmd arg1 chara{v1}
+* ~~~
+* When the plugin command runs the {v1} will get replaced with the value of
+* variable 1. If the value of variable 1 is 10, , then your plugin command will
+* format to: `qPlugin cmd arg1 chara10`
+* ----------------------------------------------------------------------------
+* **Switches**
+* ----------------------------------------------------------------------------
+* If you want to use a value of a switch in a plugin command you can do so
+* with the following format:
+* ~~~
+* {sID}
+* ~~~
+* - ID: The id of the switch to use
+*
+* Example:
+* ~~~
+*  qPlugin cmd arg1 {s1}
+* ~~~
+* When the plugin command runs the {s1} will get replaced with the value of
+* switch 1. If the value of switch 1 is true, then your plugin command will
+* format to: `qPlugin cmd arg1 true`
+*
+* ============================================================================
 * ## Plugin Commands
 * ============================================================================
 * **Random wait between X Y**
@@ -76,11 +125,10 @@ Imported.QPlus = '1.5.0';
 *  globalLock LEVEL [CHARACTERS] [options]
 * ~~~
 * - LEVEL: The level of global lock
-*  - 0: clears the global lock
-*  - 1: locks the characters movement
-*  - 2: locks the characters movement and animation
-* - [CHARACTERS] - optional, list of `Character Ids` to apply to or ignore.
-* Seperated by a space.
+*  * 0: clears the global lock
+*  * 1: locks the characters movement
+*  * 2: locks the characters movement and animation
+* - [CHARACTERS] - optional, list of `Character Ids` to apply to or ignore. Seperated by a space.
 *  * CHARAID: The character identifier.
 *   - For player: 0, p, or player
 *   - For events: EVENTID, eEVENTID, eventEVENTID or this for the event that called this
@@ -200,6 +248,9 @@ function QPlus() {
    * @return {Array}
    */
   QPlus.makeArgs = function(string) {
+    if (string.constructor === Array) {
+      string = string.join(' ');
+    }
     var args = [];
     var regex = /("?|'?)(.+?)\1(?:\s|$)/g;
     while (true) {
@@ -210,15 +261,16 @@ function QPlus() {
         break;
       }
     }
+    console.log(this.formatArgs(args));
     return this.formatArgs(args);
   };
 
   QPlus.formatArgs = function(args) {
     for (var i = 0; i < args.length; i++) {
       var arg = args[i].trim();
-      var match = /^\{(.*?)\}$/.exec(arg);
+      var match = /\{(.*?)\}/.exec(arg);
       if (match) {
-        var val = arg;
+        var val = match[1];
         var cmd = match[1][0].toLowerCase();
         switch (cmd) {
           case 'v': {
@@ -232,7 +284,7 @@ function QPlus() {
             break;
           }
         }
-        args[i] = String(val);
+        args[i] = args[i].replace(/\{(.*?)\}/, val);
       }
     }
     return args;
@@ -780,6 +832,13 @@ function SimpleTilemap() {
 
   var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
+    if (this.qPlusCommand(command, QPlus.makeArgs(args))) {
+      return;
+    }
+    Alias_Game_Interpreter_pluginCommand.call(this, command, args);
+  };
+
+  Game_Interpreter.prototype.qPlusCommand = function(command, args) {
     if (command.toLowerCase() === 'wait') {
       var min = Number(args[0]);
       var max = Number(args[1]);
@@ -789,7 +848,7 @@ function SimpleTilemap() {
       }
       var wait = Math.randomIntBetween(min, max);
       this.wait(wait);
-      return;
+      return true;
     }
     if (command.toLowerCase() === 'globallock') {
       var level = Number(args[0]);
@@ -799,9 +858,9 @@ function SimpleTilemap() {
       var charas = args2.map(QPlus.getCharacter);
       var mode = only !== -1 ? 1 : 0;
       $gameMap.globalLock(charas, mode, level);
-      return;
+      return true;
     }
-    Alias_Game_Interpreter_pluginCommand.call(this, command, args);
+    return false;
   };
 
   //-----------------------------------------------------------------------------

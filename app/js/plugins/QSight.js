@@ -12,13 +12,13 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
   throw new Error('Error: QSight requires QMovement 1.1.4 or newer to work.');
 }
 
-Imported.QSight = '1.1.11';
+Imported.QSight = '1.1.12';
 
 //=============================================================================
 /*:
 * @plugindesc <QSight>
 * Real time line of sight
-* @author Quxios  | Version 1.1.11
+* @author Quxios  | Version 1.1.12
 *
 * @requires QPlus
 *
@@ -728,4 +728,10 @@ function QSight() {
     if (this._erased) return false;
     return !this._invisible;
   };
+
+  if (Imported.QMap) {
+    Game_MapObj.prototype.castsShadow = function() {
+      return this.visible && !this.meta.invisible;
+    };
+  }
 })();
