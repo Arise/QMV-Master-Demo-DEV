@@ -12,57 +12,57 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, 'x.y.z')) {
 Imported.QName = '1.0.0';
 
 //=============================================================================
- /*:
- * @plugindesc <QName>
- * desc
- * @author Quxios  | Version 1.0.0
- *
- * @requires
- *
- * @video
- *
- * @param
- * @desc
- * @default
- *
- * @param ===========
- * @desc spacer
- * @default
- *
- * @help
- * ============================================================================
- * ## About
- * ============================================================================
- *
- * ============================================================================
- * ## How to use
- * ============================================================================
- *
- * ----------------------------------------------------------------------------
- * **Sub section**
- * ----------------------------------------------------------------------------
- *
- * ============================================================================
- * ## Links
- * ============================================================================
- * Formated Help:
- *
- *  https://quxios.github.io/#/plugins/QName
- *
- * RPGMakerWebs:
- *
- *  http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
- *
- * Terms of use:
- *
- *  https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
- *
- * Like my plugins? Support me on Patreon!
- *
- *  https://www.patreon.com/quxios
- *
- * @tags
- */
+/*:
+* @plugindesc <QName>
+* desc
+* @author Quxios  | Version 1.0.0
+*
+* @requires
+*
+* @video
+*
+* @param
+* @desc
+* @default
+*
+* @param ===========
+* @desc spacer
+* @default
+*
+* @help
+* ============================================================================
+* ## About
+* ============================================================================
+*
+* ============================================================================
+* ## How to use
+* ============================================================================
+*
+* ----------------------------------------------------------------------------
+* **Sub section**
+* ----------------------------------------------------------------------------
+*
+* ============================================================================
+* ## Links
+* ============================================================================
+* Formated Help:
+*
+*  https://quxios.github.io/#/plugins/QName
+*
+* RPGMakerWebs:
+*
+*  http://forums.rpgmakerweb.com/index.php?threads/qplugins.73023/
+*
+* Terms of use:
+*
+*  https://github.com/quxios/QMV-Master-Demo/blob/master/readme.md
+*
+* Like my plugins? Support me on Patreon!
+*
+*  https://www.patreon.com/quxios
+*
+* @tags
+*/
 //=============================================================================
 
 //=============================================================================
@@ -91,8 +91,7 @@ function NewClass() {
   var Alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
   Game_Interpreter.prototype.pluginCommand = function(command, args) {
     if (command.toLowerCase() === 'qplugin') {
-      this.qPluginCommand(args);
-      return;
+      return this.qPluginCommand(QPlus.makeArgs(args));
     }
     Alias_Game_Interpreter_pluginCommand.call(this, command, args);
   };
