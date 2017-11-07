@@ -33,6 +33,7 @@ app/js/rpg_windows.js
 *.rpgsave
 
 # other
+.vs/*
 .vscode
 app/js/plugins/QuasiSight.js
 app/js/plugins/Q_IsoCam.js
