@@ -9,13 +9,13 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
   throw new Error('Error: QMovement requires QPlus 1.4.0 or newer to work.');
 }
 
-Imported.QMovement = '1.4.3';
+Imported.QMovement = '1.4.4';
 
 //=============================================================================
  /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @author Quxios  | Version 1.4.3
+ * @author Quxios  | Version 1.4.4
  *
  * @repo https://github.com/quxios/QMovement
  *
