@@ -9,14 +9,14 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.4')) {
   throw new Error('Error: QEventSave requires QPlus 1.4.4 or newer to work.');
 }
 
-Imported.QEventSave = '1.0.1';
+Imported.QEventSave = '1.1.0';
 
 //=============================================================================
 /*:
  * @plugindesc <QEventSave>
  * Save Events position on Map change
- * @version 1.0.1
- * @author Quxios  | Version 1.0.1
+ * @version 1.1.0
+ * @author Quxios  | Version 1.1.0
  * @site https://quxios.github.io/
  * @updateurl https://quxios.github.io/data/pluginsMin.json
  * 
