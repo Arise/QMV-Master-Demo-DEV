@@ -18,11 +18,14 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.4')) {
 Imported.QDebug = '1.0.0';
 
 //=============================================================================
- /*/*:
+/*:
  * @plugindesc <QDebug>
  * A better debug for MV
+ * @version 1.0.0
  * @author Quxios  | Version 1.0.0
- *
+ * @site https://quxios.github.io/
+ * @updateurl https://quxios.github.io/data/pluginsMin.json
+ * 
  * @private
  *
  * @requires QPlus

@@ -12,10 +12,13 @@ if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.3.8')) {
 Imported.QMFaceMouse = '1.0.0';
 
 //=============================================================================
- /*:
+/*:
  * @plugindesc <QMFaceMouse>
  * QMovement Addon: Player will always face towards mouse position
+ * @version 1.0.0
  * @author Quxios  | Version 1.0.0
+ * @site https://quxios.github.io/
+ * @updateurl https://quxios.github.io/data/pluginsMin.json
  *
  * @requires QMovement
 
