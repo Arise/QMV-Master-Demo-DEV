@@ -54,6 +54,11 @@
     return comments + '<sight:circle,' + range + ', AI, 0>';
   };
 
+  Game_Event.prototype.canSeeThroughChara = function(chara) {
+    return chara.team() === this.team() ||
+      Game_CharacterBase.prototype.canSeeThroughChara.call(this, chara);
+  };
+
   Game_Event.prototype.disableEnemy = function() {
     $gameSystem.disableEnemy(this._mapId, this._eventId);
     this.clearABS();
@@ -123,11 +128,11 @@
     var bestTarget = this.bestTarget();
     if (!bestTarget) return;
     var targetId = bestTarget.charaId();
-    if (this.AISimpleRange(bestTarget)) return;
+    if (!this.AISimpleInRange(bestTarget)) return;
     this.AISimpleAction(bestTarget, this.AISimpleGetAction(bestTarget));
   };
 
-  Game_Event.prototype.AISimpleRange = function(bestTarget) {
+  Game_Event.prototype.AISimpleInRange = function(bestTarget) {
     var targetId = bestTarget.charaId();
     if (this.isTargetInRange(bestTarget)) {
       if (!this._agroList.hasOwnProperty(targetId)) {
@@ -141,13 +146,14 @@
         this.removeWaitListener(this._endWait);
         this._endWait = null;
       }
+      return true;
     } else {
       if (!this._endWait && this.inCombat()) {
         bestTarget.removeAgro(this.charaId());
         if (this._aiPathfind) {
           this.clearPathfind();
         }
-        this._endWait = this.wait(120).then(function() {
+        this._endWait = this.wait(90).then(function() {
           this._endWait = null;
           this.endCombat();
         }.bind(this));
@@ -155,7 +161,7 @@
       if (this._endWait && this.canMove()) {
         this.moveTowardCharacter(bestTarget);
       }
-      return true;
+      return false;
     }
     return false;
   };
@@ -194,14 +200,6 @@
     }
   };
 
-  Game_Event.prototype.updateRespawn = function() {
-    if (this._respawn === 0) {
-      this.respawn();
-    } else {
-      this._respawn--;
-    }
-  };
-
   Game_Event.prototype.isTargetInRange = function(target) {
     if (!target) return false;
     if (this._aiSight) {
@@ -237,6 +235,14 @@
     return dx <= range && dy <= range;
   };
 
+  Game_Event.prototype.updateRespawn = function() {
+    if (this._respawn === 0) {
+      this.respawn();
+    } else {
+      this._respawn--;
+    }
+  };
+
   Game_Event.prototype.respawn = function() {
     this._erased = false;
     this.refresh();
@@ -250,7 +256,7 @@
     }
     this._inCombat = false;
     this.clearAgro();
-    if (this._aiPathfind) {
+    if (this._aiPathfind || Imported.QPathfind) {
       var x = this.event().x * QMovement.tileSize;
       var y = this.event().y * QMovement.tileSize;
       this.initPathfind(x, y, {
@@ -337,7 +343,7 @@
       y = this.y + (Math.random() / 2) - (Math.random() / 2);
       var type = 0;
       if (DataManager.isWeapon(item)) type = 1;
-      if (DataManager.isArmor(item))  type = 2;
+      if (DataManager.isArmor(item)) type = 2;
       QABSManager.createItem(x, y, item.id, type);
     }.bind(this));
     if (this.battler().gold() > 0) {

@@ -4,19 +4,19 @@
 
 var Imported = Imported || {};
 
-if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.4.0')) {
-  alert('Error: QMovement requires QPlus 1.4.0 or newer to work.');
-  throw new Error('Error: QMovement requires QPlus 1.4.0 or newer to work.');
+if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.6.0')) {
+  alert('Error: QMovement requires QPlus 1.6.0 or newer to work.');
+  throw new Error('Error: QMovement requires QPlus 1.6.0 or newer to work.');
 }
 
-Imported.QMovement = '1.4.4';
+Imported.QMovement = '1.5.0';
 
 //=============================================================================
 /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @version 1.4.4
- * @author Quxios  | Version 1.4.4
+ * @version 1.5.0
+ * @author Quxios  | Version 1.5.0
  * @site https://quxios.github.io/
  * @updateurl https://quxios.github.io/data/pluginsMin.json
  *
@@ -81,6 +81,7 @@ Imported.QMovement = '1.4.4';
  * @parent Optional Settings
  * @desc Set if player moves with mouse click
  * * Requires QPathfind to work
+ * @type boolean
  * @on Enable
  * @off Disable
  * @default true
@@ -88,6 +89,7 @@ Imported.QMovement = '1.4.4';
  * @param Diagonal
  * @parent Optional Settings
  * @desc Allow for diagonal movement?
+ * @type boolean
  * @on Yes
  * @off No
  * @default true
@@ -146,7 +148,7 @@ Imported.QMovement = '1.4.4';
  * Note there are a few mv features disabled/broken; mouse movement, followers,
  * and vehicles.
  * ============================================================================
- * ## How to use
+ * ## Setting up
  * ============================================================================
  * To setup a pixel based movement, you'll need to change the plugin parameters
  * to something like:
@@ -340,7 +342,7 @@ Imported.QMovement = '1.4.4';
  * Will make the character do a full 360 arc clockwise around the point 480, 480
  * and it'll take 60 frames.
  * ============================================================================
- * ## Event Notetags
+ * ## Event Notetags/Comments
  * ============================================================================
  * **Offsets**
  * ----------------------------------------------------------------------------
@@ -348,7 +350,9 @@ Imported.QMovement = '1.4.4';
  * note tags:
  * ~~~
  *  <ox:X>
- *  or
+ * ~~~
+ * or
+ * ~~~
  *  <oy:X>
  * ~~~
  * Where X is the number of pixels to shift the event. Can be negative.
@@ -360,6 +364,45 @@ Imported.QMovement = '1.4.4';
  * ~~~
  *  <smartDir>
  * ~~~
+ * ----------------------------------------------------------------------------
+ * **IgnoreCharas**
+ * ----------------------------------------------------------------------------
+ * You can have an event ignore certain characters when collision checking. This
+ * allows you to let some events move through some events or the player. Note that
+ * this is not 2 ways, so if an event can move through the player, that doesn't
+ * mean the player can move through the event.
+ * ~~~
+ *  <ignoreCharas:CHARAIDS>
+ * ~~~
+ * Where CHARAIDS is a list of character Ids, separated by a comma
+ * ============================================================================
+ * ## Map Notetags
+ * ============================================================================
+ * **GridSize**
+ * ----------------------------------------------------------------------------
+ * You can set the grid size for certain maps by using the notetag:
+ * ~~~
+ *  <grid:X>
+ * ~~~
+ * Where X is the grid size to use for this map.
+ * ----------------------------------------------------------------------------
+ * **OffGrid**
+ * ----------------------------------------------------------------------------
+ * You can set weither you can or can't move off the grid for certain maps by
+ * using the notetag:
+ * ~~~
+ *  <offGrid:BOOL>
+ * ~~~
+ * Where BOOL is true or false
+ * ----------------------------------------------------------------------------
+ * **MidPass**
+ * ----------------------------------------------------------------------------
+ * You can set weither you want to use the mid pass function for certain maps by
+ * using the notetag:
+ * ~~~
+ *  <midPass:BOOL>
+ * ~~~
+ * Where BOOL is true or false
  * ============================================================================
  * ## Plugin Commands
  * ============================================================================
@@ -597,13 +640,11 @@ Imported.QMovement = '1.4.4';
  * @param Offset X
  * @desc Set to the x offset of the collider.
  * @type Number
- * @min -9999
  * @default 6
  *
  * @param Offset Y
  * @desc Set to the y offset of the collider.
  * @type Number
- * @min -9999
  * @default 24
  */
 //=============================================================================

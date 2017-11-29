@@ -29,11 +29,32 @@
     for (var i = 0; i < tiles.length; i++) {
       var flag = flags[tiles[i]];
       console.log('layer', i, ':', flag);
-      if (flag & 0x20)  console.log('layer', i, 'is ladder');
-      if (flag & 0x40)  console.log('layer', i, 'is bush');
-      if (flag & 0x80)  console.log('layer', i, 'is counter');
+      if (flag & 0x20) console.log('layer', i, 'is ladder');
+      if (flag & 0x40) console.log('layer', i, 'is bush');
+      if (flag & 0x80) console.log('layer', i, 'is counter');
       if (flag & 0x100) console.log('layer', i, 'is damage');
     }
+  };
+
+  Game_Map.prototype.gridSize = function() {
+    if ($dataMap && $dataMap.meta.grid !== undefined) {
+      return Number($dataMap.meta.grid) || QMovement.grid;
+    }
+    return QMovement.grid;
+  };
+
+  Game_Map.prototype.offGrid = function() {
+    if ($dataMap && $dataMap.meta.offGrid !== undefined) {
+      return $dataMap.meta.offGrid === 'true';
+    }
+    return QMovement.offGrid;
+  };
+
+  Game_Map.prototype.midPass = function() {
+    if ($dataMap && $dataMap.meta.midPass !== undefined) {
+      return $dataMap.meta.midPass === 'true';
+    }
+    return QMovement.midPass;
   };
 
   var Alias_Game_Map_refreshIfNeeded = Game_Map.prototype.refreshIfNeeded;
@@ -153,8 +174,8 @@
     var y1 = y * this.tileHeight();
     var ox = boxData[2] || 0;
     var oy = boxData[3] || 0;
-    var w  = boxData[0];
-    var h  = boxData[1];
+    var w = boxData[0];
+    var h = boxData[1];
     if (w === 0 || h === 0) return;
     var type = boxData[5] || 'box';
     var newBox;
@@ -167,20 +188,20 @@
     }
     newBox.isTile = true;
     newBox.moveTo(x1, y1);
-    newBox.note      = boxData[4] || '';
-    newBox.flag      = flag;
-    newBox.terrain   = flag >> 12;
-    newBox.regionId  = this.regionId(x, y);
-    newBox.isWater1  = flag >> 12 === QMovement.water1Tag || /<water1>/i.test(newBox.note);
-    newBox.isWater2  = flag >> 12 === QMovement.water2Tag || /<water2>/i.test(newBox.note);
-    newBox.isLadder  = (flag & 0x20)  || /<ladder>/i.test(newBox.note);
-    newBox.isBush    = (flag & 0x40)  || /<bush>/i.test(newBox.note);
-    newBox.isCounter = (flag & 0x80)  || /<counter>/i.test(newBox.note);
-    newBox.isDamage  = (flag & 0x100) || /<damage>/i.test(newBox.note);
+    newBox.note = boxData[4] || '';
+    newBox.flag = flag;
+    newBox.terrain = flag >> 12;
+    newBox.regionId = this.regionId(x, y);
+    newBox.isWater1 = flag >> 12 === QMovement.water1Tag || /<water1>/i.test(newBox.note);
+    newBox.isWater2 = flag >> 12 === QMovement.water2Tag || /<water2>/i.test(newBox.note);
+    newBox.isLadder = (flag & 0x20) || /<ladder>/i.test(newBox.note);
+    newBox.isBush = (flag & 0x40) || /<bush>/i.test(newBox.note);
+    newBox.isCounter = (flag & 0x80) || /<counter>/i.test(newBox.note);
+    newBox.isDamage = (flag & 0x100) || /<damage>/i.test(newBox.note);
     var vx = x * this.height() * this.width();
     var vy = y * this.height();
     var vz = index;
-    newBox.location  = vx + vy + vz;
+    newBox.location = vx + vy + vz;
     if (newBox.isWater2) {
       newBox.color = QMovement.water2.toLowerCase();
     } else if (newBox.isWater1) {

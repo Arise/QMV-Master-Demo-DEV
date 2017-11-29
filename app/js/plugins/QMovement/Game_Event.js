@@ -2,6 +2,12 @@
 // Game_Event
 
 (function() {
+  var Alias_Game_Event_clearPageSettings = Game_Event.prototype.clearPageSettings;
+  Game_Event.prototype.clearPageSettings = function() {
+    Alias_Game_Event_clearPageSettings.call(this);
+    this._ignoreCharacters = [];
+  };
+
   var Alias_Game_Event_setupPageSettings = Game_Event.prototype.setupPageSettings;
   Game_Event.prototype.setupPageSettings = function() {
     Alias_Game_Event_setupPageSettings.call(this);
@@ -9,6 +15,14 @@
     this.initialPosition();
     this._typeRandomDir = null;
     this._typeTowardPlayer = null;
+    var notes = this.notes(true);
+    var ignore = /<ignoreCharas:(.*?)>/i.exec(notes);
+    this._ignoreCharacters = [];
+    if (ignore) {
+      this._ignoreCharacters = ignore[1].split(',').map(function(s) {
+        return QPlus.charaIdToId(s);
+      })
+    }
   };
 
   Game_Event.prototype.initialPosition = function() {
@@ -29,6 +43,11 @@
     return QMovement.eventCollider;
   };
 
+  Game_Event.prototype.ignoreCharacters = function(type) {
+    var ignores = Game_CharacterBase.prototype.ignoreCharacters.call(this, type);
+    return ignores.concat(this._ignoreCharacters);
+  };
+
   Game_Event.prototype.updateStop = function() {
     if (this._locked) {
       this._freqCount = this.freqThreshold();
@@ -47,15 +66,15 @@
       }
       if (this._freqCount < this.freqThreshold()) {
         switch (this._moveType) {
-        case 1:
-          this.moveTypeRandom();
-          break;
-        case 2:
-          this.moveTypeTowardPlayer();
-          break;
-        case 3:
-          this.moveTypeCustom();
-          break;
+          case 1:
+            this.moveTypeRandom();
+            break;
+          case 2:
+            this.moveTypeTowardPlayer();
+            break;
+          case 3:
+            this.moveTypeCustom();
+            break;
         }
       }
     }

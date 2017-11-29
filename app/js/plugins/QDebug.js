@@ -86,11 +86,25 @@ function QDebug() {
 
   QDebug.open = function() {
     if (this._win) return;
-    this._win = _GUI.Window.open('', {
-      title: 'Debug',
-      toolbar: false,
-    });
-    this.setupWin();
+    _GUI.Window.open('', {
+      id: 'DEBUG_WIN',
+      title: 'QDEBUG'
+    }, function() {
+      QPlus.wait(3, function() {
+        var win;
+        for (var key in global.__nw_windows) {
+          var current = global.__nw_windows[key];
+          if (current[0].title === 'QDEBUG') {
+            win = current;
+            break;
+          }
+        }
+        if (win) {
+          this._win = win[0];
+          this.setupWin();
+        }
+      }.bind(this))
+    }.bind(this))
   };
 
   QDebug.close = function() {
@@ -182,7 +196,8 @@ function QDebug() {
     mainWin.on('close', this.onMainClose);
     window.addEventListener('beforeunload', this.onMainUnload);
     this._win.on('closed', this.onClosed);
-    this._win.on('loaded', this.onLoaded);
+    //this._win.on('loaded', this.onLoaded);
+    this.onLoaded();
   };
 
   QDebug.setupHTML = function() {

@@ -213,7 +213,7 @@
 
   var Alias_Game_Character_moveTowardCharacter = Game_Character.prototype.moveTowardCharacter;
   Game_Character.prototype.moveTowardCharacter = function(character) {
-    if (QMovement.offGrid) {
+    if ($gameMap.offGrid()) {
       var dx = this.deltaPXFrom(character.cx());
       var dy = this.deltaPYFrom(character.cy());
       var radian = Math.atan2(-dy, -dx);
@@ -229,7 +229,7 @@
 
   var Alias_Game_Character_moveAwayFromCharacter = Game_Character.prototype.moveAwayFromCharacter;
   Game_Character.prototype.moveAwayFromCharacter = function(character) {
-    if (QMovement.offGrid) {
+    if ($gameMap.offGrid()) {
       var dx = this.deltaPXFrom(character.cx());
       var dy = this.deltaPYFrom(character.cy());
       var radian = Math.atan2(dy, dx);

@@ -20,9 +20,9 @@
         if (this._touchCount === 0 || this._touchCount >= 20) {
           var x = $gameMap.canvasToMapPX(TouchInput.x);
           var y = $gameMap.canvasToMapPY(TouchInput.y);
-          if (!QMovement.offGrid) {
-            var ox  = x % QMovement.tileSize;
-            var oy  = y % QMovement.tileSize;
+          if (!$gameMap.offGrid()) {
+            var ox = x % QMovement.tileSize;
+            var oy = y % QMovement.tileSize;
             x += QMovement.tileSize / 2 - ox;
             y += QMovement.tileSize / 2 - oy;
           }

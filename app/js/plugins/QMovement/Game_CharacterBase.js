@@ -129,10 +129,10 @@
   };
 
   Game_CharacterBase.prototype.moveTiles = function() {
-    if (QMovement.grid < this.frameSpeed()) {
-      return QMovement.offGrid ? this.frameSpeed() : QMovement.grid;
+    if ($gameMap.gridSize() < this.frameSpeed()) {
+      return $gameMap.offGrid() ? this.frameSpeed() : $gameMap.gridSize();
     }
-    return QMovement.grid;
+    return $gameMap.gridSize();
   };
 
   Game_CharacterBase.prototype.frameSpeed = function(multi) {
@@ -187,14 +187,14 @@
     var y1 = $gameMap.roundPYWithDirection(y, vert, dist);
     if (dist === this.moveTiles()) {
       if (!this.canPixelPass(x1, y1, 5, null, type)) return false;
-      if (QMovement.midPass) {
+      if ($gameMap.midPass()) {
         var x2 = $gameMap.roundPXWithDirection(x, horz, dist / 2);
         var y2 = $gameMap.roundPYWithDirection(y, vert, dist / 2);
         if (!this.canPixelPass(x2, y2, 5, null, type)) return false;
       }
     } else {
       return (this.canPixelPass(x, y, vert, dist, type) && this.canPixelPass(x, y1, horz, dist, type)) &&
-             (this.canPixelPass(x, y, horz, dist, type) && this.canPixelPass(x1, y, vert, dist, type));
+        (this.canPixelPass(x, y, horz, dist, type) && this.canPixelPass(x1, y, vert, dist, type));
     }
     return true;
   };
@@ -203,7 +203,7 @@
     this.collider(type).moveTo(x, y);
     if (!this.valid(type)) return false;
     if (this.isThrough() || this.isDebugThrough()) return true;
-    if (QMovement.midPass && dir !== 5) {
+    if ($gameMap.midPass() && dir !== 5) {
       if (!this.middlePass(x, y, dir, dist, type)) return false;
     }
     if (this.collidesWithAnyTile(type)) return false;
@@ -326,7 +326,7 @@
 
   Game_CharacterBase.prototype.checkEventTriggerTouchFront = function(d) {
     var horz = vert = d;
-    if ([1,3,7,9].contains(d)) {
+    if ([1, 3, 7, 9].contains(d)) {
       horz = (d === 1 || d === 7) ? 4 : 6;
       vert = (d === 1 || d === 3) ? 2 : 8;
     }
@@ -473,7 +473,7 @@
 
   Game_CharacterBase.prototype.refreshBushDepth = function() {
     if (this.isNormalPriority() && !this.isObjectCharacter() &&
-        this.isOnBush() && !this.isJumping()) {
+      this.isOnBush() && !this.isJumping()) {
       if (!this.startedMoving()) this._bushDepth = 12;
     } else {
       this._bushDepth = 0;
@@ -661,7 +661,7 @@
     frames = frames || 1;
     rad += rad < 0 ? 2 * Math.PI : 0;
     this._currentRad = rad;
-    this._targetRad  = rad + radians * cc;
+    this._targetRad = rad + radians * cc;
     this._pivotX = pivotX;
     this._pivotY = pivotY;
     this._radiusL = this._radiusH = Math.sqrt(dy * dy + dx * dx);
@@ -683,7 +683,7 @@
     var collided = false;
     ColliderManager.getCharactersNear(collider, (function(chara) {
       if (chara.isThrough() || chara === this || !chara.isNormalPriority() ||
-          /<smartdir>/i.test(chara.notes())) {
+        /<smartdir>/i.test(chara.notes())) {
         return false;
       }
       if (chara.collider('collision').intersects(collider)) {

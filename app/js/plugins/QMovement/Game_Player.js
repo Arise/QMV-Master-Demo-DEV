@@ -34,9 +34,11 @@
 
   Game_Player.prototype.moveByMouse = function(x, y) {
     if (this.triggerTouchAction()) {
-      return this.clearMouseMove();
+      this.clearMouseMove();
+      return false;
     }
     this._movingWithMouse = true;
+    return true;
   };
 
   Game_Player.prototype.clearMouseMove = function() {
@@ -63,7 +65,7 @@
           return this.moveByMouse(x, y);
         }
       }
-      if (Imported.QInput && Input.preferGamepad() && QMovement.offGrid) {
+      if (Imported.QInput && Input.preferGamepad() && $gameMap.offGrid()) {
         this.moveWithAnalog();
       } else {
         if ([4, 6].contains(direction)) {
@@ -87,8 +89,8 @@
 
   Game_Player.prototype.moveInputDiagonal = function(dir) {
     var diag = {
-      1: [4, 2],   3: [6, 2],
-      7: [4, 8],   9: [6, 8]
+      1: [4, 2], 3: [6, 2],
+      7: [4, 8], 9: [6, 8]
     }
     this.moveDiagonally(diag[dir][0], diag[dir][1]);
   };
@@ -123,7 +125,7 @@
         if (this._freqCount >= this.freqThreshold()) {
           $gameParty.onPlayerWalk();
         }
-        this.checkEventTriggerHere([1,2]);
+        this.checkEventTriggerHere([1, 2]);
         if ($gameMap.setupStartingEvent()) return;
       }
       if (this.triggerAction()) return;
@@ -209,21 +211,24 @@
 
   Game_Player.prototype.triggerTouchAction = function() {
     if ($gameTemp.isDestinationValid()) {
-      var dx = $gameTemp.destinationPX() - this.cx();
-      var dy = $gameTemp.destinationPY() - this.cy();
-      var radian = Math.atan2(dy, dx);
-      radian += radian < 0 ? 2 * Math.PI : 0;
-      var dir = this.radianToDirection(radian, true);
-      var horz = dir;
-      var vert = dir;
-      if ([1, 3, 7, 9].contains(dir)) {
-        if (dir === 1 || dir === 7) horz = 4;
-        if (dir === 1 || dir === 3) vert = 2;
-        if (dir === 3 || dir === 9) horz = 6;
-        if (dir === 7 || dir === 9) vert = 8;
-      }
       var dist = this.pixelDistanceFrom($gameTemp.destinationPX(), $gameTemp.destinationPY());
-      if (dist <= QMovement.tileSize) {
+      if (dist <= QMovement.tileSize * 1.5) {
+        var dx = $gameTemp.destinationPX() - this.cx();
+        var dy = $gameTemp.destinationPY() - this.cy();
+        if (Math.abs(dx) < this.moveTiles() / 2 && Math.abs(dy) < this.moveTiles() / 2) {
+          return false;
+        }
+        var radian = Math.atan2(dy, dx);
+        radian += radian < 0 ? 2 * Math.PI : 0;
+        var dir = this.radianToDirection(radian, true);
+        var horz = dir;
+        var vert = dir;
+        if ([1, 3, 7, 9].contains(dir)) {
+          if (dir === 1 || dir === 7) horz = 4;
+          if (dir === 1 || dir === 3) vert = 2;
+          if (dir === 3 || dir === 9) horz = 6;
+          if (dir === 7 || dir === 9) vert = 8;
+        }
         var x1 = $gameMap.roundPXWithDirection(this._px, horz, this.moveTiles());
         var y1 = $gameMap.roundPYWithDirection(this._py, vert, this.moveTiles());
         this.startMapEvent(x1, y1, [0, 1, 2], true);
@@ -265,7 +270,7 @@
       if ([4, 6].contains(direction)) {
         var dist = Math.abs(counter.center.x - collider.center.x);
         dist += collider.width;
-      }  else if ([8, 2].contains(direction)) {
+      } else if ([8, 2].contains(direction)) {
         var dist = Math.abs(counter.center.y - collider.center.y);
         dist += collider.height;
       }
