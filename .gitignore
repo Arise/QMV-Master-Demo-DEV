@@ -35,6 +35,9 @@ app/js/rpg_windows.js
 # other
 .vs/*
 .vscode
+
+# plugins
+app/js/plugins/QDebug.js
 app/js/plugins/QuasiSight.js
 app/js/plugins/Q_IsoCam.js
 app/js/plugins/_QCamera.js
