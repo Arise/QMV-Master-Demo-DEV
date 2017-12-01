@@ -49,3 +49,5 @@ app/js/plugins/QuasiABSGauges.js
 app/js/plugins/QuasiABSHudA.js
 app/js/plugins/YEP_SlipperyTiles.js
 app/js/plugins/YEP_RegionRestrictions.js
+app/js/plugins/QParams.js
+app/js/plugins/QuasiParamsPlus.js
