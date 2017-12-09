@@ -155,7 +155,7 @@
       this.onTargetingCancel();
     }
     if (Input.isTriggered('ok') || (this.canClick() && TouchInput.isTriggered()) ||
-        QABS.quickTarget) {
+      QABS.quickTarget) {
       if (!this._groundTargeting.isOk) {
         TouchInput.stopPropagation();
         Input.stopPropagation();
@@ -232,6 +232,13 @@
       skill.radian = radian;
     }
     Game_CharacterBase.prototype.beforeSkill.call(this, skill);
+  };
+
+  Game_Player.prototype.makeTargetingSkill = function(skill) {
+    Game_CharacterBase.prototype.makeTargetingSkill.call(this, skill);
+    if (this._selectTargeting) {
+      this.updateSkillTarget();
+    }
   };
 
   var Alias_Game_Player_requestMouseMove = Game_Player.prototype.requestMouseMove;

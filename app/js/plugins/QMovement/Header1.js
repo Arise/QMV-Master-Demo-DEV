@@ -9,14 +9,14 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.6.0')) {
   throw new Error('Error: QMovement requires QPlus 1.6.0 or newer to work.');
 }
 
-Imported.QMovement = '1.5.0';
+Imported.QMovement = '1.6.0';
 
 //=============================================================================
 /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @version 1.5.0
- * @author Quxios  | Version 1.5.0
+ * @version 1.6.0
+ * @author Quxios  | Version 1.6.0
  * @site https://quxios.github.io/
  * @updateurl https://quxios.github.io/data/pluginsMin.json
  *
@@ -551,14 +551,16 @@ Imported.QMovement = '1.5.0';
  * Region Colliders is an addon for this plugin that lets you add colliders
  * to regions by creating a json file.
  * ============================================================================
- * ## Videos
+ * ## Showcase
  * ============================================================================
+ * This section is for user created stuff. If you created a video, game, tutorial,
+ * or an addon for QMovement feel free to send me a link and I'll showcase it here!
+ * ----------------------------------------------------------------------------
+ * **Videos**
+ * ----------------------------------------------------------------------------
  * Great example of using the collision map addon:
  *
  * https://www.youtube.com/watch?v=-BN4Pyr5IBo
- *
- * If you have a video you'd like to have listed here, feel free to send me a
- * link in the RPGMakerWebs thread! (link below)
  *
  * ============================================================================
  * ## Links

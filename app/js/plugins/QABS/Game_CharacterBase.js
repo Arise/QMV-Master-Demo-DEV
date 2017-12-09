@@ -322,12 +322,11 @@
     skill.collider = collider;
     skill.picture = new Sprite_SkillCollider(skill.collider);
     if (this._selectTargeting) {
-      if (skill.targets.length === 0 ) {
+      if (skill.targets.length === 0) {
         return this.onTargetingCancel();
       }
       skill.collider.color = '#00ff00';
       skill.index = 0;
-      this.updateSkillTarget();
     }
     QABSManager.addPicture(skill.picture);
     return skill;

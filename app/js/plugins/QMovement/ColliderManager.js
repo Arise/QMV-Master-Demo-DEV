@@ -94,7 +94,7 @@ function ColliderManager() {
     var x, y;
     if (prevGrid) {
       if (currGrid.x1 == prevGrid.x1 && currGrid.y1 === prevGrid.y1 &&
-          currGrid.x2 == prevGrid.x2 && currGrid.y2 === prevGrid.y2) {
+        currGrid.x2 == prevGrid.x2 && currGrid.y2 === prevGrid.y2) {
         return;
       }
       for (x = prevGrid.x1; x <= prevGrid.x2; x++) {
@@ -136,13 +136,10 @@ function ColliderManager() {
     }
   };
 
-  // TODO create a similar function that gets
-  // characters that intersect with the collider passed in
   ColliderManager.getCharactersNear = function(collider, only) {
     var grid = collider.sectorEdge();
     var near = [];
-    var checked = [];
-    var isBreaking = false;
+    var checked = {};
     var x, y, i;
     for (x = grid.x1; x <= grid.x2; x++) {
       for (y = grid.y1; y <= grid.y2; y++) {
@@ -150,34 +147,31 @@ function ColliderManager() {
         if (y < 0 || y >= this.sectorRows()) continue;
         var charas = this._characterGrid[x][y];
         for (i = 0; i < charas.length; i++) {
-          if (checked.contains(charas[i])) {
+          if (checked[charas[i].charaId()]) {
             continue;
           }
-          checked.push(charas[i]);
+          checked[charas[i].charaId()] = true;
           if (only) {
-            var value = only(charas[i])
+            var value = only(charas[i]);
             if (value === 'break') {
               near.push(charas[i]);
               isBreaking = true;
-              break;
+              return near;
             } else if (value === false) {
               continue;
             }
           }
           near.push(charas[i]);
         }
-        if (isBreaking) break;
       }
-      if (isBreaking) break;
     }
-    only = null;
     return near;
   };
 
-  ColliderManager.getCollidersNear = function(collider, only) {
+  ColliderManager.getCollidersNear = function(collider, only, debug) {
     var grid = collider.sectorEdge();
-    var checked = [];
     var near = [];
+    var checked = {};
     var isBreaking = false;
     var x, y, i;
     for (x = grid.x1; x <= grid.x2; x++) {
@@ -186,10 +180,10 @@ function ColliderManager() {
         if (y < 0 || y >= this.sectorRows()) continue;
         var colliders = this._colliderGrid[x][y];
         for (i = 0; i < colliders.length; i++) {
-          if (checked.contains(colliders[i])) {
+          if (checked[colliders[i].id]) {
             continue;
           }
-          checked.push(colliders[i]);
+          checked[colliders[i].id] = true;
           if (only) {
             var value = only(colliders[i]);
             if (value === 'break') {
@@ -207,6 +201,49 @@ function ColliderManager() {
       if (isBreaking) break;
     }
     only = null;
+    return near;
+  };
+
+  ColliderManager.getAllNear = function(collider, only) {
+    var grid = collider.sectorEdge();
+    var near = [];
+    var checked = {};
+    var x, y, i;
+    for (x = grid.x1; x <= grid.x2; x++) {
+      for (y = grid.y1; y <= grid.y2; y++) {
+        if (x < 0 || x >= this.sectorCols()) continue;
+        if (y < 0 || y >= this.sectorRows()) continue;
+        var charas = this._characterGrid[x][y];
+        var colliders = this._colliderGrid[x][y];
+        for (i = 0; i < charas.length + colliders.length; i++) {
+          var type = i >= charas.length ? 'collider' : 'chara';
+          var obj;
+          if (type === 'chara') {
+            obj = charas[i];
+            if (checked[obj.charaId()]) {
+              continue;
+            }
+            checked[obj.charaId()] = true;
+          } else {
+            obj = colliders[i - charas.length];
+            if (checked[obj.id]) {
+              continue;
+            }
+            checked[obj.id] = true;
+          }
+          if (only) {
+            var value = only(type, obj);
+            if (value === 'break') {
+              near.push(obj);
+              return near;
+            } else if (value === false) {
+              continue;
+            }
+          }
+          near.push(obj);
+        }
+      }
+    }
     return near;
   };
 
@@ -281,5 +318,16 @@ function ColliderManager() {
       return null;
     }
     return collider;
+  };
+
+  ColliderManager.rayCast = function(origin, angle, dist, filter) {
+    // Incomplete
+    // need to finish the Polygon_Collider.prototype.lineIntersection function
+    var ray = new Box_Collider(dist, 1, 0, 0, {
+      pivot: new Point(0, 0.5),
+      position: origin
+    });
+    //this.draw(ray, 600);
+    return this.getAllNear(ray, filter);
   };
 })();

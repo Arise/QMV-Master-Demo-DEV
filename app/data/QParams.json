@@ -1,0 +1,12 @@
+[
+  {
+    "abr": "pa",
+    "name": "param A name",
+    "default": 0
+  },
+  {
+    "abr": "pz",
+    "name": "param Z name",
+    "default": 0
+  }
+]

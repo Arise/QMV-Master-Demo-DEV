@@ -56,10 +56,10 @@ function Game_Loot() {
       this._lootPage = {
         conditions: {
           actorId: 1, actorValid: false,
-          itemId: 1,  itemValid: false,
+          itemId: 1, itemValid: false,
           selfSwitchCh: 'A', selfSwitchValid: false,
-          switch1Id: 1,   switch1Valid: false,
-          switch2Id: 1,   switch2Valid: false,
+          switch1Id: 1, switch1Valid: false,
+          switch2Id: 1, switch2Valid: false,
           variable1Id: 1, variable1Valid: false, variableValue: 0
         },
         image: {
@@ -67,7 +67,7 @@ function Game_Loot() {
           direction: 2, pattern: 1, tileId: 0
         },
         moveRoute: {
-          list: [{code: 0, parameters: []}],
+          list: [{ code: 0, parameters: [] }],
           repeat: false, skippable: false, wait: false
         },
         list: [],
@@ -121,8 +121,8 @@ function Game_Loot() {
 
   Game_Loot.prototype.aoeCollect = function() {
     var loot = ColliderManager.getCharactersNear(this.collider(), function(chara) {
-      return chara.constructor === Game_Loot
-        && chara.collider().intersects(this.collider());
+      return chara.constructor === Game_Loot &&
+        chara.collider().intersects(this.collider());
     }.bind(this));
     var x = this.cx();
     var y = this.cy();

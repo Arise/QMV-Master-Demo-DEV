@@ -3,18 +3,6 @@
 
 (function() {
   Object.defineProperties(Game_CharacterBase.prototype, {
-    x: {
-      get: function() {
-        return Math.floor(this.cx() / QMovement.tileSize);
-      },
-      configurable: true
-    },
-    y: {
-      get: function() {
-        return Math.floor(this.cy() / QMovement.tileSize);
-      },
-      configurable: true
-    },
     px: {
       get: function() { return this._px; },
       configurable: true

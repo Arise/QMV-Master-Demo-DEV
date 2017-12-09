@@ -187,7 +187,6 @@
       return;
     }
     newBox.isTile = true;
-    newBox.moveTo(x1, y1);
     newBox.note = boxData[4] || '';
     newBox.flag = flag;
     newBox.terrain = flag >> 12;
@@ -198,6 +197,7 @@
     newBox.isBush = (flag & 0x40) || /<bush>/i.test(newBox.note);
     newBox.isCounter = (flag & 0x80) || /<counter>/i.test(newBox.note);
     newBox.isDamage = (flag & 0x100) || /<damage>/i.test(newBox.note);
+    newBox.moveTo(x1, y1);
     var vx = x * this.height() * this.width();
     var vy = y * this.height();
     var vz = index;

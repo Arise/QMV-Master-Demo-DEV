@@ -342,18 +342,26 @@
 
   Game_Event.prototype.setupLoot = function() {
     var x, y;
+    var loot = [];
     this.battler().makeDropItems().forEach(function(item) {
       x = this.x + (Math.random() / 2) - (Math.random() / 2);
       y = this.y + (Math.random() / 2) - (Math.random() / 2);
       var type = 0;
       if (DataManager.isWeapon(item)) type = 1;
       if (DataManager.isArmor(item)) type = 2;
-      QABSManager.createItem(x, y, item.id, type);
+      loot.push(QABSManager.createItem(x, y, item.id, type));
     }.bind(this));
     if (this.battler().gold() > 0) {
       x = this.x + (Math.random() / 2) - (Math.random() / 2);
       y = this.y + (Math.random() / 2) - (Math.random() / 2);
-      QABSManager.createGold(x, y, this.battler().gold());
+      loot.push(QABSManager.createGold(x, y, this.battler().gold()));
+    }
+    if (this.battler().enemy().meta.autoLoot) {
+      var prevAoeLoot = QABS.aoeLoot;
+      QABS.aoeLoot = false;
+      loot.forEach(function(loot) {
+        loot.collectDrops();
+      });
     }
   };
 
