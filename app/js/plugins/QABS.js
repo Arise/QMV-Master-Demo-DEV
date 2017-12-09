@@ -665,6 +665,18 @@ Imported.QABS = '1.6.0';
  * ~~~
  * - X: How long until it respawns, in frames.
  *
+ * #### To change the team of the enemy
+ * ~~~
+ * <team:X>
+ * ~~~
+ * Set X to the team number
+ * - 0: Neutral
+ * - 1: Player team
+ * - 2: Enemy team
+ * - 3+ can also be used
+ *
+ * **_Note_** teams don't do much because there is no team based AI
+ * 
  * #### To set an Enemies AI type
  * ~~~
  * <AIType:TYPE>
@@ -701,18 +713,11 @@ Imported.QABS = '1.6.0';
  * javascript code
  * </onDeath>
  * ~~~
- *
- * #### To change the team of the enemy
- * ~~~
- * <team:X>
- * ~~~
- * Set X to the team number
- * - 0: Neutral
- * - 1: Player team
- * - 2: Enemy team
- * - 3+ can also be used
  * 
- * **_Note_** teams don't do much because there is no team based AI
+ * #### To auto gain the enemies loot
+ * ~~~
+ * <autoLoot>
+ * ~~~
  * ============================================================================
  * ## Disabling QABS
  * ============================================================================
@@ -1011,6 +1016,10 @@ function QABS() {
   };
 
   QABS.calcAIRange = function(skill) {
+    var settings = this.getSkillSettings(skill);
+    if (settings.range) {
+      return settings.range;
+    }
     var actions = this.getSkillSequence(skill);
     var currDist = 0;
     var stored = 0;
@@ -1116,13 +1125,15 @@ function QABSManager() {
       var r1 = aiRange * 2;
       range = new Circle_Collider(w1 + r1, h1 + r1);
       range.moveTo(x1 - r1 / 2, y1 - r1 / 2);
-      targets = QABSManager.getTargets({
+      targets = this.getTargets({
+        settings: settings,
         data: skill,
         collider: range
       }, chara);
       ColliderManager.draw(range, QABS.aiWait / 2);
     } else {
-      targets = QABSManager.getTargets({
+      targets = this.getTargets({
+        settings: settings,
         data: skill,
         collider: skillCollider
       }, chara);
@@ -3165,6 +3176,7 @@ function Skill_Sequencer() {
   };
 
   Game_CharacterBase.prototype.makeTargetingSkill = function(skill) {
+    console.log(1);
     this._groundTargeting = skill;
     this._selectTargeting = this.constructor === Game_Event ? true : skill.settings.selectTarget;
     var collider = skill.collider;
@@ -3625,6 +3637,7 @@ function Skill_Sequencer() {
 
   Game_Event.prototype.AISimpleAction = function(bestTarget, bestAction) {
     if (bestAction) {
+
       var skill = this.useSkill(bestAction);
       if (skill) skill._target = bestTarget;
     } else if (this.canMove()) {
@@ -3806,7 +3819,14 @@ function Skill_Sequencer() {
     }
   };
 
+  Game_Event.prototype._makeTargetingSkill = function(skill) {
+    console.log('ran');
+    Game_CharacterBase.prototype.makeTargetingSkill.call(this, skill);
+    this.onTargetingEnd();
+  };
+
   Game_Event.prototype.onTargetingEnd = function() {
+    console.log('ran');
     var skill = this._groundTargeting;
     var target = skill.targets[Math.floor(Math.random() * skill.targets.length)];
     var w = skill.collider.width;

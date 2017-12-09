@@ -176,6 +176,10 @@ function QABS() {
   };
 
   QABS.calcAIRange = function(skill) {
+    var settings = this.getSkillSettings(skill);
+    if (settings.range) {
+      return settings.range;
+    }
     var actions = this.getSkillSequence(skill);
     var currDist = 0;
     var stored = 0;

@@ -310,6 +310,7 @@
   };
 
   Game_CharacterBase.prototype.makeTargetingSkill = function(skill) {
+    console.log(1);
     this._groundTargeting = skill;
     this._selectTargeting = this.constructor === Game_Event ? true : skill.settings.selectTarget;
     var collider = skill.collider;

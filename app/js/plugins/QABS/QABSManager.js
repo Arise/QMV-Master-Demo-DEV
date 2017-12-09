@@ -60,13 +60,15 @@ function QABSManager() {
       var r1 = aiRange * 2;
       range = new Circle_Collider(w1 + r1, h1 + r1);
       range.moveTo(x1 - r1 / 2, y1 - r1 / 2);
-      targets = QABSManager.getTargets({
+      targets = this.getTargets({
+        settings: settings,
         data: skill,
         collider: range
       }, chara);
       ColliderManager.draw(range, QABS.aiWait / 2);
     } else {
-      targets = QABSManager.getTargets({
+      targets = this.getTargets({
+        settings: settings,
         data: skill,
         collider: skillCollider
       }, chara);

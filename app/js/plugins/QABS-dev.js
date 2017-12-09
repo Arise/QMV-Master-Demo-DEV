@@ -691,6 +691,18 @@ Imported.QABS = '1.6.0';
  * ~~~
  * - X: How long until it respawns, in frames.
  *
+ * #### To change the team of the enemy
+ * ~~~
+ * <team:X>
+ * ~~~
+ * Set X to the team number
+ * - 0: Neutral
+ * - 1: Player team
+ * - 2: Enemy team
+ * - 3+ can also be used
+ *
+ * **_Note_** teams don't do much because there is no team based AI
+ * 
  * #### To set an Enemies AI type
  * ~~~
  * <AIType:TYPE>
@@ -727,18 +739,11 @@ Imported.QABS = '1.6.0';
  * javascript code
  * </onDeath>
  * ~~~
- *
- * #### To change the team of the enemy
- * ~~~
- * <team:X>
- * ~~~
- * Set X to the team number
- * - 0: Neutral
- * - 1: Player team
- * - 2: Enemy team
- * - 3+ can also be used
  * 
- * **_Note_** teams don't do much because there is no team based AI
+ * #### To auto gain the enemies loot
+ * ~~~
+ * <autoLoot>
+ * ~~~
  * ============================================================================
  * ## Disabling QABS
  * ============================================================================
