@@ -366,14 +366,7 @@
     }
   };
 
-  Game_Event.prototype._makeTargetingSkill = function(skill) {
-    console.log('ran');
-    Game_CharacterBase.prototype.makeTargetingSkill.call(this, skill);
-    this.onTargetingEnd();
-  };
-
   Game_Event.prototype.onTargetingEnd = function() {
-    console.log('ran');
     var skill = this._groundTargeting;
     var target = skill.targets[Math.floor(Math.random() * skill.targets.length)];
     var w = skill.collider.width;

@@ -24,7 +24,7 @@ function QABSManager() {
       }
       if (item.data.scope === 11 && chara !== self) return false;
       var type = item.settings.collides || 'collision';
-      return item.collider.intersects(chara.collider('collision'));
+      return item.collider.intersects(chara.collider(type));
     });
   };
 

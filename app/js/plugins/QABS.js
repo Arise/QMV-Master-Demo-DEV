@@ -1089,7 +1089,7 @@ function QABSManager() {
       }
       if (item.data.scope === 11 && chara !== self) return false;
       var type = item.settings.collides || 'collision';
-      return item.collider.intersects(chara.collider('collision'));
+      return item.collider.intersects(chara.collider(type));
     });
   };
 
@@ -3176,7 +3176,6 @@ function Skill_Sequencer() {
   };
 
   Game_CharacterBase.prototype.makeTargetingSkill = function(skill) {
-    console.log(1);
     this._groundTargeting = skill;
     this._selectTargeting = this.constructor === Game_Event ? true : skill.settings.selectTarget;
     var collider = skill.collider;
@@ -3819,14 +3818,7 @@ function Skill_Sequencer() {
     }
   };
 
-  Game_Event.prototype._makeTargetingSkill = function(skill) {
-    console.log('ran');
-    Game_CharacterBase.prototype.makeTargetingSkill.call(this, skill);
-    this.onTargetingEnd();
-  };
-
   Game_Event.prototype.onTargetingEnd = function() {
-    console.log('ran');
     var skill = this._groundTargeting;
     var target = skill.targets[Math.floor(Math.random() * skill.targets.length)];
     var w = skill.collider.width;
