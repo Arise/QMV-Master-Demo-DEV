@@ -187,6 +187,7 @@ function Polygon_Collider() {
   };
 
   Polygon_Collider.prototype.refreshVertices = function() {
+    this._edges = [];
     var i, j;
     for (i = 0, j = this._vertices.length; i < j; i++) {
       var vertex = this._vertices[i];
