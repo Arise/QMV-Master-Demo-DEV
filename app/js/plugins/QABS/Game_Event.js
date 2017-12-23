@@ -55,10 +55,12 @@
   };
 
   Game_Event.prototype.canSeeThroughChara = function(chara) {
-    if (typeof chara.team === 'function' && chara.team() === this.team()) {
-      return true;
-    } else if (this._isDead || (typeof chara.battler === 'function' && chara.battler() && chara.battler().isDead())) {
-      return true;
+    if (this._battler) {
+      if (chara.team() === this.team()) {
+        return true;
+      } else if (this._isDead || (chara.battler() && chara.battler().isDead())) {
+        return true;
+      }
     }
     return Game_CharacterBase.prototype.canSeeThroughChara.call(this, chara);
   };
