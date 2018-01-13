@@ -824,27 +824,27 @@ Imported.QABS = '1.6.2';
  *
  * @tags QM-Addon, ABS, Battle
  */
- /*~struct~SkillKey:
- * @param Keyboard Input
- * @desc Set to which keyboard input to use for this skill
- * @default
- *
- * @param Gamepad Input
- * @desc Set to which gamepad input to use for this skill
- * @default
- *
- * @param Rebind
- * @desc Can this skill be reassigned?
- * @type Boolean
- * @on Yes
- * @off No
- * @default true
- *
- * @param Skill Id
- * @desc Which skill does this skill use
- * @type skill
- * @default
- */
+/*~struct~SkillKey:
+* @param Keyboard Input
+* @desc Set to which keyboard input to use for this skill
+* @default
+*
+* @param Gamepad Input
+* @desc Set to which gamepad input to use for this skill
+* @default
+*
+* @param Rebind
+* @desc Can this skill be reassigned?
+* @type Boolean
+* @on Yes
+* @off No
+* @default true
+*
+* @param Skill Id
+* @desc Which skill does this skill use
+* @type skill
+* @default
+*/
 //=============================================================================
 //=============================================================================
 // QABS Static Class
@@ -3224,7 +3224,9 @@ function Skill_Sequencer() {
   };
 
   Game_Player.prototype.setupBattler = function() {
+    console.log(0);
     if (!this.battler()) return;
+    console.log(1);
     this.clearABS();
     this._battlerId = this.battler()._actorId;
     this.battler()._charaId = 0;

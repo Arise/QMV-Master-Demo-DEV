@@ -15,12 +15,6 @@
     if (this === $gameParty.leader()) $gameSystem.loadClassABSKeys();
   };
 
-  var Alias_Game_Actor_initEquips = Game_Actor.prototype.initEquips;
-  Game_Actor.prototype.initEquips = function(equips) {
-    Alias_Game_Actor_initEquips.call(this, equips);
-    if (this === $gameParty.leader()) this.initWeaponSkills();
-  };
-
   Game_Actor.prototype.initWeaponSkills = function() {
     var equips = this._equips;
     for (var i = 0; i < equips.length; i++) {

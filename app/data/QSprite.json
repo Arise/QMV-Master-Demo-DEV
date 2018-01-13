@@ -1,330 +1,69 @@
 {
-  "test": {
-    "name": "test",
-    "cols": 12,
-    "rows": 8,
+  "1": {
+    "name": "1",
+    "cols": 1,
+    "rows": 1,
     "anchorX": 0.5,
-    "anchorY": 1,
-    "sampleImg": "E:\\GitHub\\QMV-Master-Demo\\img\\characters\\%test-Actor1.png",
+    "anchorY": 0.5,
+    "sampleImg": "",
     "packJSON": null,
     "poses": {
-      "move2": {
-        "name": "move2",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          1,
-          0,
-          1,
-          2
-        ]
-      },
-      "move4": {
-        "name": "move4",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          13,
-          12,
-          13,
-          14
-        ]
-      },
-      "move6": {
-        "name": "move6",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          25,
-          24,
-          25,
-          26
-        ]
-      },
-      "move8": {
-        "name": "move8",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          37,
-          36,
-          37,
-          38
-        ]
-      },
-      "idle2": {
-        "name": "idle2",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          4,
-          3,
-          4,
-          5
-        ]
-      },
-      "idle4": {
-        "name": "idle4",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          16,
-          15,
-          16,
-          17
-        ]
-      },
-      "idle6": {
-        "name": "idle6",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          28,
-          27,
-          28,
-          29
-        ]
-      },
-      "idle8": {
-        "name": "idle8",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          40,
-          39,
-          40,
-          41
-        ]
-      },
-      "idleA2": {
-        "name": "idleA2",
-        "speed": 15,
-        "adjust": false,
-        "pattern": [
-          4,
-          7,
-          10
-        ]
-      },
-      "idleA4": {
-        "name": "idleA4",
-        "speed": 15,
-        "adjust": false,
-        "pattern": [
-          16,
-          19,
-          22
-        ]
-      },
-      "idleA6": {
-        "name": "idleA6",
-        "speed": 15,
-        "adjust": false,
-        "pattern": [
-          28,
-          31,
-          34
-        ]
-      },
-      "idleA8": {
-        "name": "idleA8",
-        "speed": 15,
-        "adjust": false,
-        "pattern": [
-          40,
-          43,
-          46
-        ]
-      },
-      "idleB4x4": {
-        "name": "idleB4x4",
-        "speed": 15,
-        "adjust": false,
-        "pattern": [
-          12,
-          13,
-          14
-        ]
-      },
-      "idleB4x2": {
-        "name": "idleB4x2",
-        "speed": 15,
-        "adjust": false,
-        "pattern": [
-          0,
-          1,
-          2
-        ]
-      },
-      "idleB4x6": {
-        "name": "idleB4x6",
-        "speed": 15,
-        "adjust": false,
-        "pattern": [
-          24,
-          25,
-          26
-        ]
-      },
-      "idleB4x8": {
-        "name": "idleB4x8",
-        "speed": 15,
-        "adjust": false,
-        "pattern": [
-          36,
-          37,
-          38
-        ]
-      },
-      "test2": {
-        "name": "test2",
+      "default": {
+        "name": "default",
         "speed": 10,
         "adjust": false,
         "pattern": [
-          48,
-          49,
-          50,
-          51,
-          52,
-          53
-        ]
-      },
-      "test4": {
-        "name": "test4",
-        "speed": 10,
-        "adjust": false,
-        "pattern": [
-          60,
-          61,
-          62,
-          63,
-          64,
-          65
-        ]
-      },
-      "test6": {
-        "name": "test6",
-        "speed": 10,
-        "adjust": false,
-        "pattern": [
-          72,
-          73,
-          74,
-          75,
-          76,
-          77
-        ]
-      },
-      "test8": {
-        "name": "test8",
-        "speed": 10,
-        "adjust": false,
-        "pattern": [
-          84,
-          85,
-          86,
-          87,
-          88,
-          89
+          0
         ]
       }
     }
   },
-  "test2": {
-    "name": "test2",
-    "cols": 12,
-    "rows": 8,
+  "2": {
+    "name": "2",
+    "cols": 3,
+    "rows": 1,
     "anchorX": 0.5,
-    "anchorY": 1,
-    "sampleImg": "E:\\GitHub\\QMV-Master-Demo\\img\\characters\\%test-Actor1.png",
+    "anchorY": 0.5,
+    "sampleImg": "E:\\Documents\\Development\\RPGMaker\\ProjectQ2\\app\\img\\characters\\%2-bug.png",
     "packJSON": null,
     "poses": {
-      "move2": {
-        "name": "move2",
-        "speed": 15,
-        "adjust": true,
+      "default": {
+        "name": "default",
+        "speed": 10,
+        "adjust": false,
         "pattern": [
-          1,
+          0
+        ]
+      },
+      "hit": {
+        "name": "hit",
+        "speed": 4,
+        "adjust": false,
+        "pattern": [
           0,
           1,
-          2
+          2,
+          2,
+          1
         ]
-      },
-      "move4": {
-        "name": "move4",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          13,
-          12,
-          13,
-          14
-        ]
-      },
-      "move6": {
-        "name": "move6",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          25,
-          24,
-          25,
-          26
-        ]
-      },
-      "move8": {
-        "name": "move8",
-        "speed": 15,
-        "adjust": true,
-        "pattern": [
-          37,
-          36,
-          37,
-          38
-        ]
-      },
-      "move1": {
-        "name": "move1",
+      }
+    }
+  },
+  "3": {
+    "name": "3",
+    "cols": 1,
+    "rows": 1,
+    "anchorX": 0.5,
+    "anchorY": 0.2,
+    "sampleImg": "E:\\Documents\\Development\\RPGMaker\\ProjectQ2\\app\\img\\characters\\%1-ai.png",
+    "packJSON": null,
+    "poses": {
+      "default": {
+        "name": "default",
         "speed": 10,
         "adjust": false,
         "pattern": [
-          4,
-          3,
-          4,
-          5
-        ]
-      },
-      "move3": {
-        "name": "move3",
-        "speed": 10,
-        "adjust": false,
-        "pattern": [
-          28,
-          27,
-          28,
-          29
-        ]
-      },
-      "move7": {
-        "name": "move7",
-        "speed": 10,
-        "adjust": false,
-        "pattern": [
-          16,
-          15,
-          16,
-          17
-        ]
-      },
-      "move9": {
-        "name": "move9",
-        "speed": 10,
-        "adjust": false,
-        "pattern": [
-          40,
-          39,
-          40,
-          41
+          0
         ]
       }
     }

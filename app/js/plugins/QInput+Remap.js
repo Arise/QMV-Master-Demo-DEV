@@ -5,8 +5,8 @@
 var Imported = Imported || {};
 
 if (!Imported.QInput || !QPlus.versionCheck(Imported.QInput, '2.1.1')) {
-  alert('Error: QInputRemap requires QInput 2.1.1 or newer to work.');
-  throw new Error('Error: QInputRemap requires QInput 2.1.1 or newer to work.');
+  alert('Error: QInput+Remap requires QInput 2.1.1 or newer to work.');
+  throw new Error('Error: QInput+Remap requires QInput 2.1.1 or newer to work.');
 }
 
 Imported.QInputRemap = '2.1.3';
@@ -105,12 +105,20 @@ Imported.QInputRemap = '2.1.3';
  * ## About
  * ============================================================================
  * This plugin adds an input remapping window to the Scene_Options. This lets
- * players change their keybinds ingame.
+ * players change the games keyboard and gamepad inputs inside of the options
+ * menu.
+ * 
  * ============================================================================
  * ## How to use
  * ============================================================================
  * Place this anywhere below QInput plugin. Input configs are saved into the
  * `saves/config.rpgsave` file
+ * 
+ * **_Note_** If you remap your keys that config will get saved. So if you go
+ * back to QInput and change the parameters, those parameter changes won't apply
+ * because the game will always load the saved config! So you will need to either
+ * delete that `saves/config.rpgsave` file or hit `Set Default` button in the
+ * remap window.
  * ============================================================================
  * ## Tip
  * ============================================================================
@@ -123,16 +131,16 @@ Imported.QInputRemap = '2.1.3';
  * #space, #e, $A
  * ~~~
  * When the player goes to remap the enter key, they'll see either Space or A,
- * depending on which input they are currenting using. So they will never be able
- * to remap the #e key. Now in some cases this may be fine. But just know that
- * the only the 1st instance of the input type is remappable!
+ * depending on which input type they are currenting using. So they will never 
+ * be able to remap the #e key. Now in some cases this may be fine. But just 
+ * know that the only the 1st instance of the input type is remappable!
  *
  * ============================================================================
  * ## Links
  * ============================================================================
  * Formated Help:
  *
- *  https://quxios.github.io/#/plugins/QInputRemap
+ *  https://quxios.github.io/#/plugins/QInput+Remap
  *
  * RPGMakerWebs:
  *
