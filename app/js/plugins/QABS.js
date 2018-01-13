@@ -9,14 +9,14 @@ if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.4.0')) {
   throw new Error('Error: QABS requires QMovement 1.4.0 or newer to work.');
 }
 
-Imported.QABS = '1.6.2';
+Imported.QABS = '1.6.3';
 
 //=============================================================================
 /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @version 1.6.2
- * @author Quxios  | Version 1.6.2
+ * @version 1.6.3
+ * @author Quxios  | Version 1.6.3
  * @site https://quxios.github.io/
  * @updateurl https://quxios.github.io/data/pluginsMin.json
  *
@@ -824,27 +824,27 @@ Imported.QABS = '1.6.2';
  *
  * @tags QM-Addon, ABS, Battle
  */
-/*~struct~SkillKey:
-* @param Keyboard Input
-* @desc Set to which keyboard input to use for this skill
-* @default
-*
-* @param Gamepad Input
-* @desc Set to which gamepad input to use for this skill
-* @default
-*
-* @param Rebind
-* @desc Can this skill be reassigned?
-* @type Boolean
-* @on Yes
-* @off No
-* @default true
-*
-* @param Skill Id
-* @desc Which skill does this skill use
-* @type skill
-* @default
-*/
+ /*~struct~SkillKey:
+ * @param Keyboard Input
+ * @desc Set to which keyboard input to use for this skill
+ * @default
+ *
+ * @param Gamepad Input
+ * @desc Set to which gamepad input to use for this skill
+ * @default
+ *
+ * @param Rebind
+ * @desc Can this skill be reassigned?
+ * @type Boolean
+ * @on Yes
+ * @off No
+ * @default true
+ *
+ * @param Skill Id
+ * @desc Which skill does this skill use
+ * @type skill
+ * @default
+ */
 //=============================================================================
 //=============================================================================
 // QABS Static Class
@@ -2757,12 +2757,6 @@ function Skill_Sequencer() {
     if (this === $gameParty.leader()) $gameSystem.loadClassABSKeys();
   };
 
-  var Alias_Game_Actor_initEquips = Game_Actor.prototype.initEquips;
-  Game_Actor.prototype.initEquips = function(equips) {
-    Alias_Game_Actor_initEquips.call(this, equips);
-    if (this === $gameParty.leader()) this.initWeaponSkills();
-  };
-
   Game_Actor.prototype.initWeaponSkills = function() {
     var equips = this._equips;
     for (var i = 0; i < equips.length; i++) {
@@ -3224,9 +3218,7 @@ function Skill_Sequencer() {
   };
 
   Game_Player.prototype.setupBattler = function() {
-    console.log(0);
     if (!this.battler()) return;
-    console.log(1);
     this.clearABS();
     this._battlerId = this.battler()._actorId;
     this.battler()._charaId = 0;
