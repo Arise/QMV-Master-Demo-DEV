@@ -5,7 +5,7 @@
   QABS/Game_Interpreter.js
   QABS/Game_System.js
   QABS/Game_Map.js
-  QABS/Game_Action.js
+  QABS/Game_ABSAction.js
   QABS/Game_BattlerBase.js
   QABS/Game_Battler.js
   QABS/Game_Actor.js
@@ -35,14 +35,14 @@ if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.4.0')) {
   throw new Error('Error: QABS requires QMovement 1.4.0 or newer to work.');
 }
 
-Imported.QABS = '1.6.3';
+Imported.QABS = '1.6.4';
 
 //=============================================================================
 /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @version 1.6.3
- * @author Quxios  | Version 1.6.3
+ * @version 1.6.4
+ * @author Quxios  | Version 1.6.4
  * @site https://quxios.github.io/
  * @updateurl https://quxios.github.io/data/pluginsMin.json
  *

@@ -1,21 +1,24 @@
 //-----------------------------------------------------------------------------
 // Game_Action
 
+function Game_ABSAction() {
+  this.initialize.apply(this, arguments);
+}
+
 (function() {
-  var Alias_Game_Action_setSubject = Game_Action.prototype.setSubject;
-  Game_Action.prototype.setSubject = function(subject) {
-    Alias_Game_Action_setSubject.call(this, subject);
+  Game_ABSAction.prototype = Object.create(Game_Action.prototype);
+  Game_ABSAction.prototype.constructor = Game_ABSAction;
+
+  Game_ABSAction.prototype.setSubject = function(subject) {
+    Game_Action.prototype.setSubject.call(this, subject);
     this._realSubject = subject;
   };
 
-  var Alias_Game_Action_subject = Game_Action.prototype.subject;
-  Game_Action.prototype.subject = function() {
-    if (this._isAbs) return this._realSubject;
-    return Alias_Game_Action_subject.call(this);
+  Game_ABSAction.prototype.subject = function() {
+    return this._realSubject;
   };
 
-  Game_Action.prototype.absApply = function(target) {
-    this._isAbs = true;
+  Game_ABSAction.prototype.absApply = function(target) {
     var result = target.result();
     this._realSubject.clearResult();
     result.clear();
@@ -31,8 +34,6 @@
       this.applyItemEffect(target, effect);
     }, this);
     this.applyItemUserEffect(target);
-    this.applyGlobal();
-    this._isAbs = false;
   };
 
   var Alias_Game_ActionResult_clear = Game_ActionResult.prototype.clear;

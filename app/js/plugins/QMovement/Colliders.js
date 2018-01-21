@@ -319,8 +319,12 @@ function Polygon_Collider() {
   Polygon_Collider.prototype.intersects = function(other) {
     if (this.height === 0 || this.width === 0) return false;
     if (other.height === 0 || other.width === 0) return false;
-    if (this.containsPoint(other.center.x, other.center.y)) return true;
-    if (other.containsPoint(this.center.x, this.center.y)) return true;
+    if (!other.isPolygon()) {
+      if (this.containsPoint(other.center.x, other.center.y)) return true;
+    }
+    if (!this.isPolygon()) {
+      if (other.containsPoint(this.center.x, this.center.y)) return true;
+    }
     var i, j, x, y;
     for (i = 0, j = other._vertices.length; i < j; i++) {
       x = other._vertices[i].x;
@@ -502,6 +506,7 @@ function Box_Collider() {
       return Polygon_Collider.prototype.containsPoint.call(this, x, y);
     }
   };
+
 })();
 
 //-----------------------------------------------------------------------------

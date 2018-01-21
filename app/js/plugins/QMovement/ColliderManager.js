@@ -13,6 +13,7 @@ function ColliderManager() {
   ColliderManager._needsRefresh = true;
   ColliderManager.container = new Sprite();
   ColliderManager.container.alpha = 0.3;
+  ColliderManager.containerDict = {};
   ColliderManager.visible = QMovement.showColliders;
 
   ColliderManager.clear = function() {
@@ -20,6 +21,7 @@ function ColliderManager() {
     this._colliderGrid = [];
     this._characterGrid = [];
     this.container.removeChildren();
+    this.containerDict = {};
   };
 
   ColliderManager.refresh = function() {
@@ -77,6 +79,7 @@ function ColliderManager() {
 
   ColliderManager.removeSprite = function(sprite) {
     this.container.removeChild(sprite);
+    delete this.containerDict[sprite._collider.id];
   };
 
   ColliderManager.updateGrid = function(collider, prevGrid) {
@@ -257,17 +260,17 @@ function ColliderManager() {
 
   ColliderManager.draw = function(collider, duration) {
     if ($gameTemp.isPlaytest()) {
-      var sprites = this.container.children;
-      for (var i = 0; i < sprites.length; i++) {
-        if (sprites[i]._collider && sprites[i]._collider.id === collider.id) {
-          sprites[i]._collider.kill = false;
-          sprites[i]._duration = duration;
-          return;
-        }
+      if (this.containerDict[collider.id]) {
+        this.containerDict[collider.id]._collider = collider;
+        this.containerDict[collider.id]._collider.kill = false;
+        this.containerDict[collider.id]._duration = duration;
+        this.containerDict[collider.id].checkChanges();
+        return;
       }
       collider.kill = false;
       var sprite = new Sprite_Collider(collider, duration || -1);
       this.container.addChild(sprite);
+      this.containerDict[collider.id] = sprite;
     }
   };
 

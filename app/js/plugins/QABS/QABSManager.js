@@ -81,17 +81,18 @@ function QABSManager() {
     if (!item.animationTarget || targets.length === 0) {
       this.startAnimation(item.data.animationId, item.collider.center.x, item.collider.center.y);
     }
+    var action = new Game_ABSAction(self.battler(), true);
+    action.setSkill(item.data.id);
     for (var i = 0; i < targets.length; i++) {
       if (item.animationTarget === 1) {
         var x = targets[i].cx();
         var y = targets[i].cy();
         this.startAnimation(item.data.animationId, x, y);
       }
-      var action = new Game_Action(self.battler(), true);
-      action.setSkill(item.data.id);
       action.absApply(targets[i].battler());
       targets[i].addAgro(self.charaId(), item.data);
     }
+    action.applyGlobal();
   };
 
   QABSManager.startPopup = function(type, options) {

@@ -62,7 +62,7 @@
   Game_Event.prototype.updateSelfMovement = function() {
     if (this.isNearTheScreen() && this.canMove()) {
       if (this.checkStop(this.stopCountThreshold())) {
-        this._stopCount = this._freqCount = 0;
+        this._stopCount = 0;
       }
       if (this._freqCount < this.freqThreshold()) {
         switch (this._moveType) {
@@ -76,6 +76,8 @@
             this.moveTypeCustom();
             break;
         }
+      } else {
+        this._freqCount = -this.frameSpeed();
       }
     }
   };

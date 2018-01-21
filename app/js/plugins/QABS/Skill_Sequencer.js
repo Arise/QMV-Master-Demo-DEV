@@ -881,6 +881,7 @@ function Skill_Sequencer() {
   };
 
   Skill_Sequencer.prototype.onEnd = function() {
+
     this._skill.collider.kill = true;
     QABSManager.removePicture(this._skill.picture);
     QABSManager.removePicture(this._skill.trail);
