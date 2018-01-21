@@ -38,15 +38,7 @@ app/js/rpg_windows.js
 
 # plugins
 app/js/plugins/QDebug.js
-app/js/plugins/QuasiSight.js
 app/js/plugins/Q_IsoCam.js
-app/js/plugins/_QCamera.js
 app/js/plugins/Q_Culling.js
-app/js/plugins/QuasiPopup.js
 app/js/plugins/QM+SetAngles.js
-app/js/plugins/QuasiABS.js
-app/js/plugins/QuasiABSGauges.js
-app/js/plugins/QuasiABSHudA.js
-app/js/plugins/YEP_SlipperyTiles.js
-app/js/plugins/YEP_RegionRestrictions.js
-app/js/plugins/QuasiParamsPlus.js
+app/js/plugins/QSight+Draw.js
