@@ -28,14 +28,14 @@ if (!Imported.QPlus || !QPlus.versionCheck(Imported.QPlus, '1.6.0')) {
   throw new Error('Error: QMovement requires QPlus 1.6.0 or newer to work.');
 }
 
-Imported.QMovement = '1.6.2';
+Imported.QMovement = '1.6.3';
 
 //=============================================================================
 /*:
  * @plugindesc <QMovement>
  * More control over character movement
- * @version 1.6.2
- * @author Quxios  | Version 1.6.2
+ * @version 1.6.3
+ * @author Quxios  | Version 1.6.3
  * @site https://quxios.github.io/
  * @updateurl https://quxios.github.io/data/pluginsMin.json
  *
@@ -534,7 +534,7 @@ Imported.QMovement = '1.6.2';
  * ============================================================================
  * **Pathfind**
  * ----------------------------------------------------------------------------
- * https://quxios.github.io/#/plugins/QPathfind
+ * https://quxios.github.io/plugins/QPathfind
  *
  * QPathfind is an A* pathfinding algorithm. This algorithm can be pretty heavy
  * if you are doing pixel based movements. So avoid having to many pathfinders
@@ -555,7 +555,7 @@ Imported.QMovement = '1.6.2';
  * ----------------------------------------------------------------------------
  * **Collision Map**
  * ----------------------------------------------------------------------------
- * https://quxios.github.io/#/plugins/QM+CollisionMap
+ * https://quxios.github.io/plugins/QM+CollisionMap
  *
  * Collision Map is an addon for this plugin that lets you use images for
  * collisions. Note that collision map checks are a lot heavier then normal
@@ -565,7 +565,7 @@ Imported.QMovement = '1.6.2';
  * ----------------------------------------------------------------------------
  * **Region Colliders**
  * ----------------------------------------------------------------------------
- * https://quxios.github.io/#/plugins/QM+RegionColliders
+ * https://quxios.github.io/plugins/QM+RegionColliders
  *
  * Region Colliders is an addon for this plugin that lets you add colliders
  * to regions by creating a json file.
@@ -586,7 +586,7 @@ Imported.QMovement = '1.6.2';
  * ============================================================================
  * Formated Help:
  *
- *  https://quxios.github.io/#/plugins/QMovement
+ *  https://quxios.github.io/plugins/QMovement
  *
  * RPGMakerWebs:
  *

@@ -10,14 +10,9 @@
     if (this._activeSkills && this._activeSkills.length > 0) {
       this.clearSkills();
     }
-    if (this._agroList) {
-      this.clearAgro();
-    }
+    this.clearAgro();
     this._activeSkills = [];
     this._skillCooldowns = {};
-    this._agroList = {};
-    this._agrodList = [];
-    this._inCombat = false;
     this._casting = null;
     this._skillLocked = [];
   };
@@ -96,66 +91,48 @@
     return value;
   };
 
-  Game_CharacterBase.prototype.addAgro = function(charaId, skill) {
-    var chara = QPlus.getCharacter(charaId);
-    if (!chara || chara === this || this.isFriendly(chara)) return;
-    this._agroList[charaId] = this._agroList[charaId] || 0;
-    this._agroList[charaId] += (skill && skill.agroPoints) ? skill.agroPoints : 1;
-    if (!chara._agrodList.contains(this.charaId())) {
-      chara._agrodList.push(this.charaId());
-    }
-    this._inCombat = true;
-    chara._inCombat = true;
+  Game_CharacterBase.prototype.inCombat = function() {
+    if (!this._agro) return false;
+    return this._agro.inCombat();
   };
 
-  Game_CharacterBase.prototype.removeAgro = function(charaId) {
-    delete this._agroList[charaId];
-    var i = this._agrodList.indexOf(charaId);
-    if (i !== -1) {
-      this._agrodList.splice(i, 1);
-      this._inCombat = (this.totalAgro() + this._agrodList.length) > 0;
-      if (!this._inCombat && typeof this.endCombat === 'function') {
-        this.endCombat();
-      }
+  Game_CharacterBase.prototype.addAgro = function(from, skill) {
+    var chara = QPlus.getCharacter(from);
+    if (!chara || chara === this || !chara._agro) {
+      return;
     }
+    if (this.isFriendly(chara) || !this._agro) {
+      return;
+    }
+    var amt = skill ? skill.agroPoints || 1 : 1;
+    this._agro.add(from, amt);
+  };
+
+  Game_CharacterBase.prototype.removeAgro = function(from) {
+    if (!this._agro) {
+      return;
+    }
+    this._agro.remove(from);
   };
 
   Game_CharacterBase.prototype.clearAgro = function() {
-    for (var charaId in this._agroList) {
-      var chara = QPlus.getCharacter(charaId);
-      if (chara) chara.removeAgro(this.charaId());
+    if (this._agro) {
+      var agrod = this._agro._agrodList;
+      for (var charaId in agrod) {
+        var chara = QPlus.getCharacter(charaId);
+        if (chara) chara.removeAgro(this.charaId());
+      }
+      this._agro.clear();
+    } else {
+      this._agro = new Game_CharacterAgro(this.charaId());
     }
-    for (var i = this._agrodList.length - 1; i >= 0; i--) {
-      var chara = QPlus.getCharacter(this._agrodList[i]);
-      if (chara) chara.removeAgro(this.charaId());
-    }
-    this._agroList = {};
-    this._agrodList = [];
-    this._inCombat = false;
-  };
-
-  Game_CharacterBase.prototype.totalAgro = function() {
-    var total = 0;
-    for (var agro in this._agroList) {
-      total += this._agroList[agro] || 0;
-    }
-    return total;
   };
 
   Game_CharacterBase.prototype.bestTarget = function() {
-    // TODO consider team
-    var mostAgro = 0;
-    var bestChara = null;
-    for (var charaId in this._agroList) {
-      if (this._agroList[charaId] > mostAgro) {
-        mostAgro = this._agroList[charaId];
-        bestChara = charaId;
-      }
+    if (!this._agro) {
+      return null;
     }
-    if (bestChara !== null) {
-      return QPlus.getCharacter(bestChara);
-    }
-    return null;
+    return this._agro.highest();
   };
 
   var Alias_Game_CharacterBase_update = Game_CharacterBase.prototype.update;
@@ -171,6 +148,7 @@
       }
       return;
     }
+    this._agro.update();
     this.updateSkills();
     this.battler().updateABS();
   };

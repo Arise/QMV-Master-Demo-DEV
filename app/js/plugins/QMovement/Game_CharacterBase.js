@@ -358,11 +358,11 @@
   };
 
   Game_CharacterBase.prototype.terrainTag = function() {
-    return $gameMap.terrainTag(this.x, this.y);
+    return $gameMap.terrainTag(Math.floor(this.cx(true)), Math.floor(this.cy(true)));
   };
 
   Game_CharacterBase.prototype.regionId = function() {
-    return $gameMap.regionId(this.x, this.y);
+    return $gameMap.regionId(Math.floor(this.cx(true)), Math.floor(this.cy(true)));
   };
 
   var Alias_Game_CharacterBase_update = Game_CharacterBase.prototype.update;
@@ -750,9 +750,17 @@
     this._colliders = null;
   };
 
-  Game_CharacterBase.prototype.collider = function(type) {
+  // Can pass multiple types into args, ect:
+  // collider('collision', 'interaction', 'default')
+  // will return first one thats found
+  Game_CharacterBase.prototype.collider = function(type, alternative) {
     if (!this._colliders) this.setupColliders();
-    return this._colliders[type] || this._colliders['default'];
+    for (var i = 0; i < arguments.length; i++) {
+      if (this._colliders[arguments[i]]) {
+        return this._colliders[arguments[i]];
+      }
+    }
+    return this._colliders['default'];
   };
 
   Game_CharacterBase.prototype.defaultColliderConfig = function() {
@@ -834,11 +842,15 @@
     ColliderManager.updateGrid(this, prev);
   };
 
-  Game_CharacterBase.prototype.cx = function() {
-    return this.collider('collision').center.x;
+  Game_CharacterBase.prototype.cx = function(grid) {
+    var x = this.collider('collision').center.x;;
+    if (grid) x /= QMovement.tileSize;
+    return x;
   };
 
-  Game_CharacterBase.prototype.cy = function() {
-    return this.collider('collision').center.y;
+  Game_CharacterBase.prototype.cy = function(grid) {
+    var y = this.collider('collision').center.y;
+    if (grid) y /= QMovement.tileSize;
+    return y;
   };
 })();

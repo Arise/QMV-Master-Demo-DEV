@@ -60,10 +60,7 @@
   };
 
   Game_Event.prototype.updateSelfMovement = function() {
-    if (this.isNearTheScreen() && this.canMove()) {
-      if (this.checkStop(this.stopCountThreshold())) {
-        this._stopCount = 0;
-      }
+    if (!this._locked && this.isNearTheScreen()) {
       if (this._freqCount < this.freqThreshold()) {
         switch (this._moveType) {
           case 1:
@@ -76,8 +73,8 @@
             this.moveTypeCustom();
             break;
         }
-      } else {
-        this._freqCount = -this.frameSpeed();
+      } else if (this.checkStop(this.stopCountThreshold())) {
+        this._freqCount = 0;
       }
     }
   };

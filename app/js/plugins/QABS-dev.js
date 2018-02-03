@@ -10,6 +10,7 @@
   QABS/Game_Battler.js
   QABS/Game_Actor.js
   QABS/Game_Enemy.js
+  QABS/Game_CharacterAgro.js
   QABS/Game_CharacterBase.js
   QABS/Game_Player.js
   QABS/Game_Event.js
@@ -35,14 +36,14 @@ if (!Imported.QMovement || !QPlus.versionCheck(Imported.QMovement, '1.4.0')) {
   throw new Error('Error: QABS requires QMovement 1.4.0 or newer to work.');
 }
 
-Imported.QABS = '1.6.4';
+Imported.QABS = '1.7.0';
 
 //=============================================================================
 /*:
  * @plugindesc <QABS>
  * Action Battle System for QMovement
- * @version 1.6.4
- * @author Quxios  | Version 1.6.4
+ * @version 1.7.0
+ * @author Quxios  | Version 1.7.0
  * @site https://quxios.github.io/
  * @updateurl https://quxios.github.io/data/pluginsMin.json
  *
@@ -834,7 +835,7 @@ Imported.QABS = '1.6.4';
  * ============================================================================
  * Formated Help:
  *
- *  https://quxios.github.io/#/plugins/QABS
+ *  https://quxios.github.io/plugins/QABS
  *
  * RPGMakerWebs:
  *

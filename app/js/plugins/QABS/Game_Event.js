@@ -89,20 +89,6 @@
     return best;
   };
 
-  Game_Event.prototype.addAgro = function(charaId, skill) {
-    var isNew = !this._agroList[charaId];
-    Game_CharacterBase.prototype.addAgro.call(this, charaId, skill);
-    if (isNew) {
-      if (this._aiPathfind) {
-        this.clearPathfind();
-      }
-      if (this._endWait) {
-        this.removeWaitListener(this._endWait);
-        this._endWait = null;
-      }
-    }
-  };
-
   Game_Event.prototype.updateABS = function() {
     if ($gameSystem.isDisabled(this._mapId, this._eventId)) return;
     Game_CharacterBase.prototype.updateABS.call(this);
@@ -136,10 +122,19 @@
     this.AISimpleAction(bestTarget, this.AISimpleGetAction(bestTarget));
   };
 
+  Game_Event.prototype.removeAgro = function(charaId) {
+    if (!this._agro) return;
+    Game_CharacterBase.prototype.removeAgro.call(this, charaId);
+    if (!this.inCombat() && !this._endWait) {
+      this.endCombat();
+    }
+  };
+
   Game_Event.prototype.AISimpleInRange = function(bestTarget) {
     var targetId = bestTarget.charaId();
     if (this.isTargetInRange(bestTarget)) {
-      if (!this._agroList.hasOwnProperty(targetId)) {
+      this._agro.placeInCombat();
+      if (!this._agro.has(targetId)) {
         this._aiWait = QABS.aiWait;
         this.addAgro(targetId);
         if (this._aiPathfind) {
@@ -152,8 +147,7 @@
       }
       return true;
     } else {
-      if (!this._endWait && this.inCombat()) {
-        bestTarget.removeAgro(this.charaId());
+      if (this._agro.has(targetId)) {
         if (this._aiPathfind) {
           this.clearPathfind();
         }
@@ -161,6 +155,7 @@
           this._endWait = null;
           this.endCombat();
         }.bind(this));
+        this.removeAgro(targetId);
       }
       if (this._endWait && this.canMove()) {
         this.moveTowardCharacter(bestTarget);
@@ -184,7 +179,6 @@
 
   Game_Event.prototype.AISimpleAction = function(bestTarget, bestAction) {
     if (bestAction) {
-
       var skill = this.useSkill(bestAction);
       if (skill) skill._target = bestTarget;
     } else if (this.canMove()) {
@@ -236,7 +230,7 @@
     }
     var dx = Math.abs(target.cx() - this.cx());
     var dy = Math.abs(target.cy() - this.cy());
-    var range = this._aiRange + (this._inCombat ? 96 : 0);
+    var range = this._aiRange + (this.inCombat() ? 96 : 0);
     return dx <= range && dy <= range;
   };
 
@@ -259,7 +253,6 @@
     if (this._aiPathfind) {
       this.clearPathfind();
     }
-    this._inCombat = false;
     this.clearAgro();
     if (this._aiPathfind || Imported.QPathfind) {
       var x = this.event().x * QMovement.tileSize;
@@ -324,7 +317,7 @@
         console.error('Error with `onDeath` meta inside enemy ' + id, e);
       }
     }
-    if (this._agroList[0] > 0) {
+    if (this._agro.has(0)) {
       var exp = this.battler().exp();
       $gamePlayer.battler().gainExp(exp);
       if (exp > 0) {

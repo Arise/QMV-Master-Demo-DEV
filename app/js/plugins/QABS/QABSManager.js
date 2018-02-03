@@ -81,6 +81,7 @@ function QABSManager() {
     if (!item.animationTarget || targets.length === 0) {
       this.startAnimation(item.data.animationId, item.collider.center.x, item.collider.center.y);
     }
+    self._agro.placeInCombat();
     var action = new Game_ABSAction(self.battler(), true);
     action.setSkill(item.data.id);
     for (var i = 0; i < targets.length; i++) {

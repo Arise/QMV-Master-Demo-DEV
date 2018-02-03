@@ -29,6 +29,16 @@
     return 1;
   };
 
+  var Alias_Game_Player_performTransfer = Game_Player.prototype.performTransfer;
+  Game_Player.prototype.performTransfer = function() {
+    if (this.isTransferring()) {
+      if (this._newMapId !== $gameMap.mapId() || this._needsMapReload) {
+        if (this._agro) this._agro.clear();
+      }
+    }
+    Alias_Game_Player_performTransfer.call(this);
+  };
+
   var Alias_Game_Player_canMove = Game_Player.prototype.canMove;
   Game_Player.prototype.canMove = function() {
     if (QABS.lockTargeting && this._groundTargeting) return false;
